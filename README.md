@@ -30,6 +30,8 @@ USAGE
 <!-- commands -->
 * [`pilot hello [FILE]`](#pilot-hello-file)
 * [`pilot help [COMMAND]`](#pilot-help-command)
+* [`pilot setup [FILE]`](#pilot-setup-file)
+* [`pilot template [FILE]`](#pilot-template-file)
 
 ## `pilot hello [FILE]`
 
@@ -67,4 +69,20 @@ OPTIONS
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
+
+## `pilot setup [FILE]`
+
+describe the command here
+
+```
+USAGE
+  $ pilot setup [FILE]
+
+OPTIONS
+  -f, --force
+  -h, --help       show CLI help
+  -n, --name=name  name to print
+```
+
+_See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/setup.ts)_
 <!-- commandsstop -->
