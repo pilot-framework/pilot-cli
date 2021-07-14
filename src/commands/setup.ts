@@ -1,9 +1,10 @@
 import {Command, flags} from '@oclif/command'
 import {exec} from 'child_process'
 import paths from '../util/paths'
+import creds from '../util/creds'
+import fsUtil from '../util/fs'
 
 const fs = require('fs')
-const appRoot = require('app-root-path')
 
 const CWD = process.cwd()
 
@@ -35,10 +36,32 @@ export default class Setup extends Command {
       return
     }
 
+    const awsRegion = creds.getAWSRegion()
+    const aKey = creds.getAWSAccessKey()
+    const sKey = creds.getAWSSecretKey()
+
+    if (awsRegion === '') {
+      this.log('No AWS Access Key configured')
+      return
+    }
+
+    if (aKey === '') {
+      this.log('No AWS Access Key configured')
+      return
+    }
+
+    if (sKey === '') {
+      this.log('No AWS Secret Key configured')
+      return
+    }
+
     this.log('Setting up resources...')
 
     // Create local directory
     makeDir(CWD + '/aws')
+
+    fsUtil.genTerraformVars(`region="${awsRegion}"`)
+    this.log('Succesfully written aws/instances/terraform.tfvars')
 
     // Generate SSH Keys
     // ssh-keygen -t rsa -C "autopilot" -q -N "" -f ../tf-cloud-init
@@ -49,7 +72,7 @@ export default class Setup extends Command {
 
     // terraform init
     // await new Promise(f => setTimeout(f, 2000))
-    await exec(appRoot + '/bin/terraform_1.0.2_linux_amd64/terraform version', (error, stdout) => {
+    await exec(paths.appRoot + '/bin/terraform_1.0.2_linux_amd64/terraform version', (error, stdout) => {
       if (error) {
         throw error
       }
