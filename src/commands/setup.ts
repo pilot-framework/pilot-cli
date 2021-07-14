@@ -31,8 +31,9 @@ export default class Setup extends Command {
         this.log('AWS config not found at ~/.aws/config.')
         return
       }
+      this.log('AWS Configuration detected')
     } else {
-      this.log('No AWS configuration found. Please configure AWS CLI')
+      this.log('No AWS configuration found. Please configure AWS CLI.')
       return
     }
 
@@ -65,18 +66,36 @@ export default class Setup extends Command {
 
     // Generate SSH Keys
     // ssh-keygen -t rsa -C "autopilot" -q -N "" -f ../tf-cloud-init
+    if (!fs.existsSync(paths.TF_CLOUD_INIT)) {
+      await exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.appRoot + '/aws/tf-cloud-init'}`, (error, _) => {
+        if (error) throw error
+      })
+      this.log('Successfully generated SSH keys')
+    }
 
     // Generate yaml file for cloud-init
+    if (!fs.existsSync(paths.SSH_DOCKER_WAYPOINT_INIT)) {
+      fsUtil.genCloudInitYaml()
+      this.log('Successfully generated cloud init')
+    }
 
     // Generate keypair to associate with EC2 for SSH access
+    await exec('aws ec2 delete-key-pair --key-name PilotKeyPair', (error, _) => {
+      if (error) throw error
+    })
+
+    await exec(`aws ec2 create-key-pair --key-name PilotKeyPair --query 'KeyMaterial' --output text > ${paths.EC2_KEY_PAIR}`, (error, _) => {
+      if (error) throw error
+      this.log('Generated new EC2 key pair')
+    })
 
     // terraform init
-    // await new Promise(f => setTimeout(f, 2000))
-    await exec(paths.appRoot + '/bin/terraform_1.0.2_linux_amd64/terraform version', (error, stdout) => {
-      if (error) {
-        throw error
-      }
-      this.log(stdout)
+    await exec(paths.TERRAFORM_EXEC + 'init', (error, _) => {
+      if (error) throw error
+    })
+
+    await exec(paths.TERRAFORM_EXEC + 'apply -auto-approve', (error, _) => {
+      if (error) throw error
     })
 
     // terrform apply --auto-approve
