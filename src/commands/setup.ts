@@ -58,9 +58,11 @@ export default class Setup extends Command {
 
     this.log('Setting up resources...')
 
-    // Create local directory
-    makeDir(CWD + '/aws_ec2')
-    makeDir(CWD + '/templates')
+    // Create local directory for ssh keys
+    makeDir(CWD + '/.aws_server')
+
+    // Create templates directory
+    makeDir(paths.appRoot + '/templates')
 
     fsUtil.genTerraformVars(`region="${awsRegion}"`)
     this.log('Succesfully written terraform.tfvars')
@@ -72,24 +74,20 @@ export default class Setup extends Command {
     }
 
     // Generate yaml file for cloud-init
-    if (!fs.existsSync(paths.SSH_DOCKER_WAYPOINT_INIT)) {
-      fsUtil.genCloudInitYaml()
-      this.log('Successfully generated cloud init')
-    }
+    fsUtil.genCloudInitYaml()
+    this.log('Successfully generated cloud init')
 
     // Generate keypair to associate with EC2 for SSH access
+    this.log('Refreshing EC2 key pair')
     await execUtil.deleteKeyPair()
-    this.log('Deleted EC2 key pair')
-
     await execUtil.createKeyPair()
-    this.log('Created EC2 key pair')
 
     // terraform init
     await execUtil.terraInit()
     this.log('Terraform initialized')
 
     // terrform apply --auto-approve
-    await execUtil.terraApply()
-    this.log('Terraform apply')
+    // await execUtil.terraApply()
+    // this.log('Terraform apply')
   }
 }
