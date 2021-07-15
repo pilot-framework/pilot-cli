@@ -59,10 +59,11 @@ export default class Setup extends Command {
     this.log('Setting up resources...')
 
     // Create local directory
-    makeDir(CWD + '/aws')
+    makeDir(CWD + '/aws_ec2')
+    makeDir(CWD + '/templates')
 
     fsUtil.genTerraformVars(`region="${awsRegion}"`)
-    this.log('Succesfully written aws/instances/terraform.tfvars')
+    this.log('Succesfully written terraform.tfvars')
 
     // Generate SSH Keys
     if (!fs.existsSync(paths.TF_CLOUD_INIT)) {

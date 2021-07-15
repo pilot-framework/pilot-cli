@@ -3,7 +3,7 @@ import paths from './paths'
 
 const sshKeyGen = () => {
   return new Promise((res, rej) => {
-    exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.appRoot + '/aws/tf-cloud-init'}`, (error, _) => {
+    exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.TF_CLOUD_INIT}`, (error, _) => {
       if (error) rej(error)
       res('success')
     })
