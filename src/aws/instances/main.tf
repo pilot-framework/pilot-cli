@@ -92,7 +92,7 @@ resource "aws_security_group" "sg_22_80" {
 }
 
 data "template_file" "user_data" {
-  template = file("../scripts/ssh-docker-waypoint-init.yaml")
+  template = file("../../templates/ssh-docker-waypoint-init.yaml")
 }
 
 resource "aws_instance" "waypoint" {

@@ -1,8 +1,8 @@
 import {Command, flags} from '@oclif/command'
-import {exec} from 'child_process'
 import paths from '../util/paths'
 import creds from '../util/creds'
 import fsUtil from '../util/fs'
+import execUtil from '../util/exec'
 
 const fs = require('fs')
 
@@ -65,11 +65,8 @@ export default class Setup extends Command {
     this.log('Succesfully written aws/instances/terraform.tfvars')
 
     // Generate SSH Keys
-    // ssh-keygen -t rsa -C "autopilot" -q -N "" -f ../tf-cloud-init
     if (!fs.existsSync(paths.TF_CLOUD_INIT)) {
-      await exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.appRoot + '/aws/tf-cloud-init'}`, (error, _) => {
-        if (error) throw error
-      })
+      await execUtil.sshKeyGen()
       this.log('Successfully generated SSH keys')
     }
 
@@ -80,24 +77,18 @@ export default class Setup extends Command {
     }
 
     // Generate keypair to associate with EC2 for SSH access
-    await exec('aws ec2 delete-key-pair --key-name PilotKeyPair', (error, _) => {
-      if (error) throw error
-    })
+    await execUtil.deleteKeyPair()
+    this.log('Deleted EC2 key pair')
 
-    await exec(`aws ec2 create-key-pair --key-name PilotKeyPair --query 'KeyMaterial' --output text > ${paths.EC2_KEY_PAIR}`, (error, _) => {
-      if (error) throw error
-      this.log('Generated new EC2 key pair')
-    })
+    await execUtil.createKeyPair()
+    this.log('Created EC2 key pair')
 
     // terraform init
-    await exec(paths.TERRAFORM_EXEC + 'init', (error, _) => {
-      if (error) throw error
-    })
-
-    await exec(paths.TERRAFORM_EXEC + 'apply -auto-approve', (error, _) => {
-      if (error) throw error
-    })
+    await execUtil.terraInit()
+    this.log('Terraform initialized')
 
     // terrform apply --auto-approve
+    await execUtil.terraApply()
+    this.log('Terraform apply')
   }
 }
