@@ -10,7 +10,7 @@ const genTerraformVars = async (data: string) =>
   })
 
 const genCloudInitYaml = async () =>
-  fs.writeFileSync(paths.SSH_DOCKER_WAYPOINT_INIT, templates.yamlConfig(fs.readFileSync(paths.TF_CLOUD_INIT)), (err: Error) => {
+  fs.writeFileSync(paths.SSH_DOCKER_WAYPOINT_INIT, templates.yamlConfig(fs.readFileSync(paths.TF_CLOUD_INIT + '.pub')), (err: Error) => {
     if (err) throw new Error('Unable to write tf-cloud-init.yaml file')
   })
 
