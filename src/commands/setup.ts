@@ -93,5 +93,6 @@ export default class Setup extends Command {
     cli.action.start('Setting up your remote Waypoint server')
     await execUtil.terraApply()
     cli.action.stop()
+    this.log('Please allow a few minutes for the remote server\'s configuration')
   }
 }

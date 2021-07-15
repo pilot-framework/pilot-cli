@@ -14,7 +14,12 @@ const genCloudInitYaml = async () =>
     if (err) throw new Error('Unable to write tf-cloud-init.yaml file')
   })
 
+const getPrivateKey = () => {
+  return fs.readFileSync(paths.TF_CLOUD_INIT)
+}
+
 export default {
   genTerraformVars,
   genCloudInitYaml,
+  getPrivateKey,
 }

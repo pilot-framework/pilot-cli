@@ -13,6 +13,18 @@ const sshKeyGen = () => {
   })
 }
 
+const getServerIP = () => {
+  return new Promise((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw public_ip`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
 const deleteKeyPair = () => {
   return new Promise((res, rej) => {
     exec('aws ec2 delete-key-pair --key-name PilotKeyPair', (error, _) => {
@@ -65,6 +77,7 @@ const terraApply = () => {
 export default {
   createKeyPair,
   deleteKeyPair,
+  getServerIP,
   sshKeyGen,
   terraApply,
   terraInit,
