@@ -6,3 +6,14 @@
 /package-lock.json
 /tmp
 node_modules
+.env
+**/.terraform/*
+/instances/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/terraform.tfvars
+**/.terraform.lock.hcl
+**/*.pem
+**/*.pub
+**/*.yaml
+tf-cloud-init
