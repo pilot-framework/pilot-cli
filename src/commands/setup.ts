@@ -1,4 +1,5 @@
 import {Command, flags} from '@oclif/command'
+import cli from 'cli-ux'
 import paths from '../util/paths'
 import creds from '../util/creds'
 import fsUtil from '../util/fs'
@@ -78,16 +79,19 @@ export default class Setup extends Command {
     this.log('Successfully generated cloud init')
 
     // Generate keypair to associate with EC2 for SSH access
-    this.log('Refreshing EC2 key pair')
+    cli.action.start('Refreshing EC2 key pair')
     await execUtil.deleteKeyPair()
     await execUtil.createKeyPair()
+    cli.action.stop()
 
     // terraform init
+    cli.action.start('Initializing Terraform')
     await execUtil.terraInit()
-    this.log('Terraform initialized')
+    cli.action.stop()
 
     // terrform apply --auto-approve
+    cli.action.start('Setting up your remote Waypoint server')
     await execUtil.terraApply()
-    this.log('Terraform apply')
+    cli.action.stop()
   }
 }
