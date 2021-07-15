@@ -87,7 +87,7 @@ export default class Setup extends Command {
     this.log('Terraform initialized')
 
     // terrform apply --auto-approve
-    // await execUtil.terraApply()
-    // this.log('Terraform apply')
+    await execUtil.terraApply()
+    this.log('Terraform apply')
   }
 }
