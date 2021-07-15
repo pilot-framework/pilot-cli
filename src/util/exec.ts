@@ -74,11 +74,24 @@ const terraApply = () => {
   })
 }
 
+const terraDestroy = () => {
+  return new Promise((res, rej) => {
+    exec(paths.TERRAFORM_EXEC + `-chdir=${paths.AWS_INSTANCES} destroy -auto-approve`, (error, _) => {
+      if (error) rej(error)
+      res('success')
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
 export default {
   createKeyPair,
   deleteKeyPair,
   getServerIP,
   sshKeyGen,
   terraApply,
+  terraDestroy,
   terraInit,
 }
