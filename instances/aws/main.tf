@@ -112,3 +112,7 @@ resource "aws_instance" "waypoint" {
 output "public_ip" {
   value = aws_instance.waypoint.public_ip
 }
+
+output "instance_id" {
+  value = aws_instance.waypoint.id
+}
