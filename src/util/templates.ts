@@ -36,7 +36,7 @@ runcmd:
   - curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
   - sudo apt-get install -y nodejs
   - sudo apt install -y awscli
-  - sudo apt install -y yarn`
+  - sudo npm install -g yarn`
 
 export default {
   yamlConfig,
