@@ -2,7 +2,7 @@ import cli from 'cli-ux'
 import paths from './paths'
 import creds from './creds'
 import fsUtil from './fs'
-import execUtil from './exec'
+import execUtil from './aws-exec'
 
 const fs = require('fs')
 

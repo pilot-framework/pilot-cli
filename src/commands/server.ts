@@ -1,5 +1,5 @@
 import {Command, flags} from '@oclif/command'
-import execUtil from '../util/exec'
+import execUtil from '../util/aws-exec'
 import cli from 'cli-ux'
 
 export default class Server extends Command {
