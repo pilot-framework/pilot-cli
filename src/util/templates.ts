@@ -36,7 +36,12 @@ runcmd:
   - curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
   - sudo apt-get install -y nodejs
   - sudo apt install -y awscli
-  - sudo npm install -g yarn`
+  - sudo npm install -g yarn
+  - sudo apt-get install python
+  - echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+  - sudo apt-get install -y apt-transport-https ca-certificates gnupg
+  - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+  - sudo apt-get update && sudo apt-get install -y google-cloud-sdk`
 
 export default {
   yamlConfig,
