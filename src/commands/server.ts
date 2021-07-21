@@ -1,6 +1,7 @@
 import {Command, flags} from '@oclif/command'
-import execUtil from '../util/aws-exec'
+import execUtil from '../util/aws/exec'
 import cli from 'cli-ux'
+import paths from '../util/paths'
 
 export default class Server extends Command {
   static description = 'Used to interact with the remote management server'
@@ -25,7 +26,7 @@ export default class Server extends Command {
     if (flags.ssh) {
       const ipAddr = String(await execUtil.getServerIP())
       this.log(`To SSH to the remote server, execute the following from the server initialization directory:
-ssh pilot@${ipAddr} -i .aws_server/tf-cloud-init`)
+ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT}`)
     }
 
     if (flags.destroy) {

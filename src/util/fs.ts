@@ -1,5 +1,5 @@
 import paths from './paths'
-import templates from './aws-templates'
+import templates from './aws/templates'
 
 const fs = require('fs')
 const path = require('path')

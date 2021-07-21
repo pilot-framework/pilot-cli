@@ -1,6 +1,6 @@
 import {Command, flags} from '@oclif/command'
 
-import {awsSetup} from '../util/aws-setup'
+import {awsSetup} from '../util/aws/setup'
 // import {gcpSetup} from '../util/gcp-setup'
 
 export default class Setup extends Command {

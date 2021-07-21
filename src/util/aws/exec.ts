@@ -1,5 +1,5 @@
 import {exec} from 'child_process'
-import paths from './paths'
+import paths from '../paths'
 
 const sshKeyGen = () => {
   return new Promise((res, rej) => {
@@ -70,7 +70,7 @@ const installWaypoint = async () => {
     await timeout(10000)
     seconds += 10
     if (seconds % 30 === 0) {
-      this.log(`${reachabilityStatus} ${seconds} seconds`)
+      console.log(`${reachabilityStatus} ${seconds} seconds`)
     }
     await getInstanceID((result: string) => {
       instanceID = result
@@ -87,7 +87,7 @@ const installWaypoint = async () => {
   const ipAddr = String(await getServerIP())
 
   return new Promise((res, rej) => {
-    exec(`ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no "waypoint install -platform=docker -accept-tos"`, (error, stdout) => {
+    exec(`ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })

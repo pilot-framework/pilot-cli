@@ -1,8 +1,8 @@
 import cli from 'cli-ux'
-import paths from './paths'
+import paths from '../paths'
 import creds from './creds'
-import fsUtil from './fs'
-import execUtil from './aws-exec'
+import fsUtil from '../fs'
+import execUtil from './exec'
 
 const fs = require('fs')
 
@@ -18,9 +18,9 @@ export async function awsSetup() {
   // Check for AWS config
   // ~/.aws/config
   // ~/.aws/credentials
-  if (fs.existsSync(paths.AWS_CREDENTIALS)) {
+  if (fs.existsSync(paths.PILOT_AWS_CREDENTIALS)) {
     this.log('AWS Credentials detected')
-    if (!fs.existsSync(paths.AWS_CONFIG)) {
+    if (!fs.existsSync(paths.PILOT_AWS_CONFIG)) {
       this.log('AWS config not found at ~/.aws/config.')
       return
     }
