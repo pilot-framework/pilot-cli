@@ -51,9 +51,6 @@ export async function awsSetup() {
 
   this.log('Setting up resources...')
 
-  // Create local directory for ssh keys
-  makeDir(CWD + '/.aws_server')
-
   // Create templates directory
   makeDir(paths.appRoot + '/templates')
 
