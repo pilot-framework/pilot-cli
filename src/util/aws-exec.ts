@@ -66,15 +66,21 @@ const installWaypoint = async () => {
   let seconds = 0
 
   while (reachabilityStatus !== 'passed') {
+    /* eslint-disable no-await-in-loop */
     await timeout(10000)
     seconds += 10
     if (seconds % 30 === 0) {
-      console.log(`${reachabilityStatus} ${seconds} seconds`)
+      this.log(`${reachabilityStatus} ${seconds} seconds`)
     }
-    await getInstanceID((result: string) => instanceID = result)
-    await getServerStatus(instanceID, result => instanceStatus = JSON.parse(result))
+    await getInstanceID((result: string) => {
+      instanceID = result
+    })
+    await getServerStatus(instanceID, (result: string) => {
+      instanceStatus = JSON.parse(result)
+    })
 
     reachabilityStatus = instanceStatus.InstanceStatuses[0].InstanceStatus.Details[0].Status
+    /* eslint-enable no-await-in-loop */
   }
 
   console.log(`${reachabilityStatus} ${seconds} seconds`)
