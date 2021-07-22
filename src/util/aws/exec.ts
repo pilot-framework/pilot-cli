@@ -159,6 +159,24 @@ const terraDestroy = () => {
   })
 }
 
+const getWaypointAuthToken = async (ipAddress: string) => {
+  // waypoint context create
+  // -server-tls-skip-verify
+  // -set-default
+  // -server-auth-token=<server token>
+  // -server-addr=<server address>
+  // -server-require-auth
+  return new Promise((res, rej) => {
+    exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} "waypoint token new"`, (error, data) => {
+      if (error) rej(error)
+      res(data)
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
 const updateMetadata = async () => {
   const ipAddress = String(await getServerIP())
   let instanceID: string
@@ -166,12 +184,18 @@ const updateMetadata = async () => {
     instanceID = result
   })
 
-  fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err, data) => {
+  let waypointAuthToken: string
+  await getWaypointAuthToken(ipAddress).then((result: string) => {
+    waypointAuthToken = result
+  })
+
+  fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err: Error, data) => {
     if (err) throw err
     const metadata: object = JSON.parse(data)
 
     metadata.ipAddress = `${ipAddress}`
     metadata.instanceID = instanceID
+    metadata.waypointAuthToken = waypointAuthToken
     fs.writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err: Error) => {
       if (err) throw err
     })

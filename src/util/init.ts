@@ -17,7 +17,7 @@ const createFile = (path: string, content: string) => {
 
 export async function initialize() {
   // Create ~/.pilot file structure
-  if (fs.existsSync(paths.PILOT_CONFIG)) {
+  if (fs.existsSync(paths.CONFIG)) {
     this.log('Pilot configuration detected...')
   } else {
     makeDir(paths.CONFIG)
@@ -33,11 +33,11 @@ export async function initialize() {
   // if ~/.aws directory exists, copy contents
   if (fs.existsSync(paths.AWS_CONFIG) && !fs.existsSync(paths.PILOT_AWS_CONFIG)) {
     this.log('AWS configuration detected...copying...')
-    fs.copyFile(paths.AWS_CONFIG, paths.PILOT_AWS_CONFIG, err => {
+    fs.copyFile(paths.AWS_CONFIG, paths.PILOT_AWS_CONFIG, (err: Error) => {
       if (err) {
         this.log('ERROR: ', err)
       } else {
-        this.log(`AWS config copy success!`)
+        this.log('AWS config copy success!')
       }
     })
   } else {
@@ -46,11 +46,11 @@ export async function initialize() {
 
   if (fs.existsSync(paths.AWS_CREDENTIALS)) {
     this.log('AWS credentials detected...copying...')
-    fs.copyFile(paths.AWS_CREDENTIALS, paths.PILOT_AWS_CREDENTIALS, err => {
+    fs.copyFile(paths.AWS_CREDENTIALS, paths.PILOT_AWS_CREDENTIALS, (err: Error) => {
       if (err) {
         this.log('ERROR: ', err)
       } else {
-        this.log(`AWS credentials copy success!`)
+        this.log('AWS credentials copy success!')
       }
     })
   } else {

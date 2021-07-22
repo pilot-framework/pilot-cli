@@ -39,10 +39,10 @@ ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT}`)
     }
 
     if (flags.ui) {
-      fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err, data) => {
+      fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err: Error, data) => {
         if (err) throw err
-        const metadata: object = JSON.parse(data)
 
+        const metadata: object = JSON.parse(data)
         open(`https://${metadata.ipAddress}:9702`)
       })
     }
