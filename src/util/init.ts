@@ -1,5 +1,6 @@
-const fs = require('fs')
 import paths from './paths'
+import fsUtil from '../util/fs'
+const fs = require('fs')
 
 // const CWD = process.cwd()
 
@@ -27,6 +28,14 @@ export async function initialize() {
     createFile(paths.PILOT_AWS_METADATA, '{}')
   }
 
+  /**********************/
+  /*  INSTALL BINARIES  */
+  /**********************/
+  if (!fs.existsSync(paths.TERRAFORM_EXEC) && !fs.existsSync(paths.WAYPOINT_EXEC)) {
+    console.log('Installing binaries...')
+    await fsUtil.installBinaries()
+  }
+
   /***********************/
   /*  AWS CONFIGURATION  */
   /***********************/
@@ -37,11 +46,11 @@ export async function initialize() {
       if (err) {
         this.log('ERROR: ', err)
       } else {
-        this.log('AWS config copy success!')
+        this.log('AWS config copied!')
       }
     })
   } else {
-    this.log('No AWS CLI configuration detected')
+    this.log('AWS CLI configuration detected')
   }
 
   if (fs.existsSync(paths.AWS_CREDENTIALS)) {
@@ -50,7 +59,7 @@ export async function initialize() {
       if (err) {
         this.log('ERROR: ', err)
       } else {
-        this.log('AWS credentials copy success!')
+        this.log('AWS credentials copied!')
       }
     })
   } else {

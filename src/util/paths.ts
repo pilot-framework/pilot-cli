@@ -18,7 +18,8 @@ const AWS_INSTANCES: string = path.join(appRoot.toString(), '/instances/aws')
 const TF_CLOUD_INIT: string = path.join(CONFIG, '/aws/ssh/tf-cloud-init')
 const SSH_DOCKER_WAYPOINT_INIT: string = path.join(appRoot.toString(), '/templates/ssh-docker-waypoint-init.yaml')
 const EC2_KEY_PAIR: string = path.join(CONFIG, '/aws/ssh/PilotKeyPair.pem')
-const TERRAFORM_EXEC: string = path.join(appRoot.toString(), os.platform() === 'darwin' ? '/bin/terraform_1.0.3_darwin_amd64/terraform ' : '/bin/terraform_1.0.2_linux_amd64/terraform ')
+const TERRAFORM_EXEC: string = path.join(appRoot.toString(), '/bin/terraform/terraform')
+const WAYPOINT_EXEC: string = path.join(appRoot.toString(), '/bin/waypoint/waypoint')
 
 
 export default {
@@ -38,4 +39,5 @@ export default {
   SSH_DOCKER_WAYPOINT_INIT,
   TERRAFORM_EXEC,
   TF_CLOUD_INIT,
+  WAYPOINT_EXEC,
 }

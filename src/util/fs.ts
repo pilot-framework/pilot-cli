@@ -1,8 +1,12 @@
 import paths from './paths'
 import templates from './aws/templates'
+import { string } from '@oclif/command/lib/flags'
 
 const fs = require('fs')
+const os = require('os')
 const path = require('path')
+const https = require('https')
+const decompress = require('decompress')
 
 const genTerraformVars = async (data: string) =>
   fs.writeFileSync(path.join(paths.AWS_INSTANCES, '/terraform.tfvars'), data, (err: Error) => {
@@ -18,8 +22,74 @@ const getPrivateKey = () => {
   return fs.readFileSync(paths.TF_CLOUD_INIT)
 }
 
+const downloadFile = async (url: string, dest: string, callback) => {
+  return new Promise((res, rej) => {
+    const file = fs.createWriteStream(dest)
+    https.get(url, res => {
+      res.pipe(file)
+      res.on('end', () => {
+        callback()
+      })
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
+const installBinaries = async () => {
+  const platform = os.platform()
+  const arch = os.arch()
+
+  const system = `${platform}${arch}`
+
+  let terraform_url: string
+  let terraform_dest: string
+  let waypoint_url: string
+  let waypoint_dest: string
+
+  switch (system) {
+  case 'linuxx64': {
+    terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_linux_amd64.zip'
+    terraform_dest = './bin/terraform_1.0.3_linux_amd64.zip'
+    waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_linux_amd64.zip'
+    waypoint_dest = './bin/waypoint_0.4.2_linux_amd64.zip'
+    break
+  }
+
+  case 'linuxx32': {
+    terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_linux_386.zip'
+    terraform_dest = './bin/terraform_1.0.3_linux_386.zip'
+    waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_linux_386.zip'
+    waypoint_dest = './bin/waypoint_0.4.2_linux_386.zip'
+    break
+  }
+
+  case 'darwinx64': {
+    terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_darwin_amd64.zip'
+    terraform_dest = './bin/terraform_1.0.3_darwin_amd64.zip'
+    waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_darwin_amd64.zip'
+    waypoint_dest = './bin/waypoint_0.4.2_darwin_amd64.zip'
+    break
+  }
+
+  default: {
+    console.log(`${platform} ${arch} is not supported`)
+  }
+  }
+
+  downloadFile(terraform_url, terraform_dest, () => {
+    decompress(terraform_dest, './bin/terraform/')
+    downloadFile(waypoint_url, waypoint_dest, () => {
+      decompress(waypoint_dest, './bin/waypoint/')
+    })
+  })
+}
+
 export default {
   genTerraformVars,
   genCloudInitYaml,
   getPrivateKey,
+  downloadFile,
+  installBinaries,
 }
