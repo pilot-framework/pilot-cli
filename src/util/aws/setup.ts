@@ -90,7 +90,7 @@ export async function awsSetup() {
   cli.action.stop()
 
   // Store metadata to ~/.pilot/aws/metadata
-  cli.action.start('Finishing up')
+  cli.action.start('Generating local configs')
   await execUtil.updateMetadata()
   cli.action.stop()
 }
