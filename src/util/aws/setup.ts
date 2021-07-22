@@ -88,4 +88,9 @@ export async function awsSetup() {
   cli.action.start('Setting up your remote Waypoint server')
   await execUtil.installWaypoint()
   cli.action.stop()
+
+  // Store metadata to ~/.pilot/aws/metadata
+  cli.action.start('Finishing up')
+  await execUtil.updateMetadata()
+  cli.action.stop()
 }

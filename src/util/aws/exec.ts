@@ -1,5 +1,6 @@
 import {exec} from 'child_process'
 import paths from '../paths'
+const fs = require('fs')
 
 const sshKeyGen = () => {
   return new Promise((res, rej) => {
@@ -158,6 +159,25 @@ const terraDestroy = () => {
   })
 }
 
+const updateMetadata = async () => {
+  const ipAddress = String(await getServerIP())
+  let instanceID: string
+  await getInstanceID((result: string) => {
+    instanceID = result
+  })
+
+  fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err, data) => {
+    if (err) throw err
+    const metadata: object = JSON.parse(data)
+
+    metadata.ipAddress = `${ipAddress}`
+    metadata.instanceID = instanceID
+    fs.writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err: Error) => {
+      if (err) throw err
+    })
+  })
+}
+
 export default {
   createKeyPair,
   deleteKeyPair,
@@ -169,4 +189,5 @@ export default {
   terraApply,
   terraDestroy,
   terraInit,
+  updateMetadata,
 }

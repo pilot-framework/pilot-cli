@@ -9,15 +9,22 @@ const makeDir = (path: string) => {
   }
 }
 
+const createFile = (path: string, content: string) => {
+  fs.appendFile(path, content, (err: Error) => {
+    if (err) throw err
+  })
+}
+
 export async function initialize() {
   // Create ~/.pilot file structure
   if (fs.existsSync(paths.PILOT_CONFIG)) {
     this.log('Pilot configuration detected...')
   } else {
-    makeDir(paths.PILOT_CONFIG)
+    makeDir(paths.CONFIG)
     makeDir(paths.PILOT_AWS)
     makeDir(paths.PILOT_AWS_SSH)
     makeDir(paths.PILOT_GCP)
+    createFile(paths.PILOT_AWS_METADATA, '{}')
   }
 
   /***********************/
