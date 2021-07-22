@@ -89,6 +89,13 @@ resource "aws_security_group" "sg_22_80" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 2375
+    to_port     = 2375
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # TODO: Change to instance ip address
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
