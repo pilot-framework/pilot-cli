@@ -2,6 +2,8 @@ import {Command, flags} from '@oclif/command'
 import execUtil from '../util/aws/exec'
 import cli from 'cli-ux'
 import paths from '../util/paths'
+const fs = require('fs')
+const open = require('open')
 
 export default class Server extends Command {
   static description = 'Used to interact with the remote management server'
@@ -11,6 +13,7 @@ export default class Server extends Command {
     ssh: flags.boolean({char: 's', description: 'SSH to remote management server'}),
     destroy: flags.boolean({char: 'd',
       description: 'Teardown the remote management server with its provisioned resources'}),
+    ui: flags.boolean({description: 'Opens the Waypoint UI on the default browser'}),
   }
 
   static args = [{name: 'file'}]
@@ -33,6 +36,15 @@ ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT}`)
       cli.action.start('Tearing down remote management server')
       await execUtil.terraDestroy()
       cli.action.stop()
+    }
+
+    if (flags.ui) {
+      fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err, data) => {
+        if (err) throw err
+        const metadata: object = JSON.parse(data)
+
+        open(`https://${metadata.ipAddress}:9702`)
+      })
     }
   }
 }
