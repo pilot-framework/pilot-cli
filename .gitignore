@@ -17,3 +17,7 @@ node_modules
 **/*.pub
 **/*.yaml
 tf-cloud-init
+bin/terraform/
+bin/terraform_1.0.3_linux_amd64.zip
+bin/waypoint/
+bin/waypoint_0.4.2_linux_amd64.zip
