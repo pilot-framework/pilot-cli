@@ -35,6 +35,7 @@ USAGE
 * [`pilot setup`](#pilot-setup)
 * [`pilot template [FILE]`](#pilot-template-file)
 * [`pilot ui [FILE]`](#pilot-ui-file)
+* [`pilot up [FILE]`](#pilot-up-file)
 
 ## `pilot hello [FILE]`
 
@@ -96,11 +97,9 @@ USAGE
   $ pilot server [FILE]
 
 OPTIONS
-  -a, --authenticate  Automatically log in to Waypoint UI
-  -d, --destroy       Teardown the remote management server with its provisioned resources
-  -h, --help          show CLI help
-  -s, --ssh           SSH to remote management server
-  --ui                Opens the Waypoint UI on the default browser
+  -d, --destroy  Teardown the remote management server with its provisioned resources
+  -h, --help     show CLI help
+  -s, --ssh      SSH to remote management server
 ```
 
 _See code: [src/commands/server.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/server.ts)_
@@ -139,11 +138,26 @@ _See code: [src/commands/template.ts](https://github.com/pilot-framework/pilot-c
 
 ## `pilot ui [FILE]`
 
-describe the command here
+Opens the Waypoint UI on the default browser
 
 ```
 USAGE
   $ pilot ui [FILE]
+
+OPTIONS
+  -a, --authenticate  Automatically log in to Waypoint UI
+  -h, --help          show CLI help
+```
+
+_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/ui.ts)_
+
+## `pilot up [FILE]`
+
+describe the command here
+
+```
+USAGE
+  $ pilot up [FILE]
 
 OPTIONS
   -f, --force
@@ -151,5 +165,5 @@ OPTIONS
   -n, --name=name  name to print
 ```
 
-_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/ui.ts)_
+_See code: [src/commands/up.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/up.ts)_
 <!-- commandsstop -->

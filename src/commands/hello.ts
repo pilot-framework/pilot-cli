@@ -1,5 +1,5 @@
 import {Command, flags} from '@oclif/command'
-import execUtil from '../util/aws/exec'
+// import execUtil from '../util/aws/exec'
 import fsUtil from '../util/fs'
 
 export default class Hello extends Command {
