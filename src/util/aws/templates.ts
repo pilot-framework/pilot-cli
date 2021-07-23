@@ -33,15 +33,13 @@ runcmd:
   - curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
   - sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
   - sudo apt-get update && sudo apt-get install waypoint
-  - curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-  - sudo apt-get install -y nodejs
-  - sudo apt install -y awscli
-  - sudo npm install -g yarn
-  - sudo apt-get install python
-  - echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-  - sudo apt-get install -y apt-transport-https ca-certificates gnupg
-  - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-  - sudo apt-get update && sudo apt-get install -y google-cloud-sdk`
+  # Docker host configuration
+  - >-
+    echo {\\"hosts\\": [\\"tcp://0.0.0.0:2375\\", \\"unix:///var/run/docker.sock\\"]} | sudo tee /etc/docker/daemon.json > /dev/null
+  - sudo mkdir /etc/systemd/system/docker.service.d
+  - echo "[Service]" | sudo tee /etc/systemd/system/docker.service.d/override.conf > /dev/null
+  - echo "ExecStart=" | sudo tee -a /etc/systemd/system/docker.service.d/override.conf > /dev/null
+  - echo "ExecStart=/usr/bin/dockerd" | sudo tee -a /etc/systemd/system/docker.service.d/override.conf > /dev/null`
 
 export default {
   yamlConfig,

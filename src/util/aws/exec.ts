@@ -249,7 +249,7 @@ const configureRunner = async () => {
 
   readMetadata((metadata: string) => {
     metadata = JSON.parse(metadata)
-    const execCommand = `${paths.WAYPOINT_EXEC} config set -runner AWS_ACCES_KEY_ID=${metadata.awsAccessKey} AWS_SECRET_ACCESS_KEY=${metadata.awsSecretKey} AWS_DEFAULT_REGION=${metadata.awsRegion}`
+    const execCommand = `${paths.WAYPOINT_EXEC} config set -runner AWS_ACCESS_KEY_ID=${metadata.awsAccessKey} AWS_SECRET_ACCESS_KEY=${metadata.awsSecretKey} AWS_DEFAULT_REGION=${metadata.awsRegion}`
     exec(execCommand, (err: Error) => {
       if (err) throw err
     })
