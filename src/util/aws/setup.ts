@@ -93,4 +93,8 @@ export async function awsSetup() {
   cli.action.start('Generating local configs')
   await execUtil.updateMetadata()
   cli.action.stop()
+
+  cli.action.start('Setting context')
+  await execUtil.setContext()
+  cli.action.stop
 }

@@ -2,6 +2,10 @@ import {exec} from 'child_process'
 import paths from '../paths'
 const fs = require('fs')
 
+const timeout = (ms: number) => {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 const sshKeyGen = () => {
   return new Promise((res, rej) => {
     exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.TF_CLOUD_INIT}`, (error, _) => {
@@ -57,10 +61,6 @@ const getServerStatus = (instanceID: string, callback) => {
 }
 
 const installWaypoint = async () => {
-  const timeout = ms => {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
-
   let instanceID
   let instanceStatus
   let reachabilityStatus
@@ -125,7 +125,7 @@ const createKeyPair = () => {
 
 const terraInit = () => {
   return new Promise((res, rej) => {
-    exec(paths.TERRAFORM_EXEC + `-chdir=${paths.AWS_INSTANCES} init`, (error, _) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} init`, (error, _) => {
       if (error) rej(error)
       res('success')
     })
@@ -137,7 +137,7 @@ const terraInit = () => {
 
 const terraApply = () => {
   return new Promise((res, rej) => {
-    exec(paths.TERRAFORM_EXEC + `-chdir=${paths.AWS_INSTANCES} apply -auto-approve`, (error, _) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} apply -auto-approve`, (error, _) => {
       if (error) rej(error)
       res('success')
     })
@@ -149,7 +149,7 @@ const terraApply = () => {
 
 const terraDestroy = () => {
   return new Promise((res, rej) => {
-    exec(paths.TERRAFORM_EXEC + `-chdir=${paths.AWS_INSTANCES} destroy -auto-approve`, (error, _) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} destroy -auto-approve`, (error, _) => {
       if (error) rej(error)
       res('success')
     })
@@ -199,9 +199,29 @@ const updateMetadata = async () => {
 
     metadata.ipAddress = `${ipAddress}`
     metadata.instanceID = instanceID
-    metadata.waypointAuthToken = waypointAuthToken
+    metadata.waypointAuthToken = waypointAuthToken.trim()
 
     fs.writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err: Error) => {
+      if (err) throw err
+    })
+  })
+}
+
+const setContext = async () => {
+  // waypoint context create
+  // -server-tls-skip-verify
+  // -set-default
+  // -server-auth-token=<server token>
+  // -server-addr=<server address>
+  // -server-require-auth
+  // <contextName>
+
+  await timeout(2000)
+
+  readMetadata((metadata: string) => {
+    metadata = JSON.parse(metadata)
+    const execCommand = `${paths.WAYPOINT_EXEC} context create -server-tls-skip-verify -set-default -server-auth-token=${metadata.waypointAuthToken} -server-addr=${metadata.ipAddress} -server-require-auth pilot-aws`
+    exec(execCommand, (err: Error) => {
       if (err) throw err
     })
   })
@@ -218,5 +238,7 @@ export default {
   terraApply,
   terraDestroy,
   terraInit,
+  readMetadata,
   updateMetadata,
+  setContext,
 }
