@@ -50,7 +50,7 @@ export async function initialize() {
       if (err) {
         this.log('ERROR: ', err)
       } else {
-        this.log('AWS credentials copy success!')
+        this.log('gcloud credentials copy success!')
       }
     })
   } else {
@@ -60,4 +60,16 @@ export async function initialize() {
   /***********************/
   /*  GCP CONFIGURATION  */
   /***********************/
+  if (fs.existsSync(paths.GCP_CONFIG) && !fs.existsSync(paths.PILOT_GCP_CONFIG)) {
+    this.log('gcloud configuration detected...copying...')
+    fs.copyFile(paths.GCP_CONFIG, paths.PILOT_GCP_CONFIG, (err: Error) => {
+      if (err) {
+        this.log('ERROR: ', err)
+      } else {
+        this.log('gcloud config copy success!')
+      }
+    })
+  } else {
+    this.log('No gcloud configuration detected')
+  }
 }
