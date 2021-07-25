@@ -1,6 +1,10 @@
+import {exec} from 'child_process'
+import paths from '../paths'
+const fs = require('fs')
+
 const terraInit = () => {
   return new Promise((res, rej) => {
-    exec(paths.TERRAFORM_EXEC + `-chdir=${paths.GCP_INSTANCES} init`, (error, _) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} init`, (error, _) => {
       if (error) rej(error)
       res('success')
     })
@@ -12,7 +16,7 @@ const terraInit = () => {
 
 const terraApply = () => {
   return new Promise((res, rej) => {
-    exec(paths.TERRAFORM_EXEC + `-chdir=${paths.GCP_INSTANCES} apply -auto-approve`, (error, _) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} apply -auto-approve`, (error, _) => {
       if (error) rej(error)
       res('success')
     })
@@ -24,7 +28,7 @@ const terraApply = () => {
 
 const terraDestroy = () => {
   return new Promise((res, rej) => {
-    exec(paths.TERRAFORM_EXEC + `-chdir=${paths.GCP_INSTANCES} destroy -auto-approve`, (error, _) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} destroy -auto-approve`, (error, _) => {
       if (error) rej(error)
       res('success')
     })
@@ -44,5 +48,11 @@ const getWaypointAuthToken = async (ipAddress: string) => {
   .catch(error => {
     throw error
   })
+}
+
+export default {
+  terraInit,
+  terraApply,
+  terraDestroy,
 }
 
