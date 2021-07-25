@@ -78,7 +78,9 @@ export async function initialize() {
         this.log('gcloud config copy success!')
       }
     })
-  } else {
+  } else if (!fs.existsSync(paths.GCP_CONFIG)) {
     this.log('No gcloud configuration detected')
+  } else {
+    this.log('gcloud configuration detected')
   }
 }

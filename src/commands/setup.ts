@@ -1,7 +1,7 @@
 import {Command, flags} from '@oclif/command'
 
 import {awsSetup} from '../util/aws/setup'
-// import {gcpSetup} from '../util/gcp-setup'
+import {gcpSetup} from '../util/gcp/setup'
 
 export default class Setup extends Command {
   static description = 'Sets up Pilot Framework environment'
@@ -17,6 +17,6 @@ export default class Setup extends Command {
     if (!flags.aws && !flags.gcp) this.log('Run "pilot setup -h" for command listing')
 
     if (flags.aws) await awsSetup.call(this)
-    // if (flags.gcp) await gcpSetup.call(this)
+    if (flags.gcp) await gcpSetup.call(this)
   }
 }
