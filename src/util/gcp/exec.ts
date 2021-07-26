@@ -50,9 +50,17 @@ const getWaypointAuthToken = async (ipAddress: string) => {
 }
 
 const serviceAccountExists = (gcpProjectID: string) => {
-  return new Promise((res, _) => {
+  return new Promise((res, rej) => {
     exec(`gcloud iam service-accounts describe pilot-user@${gcpProjectID}.iam.gserviceaccount.com`, (error, _) => {
-      if (error) res(false)
+      if (error) {
+        let errMsg = error.toString()
+
+        if (errMsg.includes("NOT_FOUND")) {
+          res(false)
+        }
+        
+        rej(error)
+      }
       res(true)
     }) 
   })
@@ -62,9 +70,17 @@ const serviceAccountExists = (gcpProjectID: string) => {
 }
 
 const pilotRoleExists = async (gcpProjectID: string) => {
-  return new Promise((res, _) => {
-    exec(`gcloud iam roles describe pilotService --project ${gcpProjectID}`, (error, _) => {
-      if (error) res(false)
+  return new Promise((res, rej) => {
+    exec(`gcloud iam roles describe pilotService --project ${gcpProjectID}`, (error, stdout) => {
+      if (error) {
+        let errMsg = error.toString()
+
+        if (errMsg.includes("NOT_FOUND")) {
+          res(false)
+        }
+        
+        rej(error)
+      }
       res(true)
     }) 
   })
@@ -73,9 +89,9 @@ const pilotRoleExists = async (gcpProjectID: string) => {
   })
 }
 
-const createServiceAccount = () => {
+const createServiceAccount = (gcpProjectID: string) => {
   return new Promise((res, rej) => {
-    exec('gcloud iam service-accounts create pilot-user', (error, stdout) => {
+    exec(`gcloud iam service-accounts create pilot-user --project ${gcpProjectID}`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
