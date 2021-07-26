@@ -4,8 +4,8 @@ data "google_billing_account" "acct" {
 }
 
 resource "google_project" "my_project" {
-  name       = "pilot-2"
-  project_id = "pilot-2"
+  name       = "pilot-4"
+  project_id = "pilot-4"
   billing_account = data.google_billing_account.acct.id
 }
 
@@ -57,10 +57,6 @@ resource "google_service_account_key" "mykey" {
 data "google_service_account_key" "mykey" {
   name            = google_service_account_key.mykey.name
   public_key_type = "TYPE_X509_PEM_FILE"
-}
-
-data "template_file" "user_data" {
-  template = file("scripts/add-ssh-web-app.yaml")
 }
 
 resource "google_compute_instance" "default" {
