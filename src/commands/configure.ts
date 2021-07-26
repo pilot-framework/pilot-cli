@@ -55,8 +55,7 @@ export default class Setup extends Command {
 
         await gcpExec.bindIAMRole(String(flags.project))
 
-        let keyGen = await gcpExec.serviceAccountKeyGen(String(flags.project))
-        this.log(String(keyGen))
+        await gcpExec.serviceAccountKeyGen(String(flags.project))
       } catch (err) {
         this.log(err)
       }
