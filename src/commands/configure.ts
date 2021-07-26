@@ -2,6 +2,7 @@ import {Command, flags} from '@oclif/command'
 import paths from '../util/paths'
 import gcpExec from '../util/gcp/exec'
 import { cli } from 'cli-ux'
+import fs from '../util/fs'
 
 const { exec } = require('child_process')
 
@@ -56,6 +57,8 @@ export default class Setup extends Command {
         await gcpExec.bindIAMRole(String(flags.project))
 
         await gcpExec.serviceAccountKeyGen(String(flags.project))
+
+        await fs.copyFileToEC2()
       } catch (err) {
         this.log(err)
       }
