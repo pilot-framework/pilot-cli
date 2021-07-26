@@ -45,6 +45,18 @@ const dockerAuth = async (gcpProjectID: string) => {
   })
 }
 
+const setEnvVar = async (envStr: string) => {
+  return new Promise((res, rej) => {
+    exec(`${paths.WAYPOINT_EXEC} config set -runner ${envStr}`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+  .catch(err => {
+    throw err
+  })
+}
+
 export default class Setup extends Command {
   static description = 'Configure remote Waypoint Server with credentials for selected cloud provider.\nThis typically only needs to be run once for each provider.'
 
@@ -104,8 +116,15 @@ export default class Setup extends Command {
         await dockerConfig(String(flags.project))
 
         await dockerAuth(String(flags.project))
+
+        envVars.push("GOOGLE_APPLICATION_CREDENTIALS=/root/.config/pilot-user-file.json")
       } catch (err) {
         this.log(err)
+      }
+
+      for (const envVar of envVars) {
+        this.log(envVar)
+        await setEnvVar(envVar)
       }
 
       cli.action.stop()
