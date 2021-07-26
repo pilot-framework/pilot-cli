@@ -256,8 +256,58 @@ const configureRunner = async () => {
   })
 }
 
+const serviceAccountExists = () => {
+  return new Promise((res, rej) => {
+    const command = 'aws iam get-user --user-name pilot-user'
+    exec(command, err => {
+      if (err) {
+        if (err.toString().includes('NoSuchEntity')) {
+          res(false)
+        }
+        rej(err)
+      }
+      res(true)
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
+const createServiceAccount = () => {
+  return new Promise((res, rej) => {
+    const command = 'aws iam create-user --user-name pilot-user'
+    exec(command, (err, stdout) => {
+      if (err) rej(err)
+      res(stdout)
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
+const pilotRoleExists = () => {
+  return new Promise((res, rej) => {
+    const command = 'aws iam get-role --role-name pilotService'
+    exec(command, err => {
+      if (err) {
+        if (err.toString().includes('NoSuchEntity')) {
+          res(false)
+        }
+        rej(err)
+      }
+      res(true)
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
 export default {
   createKeyPair,
+  createServiceAccount,
   deleteKeyPair,
   getServerIP,
   getServerStatus,
@@ -271,4 +321,6 @@ export default {
   updateMetadata,
   setContext,
   configureRunner,
+  serviceAccountExists,
+  pilotRoleExists,
 }

@@ -1,6 +1,7 @@
 import {Command, flags} from '@oclif/command'
 import paths from '../util/paths'
 import gcpExec from '../util/gcp/exec'
+import awsExec from '../util/aws/exec'
 import { cli } from 'cli-ux'
 import fs from '../util/fs'
 
@@ -10,28 +11,38 @@ export default class Setup extends Command {
   static description = 'Configure remote Waypoint Server with credentials for selected cloud provider.\nThis typically only needs to be run once for each provider.'
 
   static flags = {
-      help: flags.help({char: 'h'}),
-      aws: flags.boolean({description: 'Configure server with AWS Pilot IAM credentials'}),
-      gcp: flags.boolean({description: 'Configure server with GCP Pilot IAM credentials'}),
-      project: flags.string({
-        char: 'p',
-        description: 'Project ID for GCP Project that the service account and IAM role will be created for',
-      }),
+    help: flags.help({char: 'h'}),
+    aws: flags.boolean({description: 'Configure server with AWS Pilot IAM credentials'}),
+    gcp: flags.boolean({description: 'Configure server with GCP Pilot IAM credentials'}),
+    project: flags.string({
+      char: 'p',
+      description: 'Project ID for GCP Project that the service account and IAM role will be created for',
+    }),
   }
 
   async run() {
     const { flags } = this.parse(Setup)
 
     if (flags.project === undefined && flags.gcp) {
-      this.log("Please specify a project like so: \"pilot configure --gcp -p=PROJECT_ID\"")
+      this.log('Please specify a project like so: "pilot configure --gcp -p=PROJECT_ID"')
       return
     }
 
     let envVars: Array<string>
 
     if (flags.aws) {
-      // TODO
-      this.log('Chose aws')
+      cli.action.start('Configuring IAM user and role for Pilot on AWS...')
+
+      if (await awsExec.serviceAccountExists()) {
+        this.log('Found existing pilot-user account')
+      } else {
+        await awsExec.createServiceAccount()
+        this.log('Created pilot-user service account')
+      }
+
+      
+
+      cli.action.stop()
     } else if (flags.gcp) {
       cli.action.start("Configuring IAM user and role for Pilot on GCP...")
 
