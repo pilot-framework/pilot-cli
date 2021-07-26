@@ -256,9 +256,8 @@ const configureRunner = async () => {
   })
 }
 
-const serviceAccountExists = () => {
+const exists = (command: string) => {
   return new Promise((res, rej) => {
-    const command = 'aws iam get-user --user-name pilot-user'
     exec(command, err => {
       if (err) {
         if (err.toString().includes('NoSuchEntity')) {
@@ -272,6 +271,10 @@ const serviceAccountExists = () => {
   .catch(error => {
     throw error
   })
+}
+
+const serviceAccountExists = () => {
+  return exists('aws iam get-user --user-name pilot-user')
 }
 
 const createServiceAccount = () => {
@@ -288,21 +291,7 @@ const createServiceAccount = () => {
 }
 
 const pilotRoleExists = () => {
-  return new Promise((res, rej) => {
-    const command = 'aws iam get-role --role-name pilotService'
-    exec(command, err => {
-      if (err) {
-        if (err.toString().includes('NoSuchEntity')) {
-          res(false)
-        }
-        rej(err)
-      }
-      res(true)
-    })
-  })
-  .catch(error => {
-    throw error
-  })
+  return exists('aws iam get-role --role-name pilotService')
 }
 
 export default {
