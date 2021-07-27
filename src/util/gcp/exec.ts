@@ -3,7 +3,9 @@ import paths from '../paths'
 import waypoint from '../waypoint'
 import fsUtil from '../fs'
 const fs = require('fs')
-let cmd = "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"
+
+//const createDockerGroup = "newgrp docker"
+const waypointServerInstall = "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"
 
 let echo = "echo hello world"
 
@@ -67,17 +69,31 @@ const installWaypoint = async () => {
       status = data.status
     })
   }
-
+  /*
   return new Promise((res, rej) => {
     console.log(status)
-    exec(cmd, (error, stdout, stderr) => {
-      if (error) console.log(error)
+    exec(createDockerGroup, (error,stdout) => {
+      if (error) throw error
       res(stdout)
     })
   })
   .catch(error => {
     throw error
    })
+   */  
+
+  /* 
+  return new Promise((res, rej) => {
+    console.log(status)
+    exec(waypointServerInstall, (error,stdout) => {
+      if (error) throw error
+      res(stdout)
+    })
+  })
+  .catch(error => {
+    throw error
+   })
+  */
 }
 
 const serviceAccountExists = (gcpProjectID: string) => {
@@ -144,6 +160,7 @@ const serviceAccountKeyGen = async (gcpProjectID: string) => {
   })
 }
 
+/*
 const createIAMRole = async (gcpProjectID: string) => {
   return new Promise((res, rej) => {
     exec(`gcloud iam roles create pilotService \\
@@ -163,6 +180,7 @@ const createIAMRole = async (gcpProjectID: string) => {
     throw error
   })
 }
+*/
 
 const bindIAMRole = async (gcpProjectID: string) => {
   return new Promise((res, rej) => {
@@ -215,7 +233,7 @@ export default {
   serviceAccountKeyGen,
   pilotRoleExists,
   createServiceAccount,
-  createIAMRole,
+  //createIAMRole,
   bindIAMRole,
   pilotUserInit,
 }

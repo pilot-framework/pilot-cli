@@ -248,8 +248,59 @@ const configureRunner = async () => {
   })
 }
 
+const exists = (command: string) => {
+  return new Promise<boolean>((res, rej) => {
+    exec(command, err => {
+      if (err) {
+        if (err.toString().includes('NoSuchEntity')) {
+          res(false)
+        }
+        rej(err)
+      }
+      res(true)
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
+const create = (command: string) => {
+  return new Promise<string>((res, rej) => {
+    exec(command, (err, stdout) => {
+      if (err) rej(err)
+      res(stdout)
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
+const serviceAccountExists = () => {
+  return exists('aws iam get-user --user-name pilot-user')
+}
+
+const createServiceAccount = () => {
+  return create('aws iam create-user --user-name pilot-user')
+}
+
+const addPolicy = () => {
+  return create(`aws iam put-user-policy --user-name pilot-user --policy-name PilotService --policy-document file://${paths.PILOT_AWS_POLICY}`)
+}
+
+const createAccessKey = async () => {
+  const keyData = await create('aws iam create-access-key --user-name pilot-user')
+  writeFile(paths.PILOT_AWS_USER_KEYS, keyData, (err) => {
+    if (err) throw err
+  })
+}
+
 export default {
+  createAccessKey,
+  addPolicy,
   createKeyPair,
+  createServiceAccount,
   deleteKeyPair,
   getServerIP,
   getServerStatus,
@@ -264,4 +315,5 @@ export default {
   updateMetadata,
   setContext,
   configureRunner,
+  serviceAccountExists,
 }

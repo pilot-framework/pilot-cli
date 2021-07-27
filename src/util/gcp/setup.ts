@@ -41,6 +41,6 @@ export async function gcpSetup() {
 
   // install waypoint post gcloud initialization
   cli.action.start('Setting up your remote Waypoint server')
-  await execUtil.installWaypoint()
+  //await execUtil.installWaypoint()
   cli.action.stop()
 }
