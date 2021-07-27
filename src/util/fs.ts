@@ -101,6 +101,10 @@ const copyFileToEC2 = async () => {
   })
 }
 
+const readPilotKeys = () => {
+  return JSON.parse(fs.readFileSync(paths.PILOT_AWS_USER_KEYS))
+}
+
 export default {
   genTerraformVars,
   genCloudInitYaml,
@@ -108,4 +112,5 @@ export default {
   downloadFile,
   installBinaries,
   copyFileToEC2,
+  readPilotKeys,
 }

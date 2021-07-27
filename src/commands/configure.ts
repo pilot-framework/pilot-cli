@@ -6,6 +6,7 @@ import awsExec from '../util/aws/exec'
 import { cli } from 'cli-ux'
 import fs from '../util/fs'
 import waypoint from '../util/waypoint'
+import creds from '../util/aws/creds'
 
 export default class Configure extends Command {
   static description = 'Configure remote Waypoint Server with credentials for selected cloud provider.\nThis typically only needs to be run once for each provider.'
@@ -62,6 +63,10 @@ export default class Configure extends Command {
 
         await awsExec.createAccessKey()
         this.log('Created access keys')
+
+        const keys = await fs.readPilotKeys()
+        this.log(keys.AccessKey.AccessKeyId)
+        await waypoint.setEnvVar(`AWS_ACCESS_KEY_ID=${keys.AccessKey.AccessKeyId} AWS_SECRET_ACCESS_KEY=${keys.AccessKey.SecretAccessKey} AWS_DEFAULT_REGION=${creds.getAWSRegion()}`)
       } catch (error) {
         throw error
       }

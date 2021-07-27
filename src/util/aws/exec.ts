@@ -213,7 +213,7 @@ const updateMetadata = async () => {
     metadata.awsSecretKey = creds.getAWSSecretKey()
     metadata.awsRegion = creds.getAWSRegion()
 
-    fs.writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err: Error) => {
+    fs.writeFileSync(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err: Error) => {
       if (err) throw err
     })
   })
@@ -300,7 +300,7 @@ const addPolicy = () => {
 
 const createAccessKey = async () => {
   const keyData = await create('aws iam create-access-key --user-name pilot-user')
-  fs.writeFile(paths.PILOT_AWS_USER_KEYS, keyData, (err: Error) => {
+  fs.writeFileSync(paths.PILOT_AWS_USER_KEYS, keyData, (err: Error) => {
     if (err) throw err
   })
 }
