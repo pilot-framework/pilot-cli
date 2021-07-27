@@ -9,7 +9,7 @@ export default class Up extends Command {
   static flags = {
     help: flags.help({char: 'h'}),
     remote: flags.boolean({char: 'r',
-      description: 'Deploys the project in the server'}),
+      description: 'Deploys the project using remote Waypoint Runner'}),
   }
 
   static args = [{name: 'project'}, {name: 'path'}]

@@ -18,7 +18,7 @@ export default class Ui extends Command {
   async run() {
     const {flags} = this.parse(Ui)
     if (flags.authenticate) {
-      exec('waypoint ui -authenticate', (err: Error) => {
+      exec(`${paths.WAYPOINT_EXEC} ui -authenticate`, (err: Error) => {
         if (err) throw err
       })
     } else {
