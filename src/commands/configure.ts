@@ -65,7 +65,6 @@ export default class Configure extends Command {
         this.log('Created access keys')
 
         const keys = await fs.readPilotKeys()
-        this.log(keys.AccessKey.AccessKeyId)
         await waypoint.setEnvVar(`AWS_ACCESS_KEY_ID=${keys.AccessKey.AccessKeyId} AWS_SECRET_ACCESS_KEY=${keys.AccessKey.SecretAccessKey} AWS_DEFAULT_REGION=${creds.getAWSRegion()}`)
       } catch (error) {
         throw error
