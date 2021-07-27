@@ -57,7 +57,7 @@ const setEnvVar = async (envStr: string) => {
   })
 }
 
-export default class Setup extends Command {
+export default class Configure extends Command {
   static description = 'Configure remote Waypoint Server with credentials for selected cloud provider.\nThis typically only needs to be run once for each provider.'
 
   static flags = {
@@ -71,7 +71,7 @@ export default class Setup extends Command {
   }
 
   async run() {
-    const { flags } = this.parse(Setup)
+    const { flags } = this.parse(Configure)
 
     if (flags.project === undefined && flags.gcp) {
       this.log("Please specify a project like so: \"pilot configure --gcp -p=PROJECT_ID\"")
