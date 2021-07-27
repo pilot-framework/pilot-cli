@@ -53,9 +53,22 @@ const setEnvVar = async (envStr: string) => {
   })
 }
 
+const getEnvVars = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.WAYPOINT_EXEC} config get -runner`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+  .catch(err => {
+    throw err
+  })
+}
+
 export default {
   dockerAuth,
   dockerConfig,
   dockerCopy,
   setEnvVar,
+  getEnvVars,
 }
