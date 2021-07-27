@@ -1,8 +1,9 @@
 import { exec } from 'child_process'
-import { readFile, writeFile } from 'fs'
+import { readFile, writeFileSync, writeFile } from 'fs'
 import paths from '../paths'
 import waypoint from '../waypoint'
 import creds from './creds'
+import fsUtil from '../fs'
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -63,7 +64,7 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
   let time = 0
 
   return new Promise<boolean>((res, _) => {
-    pingServer = setInterval(async () => {    
+    pingServer = setInterval(async () => {
       let instanceStatus = JSON.parse(await getServerStatus(instanceID))
       let reachabilityStatus = instanceStatus.InstanceStatuses[0].InstanceStatus.Details[0].Status
 
@@ -291,9 +292,25 @@ const addPolicy = () => {
 
 const createAccessKey = async () => {
   const keyData = await create('aws iam create-access-key --user-name pilot-user')
-  writeFile(paths.PILOT_AWS_USER_KEYS, keyData, (err) => {
-    if (err) throw err
-  })
+  writeFileSync(paths.PILOT_AWS_USER_KEYS, keyData)
+}
+
+const pilotUserInit = async () => {
+  if (await serviceAccountExists()) {
+    console.log('Found existing pilot-user account')
+  } else {
+    await createServiceAccount()
+    console.log('Created pilot-user service account')
+  }
+
+  await addPolicy()
+  console.log('Attached Pilot policy to service account')
+
+  await createAccessKey()
+  console.log('Created access keys')
+
+  const keys = await fsUtil.readPilotKeys()
+  await waypoint.setEnvVar(`AWS_ACCESS_KEY_ID=${keys.AccessKey.AccessKeyId} AWS_SECRET_ACCESS_KEY=${keys.AccessKey.SecretAccessKey} AWS_DEFAULT_REGION=${creds.getAWSRegion()}`)
 }
 
 export default {
@@ -316,4 +333,5 @@ export default {
   setContext,
   configureRunner,
   serviceAccountExists,
+  pilotUserInit,
 }
