@@ -133,6 +133,7 @@ resource "aws_instance" "waypoint" {
   user_data                   = data.template_file.user_data.rendered
 
   ebs_block_device {
+    device_name = "/dev/sdb"
     volume_size = 20
   }
 
