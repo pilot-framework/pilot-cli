@@ -1,8 +1,6 @@
-import {Command, flags} from '@oclif/command'
-import { ChildProcess } from 'child_process'
+import { Command, flags } from '@oclif/command'
+import { spawn } from 'child_process'
 import paths from '../util/paths'
-
-const {spawn} = require('child_process')
 
 export default class Up extends Command {
   static description = 'Deploys your project'

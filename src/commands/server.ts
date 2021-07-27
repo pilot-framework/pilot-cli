@@ -24,7 +24,7 @@ export default class Server extends Command {
     if (!flags.ssh && !flags.destroy) this.log('Run "pilot server -h" for command listing')
 
     if (flags.ssh) {
-      const ipAddr = String(await execUtil.getServerIP())
+      const ipAddr = await execUtil.getServerIP()
       this.log(`To SSH to the remote server, execute the following:
 ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT}`)
     }

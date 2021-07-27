@@ -1,0 +1,36 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Effect": "Allow",
+          "Action": [
+              "iam:UpdateAssumeRolePolicy",
+              "iam:PutRolePermissionsBoundary",
+              "iam:CreateRole",
+              "iam:AttachRolePolicy",
+              "iam:PutRolePolicy",
+              "iam:CreateUser",
+              "autoscaling:*",
+              "iam:AddRoleToInstanceProfile",
+              "iam:CreateAccessKey",
+              "cloudfront:*",
+              "iam:PutGroupPolicy",
+              "s3:*",
+              "iam:UpdateUser",
+              "iam:AttachUserPolicy",
+              "iam:UpdateRoleDescription",
+              "iam:DeleteRole",
+              "elasticloadbalancing:*",
+              "iam:CreatePolicy",
+              "iam:CreateServiceLinkedRole",
+              "iam:AttachGroupPolicy",
+              "ecs:*",
+              "lambda:*",
+              "ec2:*",
+              "ecr:*",
+              "iam:UpdateRole"
+          ],
+          "Resource": "*"
+      }
+  ]
+}
