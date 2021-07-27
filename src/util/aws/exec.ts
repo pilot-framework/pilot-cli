@@ -85,7 +85,7 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
 }
 
 const installWaypoint = async (): Promise<string> => {
-  const ipAddr = String(await getServerIP())
+  const ipAddr = await getServerIP()
 
   return new Promise<string>((res, rej) => {
     exec(`ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"`, (error, stdout) => {
