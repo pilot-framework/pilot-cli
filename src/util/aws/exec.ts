@@ -1,5 +1,6 @@
 import {exec} from 'child_process'
 import paths from '../paths'
+import creds from './creds'
 const fs = require('fs')
 
 const timeout = (ms: number) => {
@@ -175,11 +176,19 @@ interface ReadFileCallback<T1, T2 = void> {
   (param1: T1): T2;
 }
 
-const readMetadata = (callback: ReadFileCallback<string>) => {
-  fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err: Error, data: string) => {
+const readFile = (filepath: string, callback: ReadFileCallback<string>) => {
+  fs.readFile(filepath, 'utf8', (err: Error, data: string) => {
     if (err) throw err
     callback(data)
   })
+}
+
+const readMetadata = (callback: ReadFileCallback<string>) => {
+  // fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err: Error, data: string) => {
+  //   if (err) throw err
+  //   callback(data)
+  // })
+  readFile(paths.PILOT_AWS_METADATA, (data) => callback(data))
 }
 
 const updateMetadata = async () => {
@@ -200,6 +209,9 @@ const updateMetadata = async () => {
     metadata.ipAddress = `${ipAddress}`
     metadata.instanceID = instanceID
     metadata.waypointAuthToken = waypointAuthToken.trim()
+    metadata.awsAccessKey = creds.getAWSAccessKey()
+    metadata.awsSecretKey = creds.getAWSSecretKey()
+    metadata.awsRegion = creds.getAWSRegion()
 
     fs.writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err: Error) => {
       if (err) throw err
@@ -220,7 +232,24 @@ const setContext = async () => {
 
   readMetadata((metadata: string) => {
     metadata = JSON.parse(metadata)
-    const execCommand = `${paths.WAYPOINT_EXEC} context create -server-tls-skip-verify -set-default -server-auth-token=${metadata.waypointAuthToken} -server-addr=${metadata.ipAddress} -server-require-auth pilot-aws`
+    const execCommand = `${paths.WAYPOINT_EXEC} context create -server-tls-skip-verify -set-default -server-auth-token=${metadata.waypointAuthToken} -server-addr=${metadata.ipAddress}:9701 -server-require-auth pilot-aws`
+    exec(execCommand, (err: Error) => {
+      if (err) throw err
+    })
+  })
+}
+
+const configureRunner = async () => {
+  // waypoint config set -runner
+  // AWS_ACCESS_KEY_ID=<PKEY>
+  // AWS_SECRET_ACCESS_KEY=<SKEY>
+  // AWS_DEFAULT_REGION=<REGION>
+
+  await timeout(2000)
+
+  readMetadata((metadata: string) => {
+    metadata = JSON.parse(metadata)
+    const execCommand = `${paths.WAYPOINT_EXEC} config set -runner AWS_ACCESS_KEY_ID=${metadata.awsAccessKey} AWS_SECRET_ACCESS_KEY=${metadata.awsSecretKey} AWS_DEFAULT_REGION=${metadata.awsRegion}`
     exec(execCommand, (err: Error) => {
       if (err) throw err
     })
@@ -241,4 +270,5 @@ export default {
   readMetadata,
   updateMetadata,
   setContext,
+  configureRunner,
 }

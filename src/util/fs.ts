@@ -1,6 +1,8 @@
 import paths from './paths'
 import templates from './aws/templates'
 import { string } from '@oclif/command/lib/flags'
+import awsExec from './aws/exec'
+import {exec} from 'child_process'
 
 const fs = require('fs')
 const os = require('os')
@@ -22,7 +24,7 @@ const getPrivateKey = () => {
   return fs.readFileSync(paths.TF_CLOUD_INIT)
 }
 
-const downloadFile = async (url: string, dest: string, callback) => {
+const downloadFile = async (url: string, dest: string, callback: Function) => {
   return new Promise((res, rej) => {
     const file = fs.createWriteStream(dest)
     https.get(url, res => {
@@ -86,10 +88,24 @@ const installBinaries = async () => {
   })
 }
 
+const copyFileToEC2 = async () => {
+  const ipAddress = String(await awsExec.getServerIP())
+  return new Promise((res, rej) => {
+    exec(`scp -i ${paths.TF_CLOUD_INIT} ~/.pilot/gcp/service/pilot-user-file.json pilot@${ipAddress}:~/.config/pilot-user-file.json`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+  .catch(err => {
+    throw err
+  })
+}
+
 export default {
   genTerraformVars,
   genCloudInitYaml,
   getPrivateKey,
   downloadFile,
   installBinaries,
+  copyFileToEC2,
 }

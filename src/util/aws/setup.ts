@@ -80,9 +80,9 @@ export async function awsSetup() {
 
   // terrform apply --auto-approve
   cli.action.start('Provisioning resources')
+  this.log('This will take a few minutes.')
   await execUtil.terraApply()
   cli.action.stop()
-  this.log('Please allow a few minutes for the remote server\'s configuration')
 
   // install waypoint post EC2 initialization
   cli.action.start('Setting up your remote Waypoint server')
@@ -96,5 +96,9 @@ export async function awsSetup() {
 
   cli.action.start('Setting context')
   await execUtil.setContext()
+  cli.action.stop
+
+  cli.action.start('Configuring runner')
+  await execUtil.configureRunner()
   cli.action.stop
 }

@@ -30,9 +30,12 @@ USAGE
 <!-- commands -->
 * [`pilot hello [FILE]`](#pilot-hello-file)
 * [`pilot help [COMMAND]`](#pilot-help-command)
-* [`pilot init [FILE]`](#pilot-init-file)
+* [`pilot init`](#pilot-init)
 * [`pilot server [FILE]`](#pilot-server-file)
+* [`pilot setup`](#pilot-setup)
 * [`pilot template [FILE]`](#pilot-template-file)
+* [`pilot ui [FILE]`](#pilot-ui-file)
+* [`pilot up [FILE]`](#pilot-up-file)
 
 ## `pilot hello [FILE]`
 
@@ -71,18 +74,16 @@ OPTIONS
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
 
-## `pilot init [FILE]`
+## `pilot init`
 
-describe the command here
+Scaffolds Pilot's metadata information in ~/.pilot
 
 ```
 USAGE
-  $ pilot init [FILE]
+  $ pilot init
 
 OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
+  -h, --help  show CLI help
 ```
 
 _See code: [src/commands/init.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/init.ts)_
@@ -103,6 +104,22 @@ OPTIONS
 
 _See code: [src/commands/server.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/server.ts)_
 
+## `pilot setup`
+
+Sets up Pilot Framework environment
+
+```
+USAGE
+  $ pilot setup
+
+OPTIONS
+  -h, --help  show CLI help
+  --aws       Provision Waypoint server on AWS EC2
+  --gcp       Provision Waypoint server on GCP Compute Engine
+```
+
+_See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/setup.ts)_
+
 ## `pilot template [FILE]`
 
 describe the command here
@@ -118,4 +135,35 @@ OPTIONS
 ```
 
 _See code: [src/commands/template.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/template.ts)_
+
+## `pilot ui [FILE]`
+
+Opens the Waypoint UI on the default browser
+
+```
+USAGE
+  $ pilot ui [FILE]
+
+OPTIONS
+  -a, --authenticate  Automatically log in to Waypoint UI
+  -h, --help          show CLI help
+```
+
+_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/ui.ts)_
+
+## `pilot up [FILE]`
+
+describe the command here
+
+```
+USAGE
+  $ pilot up [FILE]
+
+OPTIONS
+  -f, --force
+  -h, --help       show CLI help
+  -n, --name=name  name to print
+```
+
+_See code: [src/commands/up.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/up.ts)_
 <!-- commandsstop -->
