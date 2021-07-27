@@ -3,6 +3,7 @@ import templates from './aws/templates'
 import { string } from '@oclif/command/lib/flags'
 import awsExec from './aws/exec'
 import {exec} from 'child_process'
+import { Http2ServerResponse } from 'http2'
 
 const fs = require('fs')
 const os = require('os')
@@ -25,9 +26,9 @@ const getPrivateKey = () => {
 }
 
 const downloadFile = async (url: string, dest: string, callback: Function) => {
-  return new Promise((res, rej) => {
+  return new Promise(() => {
     const file = fs.createWriteStream(dest)
-    https.get(url, res => {
+    https.get(url, (res: Http2ServerResponse) => {
       res.pipe(file)
       res.on('end', () => {
         callback()
@@ -77,6 +78,7 @@ const installBinaries = async () => {
 
   default: {
     console.log(`${platform} ${arch} is not supported`)
+    return
   }
   }
 
