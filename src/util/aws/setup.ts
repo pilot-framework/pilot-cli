@@ -2,13 +2,12 @@ import cli from 'cli-ux'
 import paths from '../paths'
 import creds from './creds'
 import fsUtil from '../fs'
+import { existsSync, mkdirSync } from 'fs'
 import execUtil from './exec'
 
-const fs = require('fs')
-
 const makeDir = (path: string) => {
-  if (!fs.existsSync(path)) {
-    fs.mkdirSync(path)
+  if (!existsSync(path)) {
+    mkdirSync(path)
   }
 }
 
@@ -16,9 +15,9 @@ export async function awsSetup() {
   // Check for AWS config
   // ~/.aws/config
   // ~/.aws/credentials
-  if (fs.existsSync(paths.PILOT_AWS_CREDENTIALS)) {
+  if (existsSync(paths.PILOT_AWS_CREDENTIALS)) {
     console.log('AWS Credentials detected')
-    if (!fs.existsSync(paths.PILOT_AWS_CONFIG)) {
+    if (!existsSync(paths.PILOT_AWS_CONFIG)) {
       console.log('AWS config not found at ~/.aws/config.')
       return
     }
@@ -56,7 +55,7 @@ export async function awsSetup() {
   console.log('Succesfully written terraform.tfvars')
 
   // Generate SSH Keys
-  if (!fs.existsSync(paths.TF_CLOUD_INIT)) {
+  if (!existsSync(paths.TF_CLOUD_INIT)) {
     await execUtil.sshKeyGen()
     console.log('Successfully generated SSH keys')
   }
