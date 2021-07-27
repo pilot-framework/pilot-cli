@@ -3,11 +3,6 @@ import paths from '../paths'
 import waypoint from '../waypoint'
 import fsUtil from '../fs'
 
-//const createDockerGroup = "newgrp docker"
-const waypointServerInstall = "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"
-
-let echo = "echo hello world"
-
 const terraInit = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} init`, (error, _) => {
@@ -149,7 +144,8 @@ const createServiceAccount = async (gcpProjectID: string): Promise<string> => {
 
 const serviceAccountKeyGen = async (gcpProjectID: string): Promise<string> => {
   return new Promise<string>((res, rej) => {
-    exec(`gcloud iam service-accounts keys create ~/.pilot/gcp/service/pilot-user-file.json --iam-account=pilot-user@${gcpProjectID}.iam.gserviceaccount.com`, (error, stdout) => {
+    exec(`gcloud iam service-accounts keys create ${paths.PILOT_GCP_SERVICE_FILE} \\
+    --iam-account=pilot-user@${gcpProjectID}.iam.gserviceaccount.com`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
