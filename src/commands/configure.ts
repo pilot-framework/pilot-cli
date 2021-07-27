@@ -37,35 +37,7 @@ export default class Configure extends Command {
       cli.action.start("Configuring IAM user and role for Pilot on GCP...")
 
       try {
-        let userExists = await gcpExec.serviceAccountExists(String(flags.project))
-
-        if (!userExists) {
-          gcpExec.createServiceAccount(String(flags.project))
-            .catch(err => this.log(err))
-        } else {
-          this.log("user exists")
-        }
-
-        let roleExists = await gcpExec.pilotRoleExists(String(flags.project))
-
-        if (!roleExists) {
-          gcpExec.createIAMRole(String(flags.project))
-            .catch(err => this.log(err))
-        } else {
-          this.log("role exists")
-        }
-
-        await gcpExec.bindIAMRole(String(flags.project))
-
-        await gcpExec.serviceAccountKeyGen(String(flags.project))
-
-        await fs.copyFileToEC2()
-
-        await waypoint.dockerCopy()
-
-        await waypoint.dockerConfig(String(flags.project))
-
-        await waypoint.dockerAuth(String(flags.project))
+        await gcpExec.pilotUserInit(String(flags.project))
 
         envVars.push("GOOGLE_APPLICATION_CREDENTIALS=/root/.config/pilot-user-file.json")
       } catch (err) {
@@ -73,7 +45,6 @@ export default class Configure extends Command {
       }
 
       for (const envVar of envVars) {
-        this.log(envVar)
         await waypoint.setEnvVar(envVar)
       }
 

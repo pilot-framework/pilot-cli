@@ -1,5 +1,7 @@
 import {exec} from 'child_process'
 import paths from '../paths'
+import waypoint from '../waypoint'
+import fsUtil from '../fs'
 const fs = require('fs')
 let cmd = "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"
 
@@ -169,6 +171,34 @@ const bindIAMRole = async (gcpProjectID: string) => {
   })
 }
 
+const pilotUserInit = async (gcpProjectID: string) => {
+  let userExists = await serviceAccountExists(gcpProjectID)
+
+  if (!userExists) {
+    createServiceAccount(gcpProjectID)
+      .catch(err => console.log(err))
+  }
+
+  let roleExists = await pilotRoleExists(gcpProjectID)
+
+  if (!roleExists) {
+    createIAMRole(gcpProjectID)
+      .catch(err => console.log(err))
+  }
+
+  await bindIAMRole(gcpProjectID)
+
+  await serviceAccountKeyGen(gcpProjectID)
+
+  await fsUtil.copyFileToEC2()
+
+  await waypoint.dockerCopy()
+
+  await waypoint.dockerConfig(gcpProjectID)
+
+  await waypoint.dockerAuth(gcpProjectID)
+}
+
 export default {
   terraInit,
   terraApply,
@@ -180,4 +210,5 @@ export default {
   createServiceAccount,
   createIAMRole,
   bindIAMRole,
+  pilotUserInit,
 }
