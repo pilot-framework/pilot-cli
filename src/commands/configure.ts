@@ -5,57 +5,7 @@ import gcpExec from '../util/gcp/exec'
 import awsExec from '../util/aws/exec'
 import { cli } from 'cli-ux'
 import fs from '../util/fs'
-
-const dockerCopy = async () => {
-  const ipAddress = String(await awsExec.getServerIP())
-  return new Promise((res, rej) => {
-    exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no "docker cp ~/.config/pilot-user-file.json waypoint-runner:/root/.config/pilot-user-file.json"`, (error, stdout) => {
-      if (error) rej(error)
-      res(stdout)
-    })
-  })
-  .catch(err => {
-    throw err
-  })
-}
-
-const dockerConfig = async (gcpProjectID: string) => {
-  const ipAddress = String(await awsExec.getServerIP())
-  return new Promise((res, rej) => {
-    exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no "docker exec waypoint-runner gcloud config set account pilot-user@${gcpProjectID}.iam.gserviceaccount.com"`, (error, stdout) => {
-      if (error) rej(error)
-      res(stdout)
-    })
-  })
-  .catch(err => {
-    throw err
-  })
-}
-
-const dockerAuth = async (gcpProjectID: string) => {
-  const ipAddress = String(await awsExec.getServerIP())
-  return new Promise((res, rej) => {
-    exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no "docker exec waypoint-runner gcloud auth activate-service-account pilot-user@${gcpProjectID}.iam.gserviceaccount.com --key-file=/root/.config/pilot-user-file.json"`, (error, stdout) => {
-      if (error) rej(error)
-      res(stdout)
-    })
-  })
-  .catch(err => {
-    throw err
-  })
-}
-
-const setEnvVar = async (envStr: string) => {
-  return new Promise((res, rej) => {
-    exec(`${paths.WAYPOINT_EXEC} config set -runner ${envStr}`, (error, stdout) => {
-      if (error) rej(error)
-      res(stdout)
-    })
-  })
-  .catch(err => {
-    throw err
-  })
-}
+import waypoint from '../util/waypoint'
 
 export default class Configure extends Command {
   static description = 'Configure remote Waypoint Server with credentials for selected cloud provider.\nThis typically only needs to be run once for each provider.'
@@ -111,11 +61,11 @@ export default class Configure extends Command {
 
         await fs.copyFileToEC2()
 
-        await dockerCopy()
+        await waypoint.dockerCopy()
 
-        await dockerConfig(String(flags.project))
+        await waypoint.dockerConfig(String(flags.project))
 
-        await dockerAuth(String(flags.project))
+        await waypoint.dockerAuth(String(flags.project))
 
         envVars.push("GOOGLE_APPLICATION_CREDENTIALS=/root/.config/pilot-user-file.json")
       } catch (err) {
@@ -124,7 +74,7 @@ export default class Configure extends Command {
 
       for (const envVar of envVars) {
         this.log(envVar)
-        await setEnvVar(envVar)
+        await waypoint.setEnvVar(envVar)
       }
 
       cli.action.stop()
