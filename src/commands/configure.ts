@@ -59,6 +59,9 @@ export default class Configure extends Command {
 
         await awsExec.addPolicy()
         this.log('Attached Pilot policy to service account')
+
+        await awsExec.createAccessKey()
+        this.log('Created access keys')
       } catch (error) {
         throw error
       }

@@ -298,10 +298,11 @@ const addPolicy = () => {
   return create(`aws iam put-user-policy --user-name pilot-user --policy-name PilotService --policy-document file://${paths.PILOT_AWS_POLICY}`)
 }
 
-const createAccessKey = () => {
-  // TODO: after creating new access key/save the access/secret keys in ~./pilot/aws/service
-  // this way the user can still have access on their local machine to these keys
-  return create('aws iam create-access-key --user-name pilot-user')
+const createAccessKey = async () => {
+  const keyData = await create('aws iam create-access-key --user-name pilot-user')
+  fs.writeFile(paths.PILOT_AWS_USER_KEYS, keyData, (err: Error) => {
+    if (err) throw err
+  })
 }
 
 export default {
