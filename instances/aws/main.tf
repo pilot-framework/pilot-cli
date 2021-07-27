@@ -125,7 +125,7 @@ data "template_file" "user_data" {
 
 resource "aws_instance" "waypoint" {
   ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "t2.micro"
+  instance_type               = "t2.medium"
   key_name                    = var.aws_key_pair
   subnet_id                   = aws_subnet.subnet_public.id
   vpc_security_group_ids      = [aws_security_group.sg_22_80.id]
