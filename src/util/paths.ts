@@ -2,8 +2,6 @@ const appRoot = require('app-root-path')
 const os = require('os')
 const path = require('path')
 
-// const CWD = process.cwd()
-
 const HOME: string = os.homedir()
 const CONFIG: string = path.join(HOME, '/.pilot')
 const PILOT_AWS: string = path.join(CONFIG, '/aws')
