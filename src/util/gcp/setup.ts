@@ -38,4 +38,9 @@ export async function gcpSetup() {
   await execUtil.terraApply()
   cli.action.stop()
   this.log('Please allow a few minutes for the remote server\'s configuration')
+
+  // install waypoint post gcloud initialization
+  cli.action.start('Setting up your remote Waypoint server')
+  await execUtil.installWaypoint()
+  cli.action.stop()
 }

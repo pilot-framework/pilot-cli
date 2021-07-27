@@ -4,8 +4,8 @@ data "google_billing_account" "acct" {
 }
 
 resource "google_project" "my_project" {
-  name       = "pilot-4"
-  project_id = "pilot-4"
+  name       = "pilot-10"
+  project_id = "pilot-10"
   billing_account = data.google_billing_account.acct.id
 }
 
