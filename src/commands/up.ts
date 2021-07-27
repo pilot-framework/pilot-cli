@@ -1,5 +1,5 @@
-import {Command, flags} from '@oclif/command'
-const {exec} = require('child_process')
+import { Command, flags } from '@oclif/command'
+import { exec } from 'child_process'
 import paths from '../util/paths'
 
 
@@ -23,7 +23,7 @@ export default class Up extends Command {
       execCommand = `cd ${args.path} && ${paths.WAYPOINT_EXEC} up`
     }
 
-    exec(execCommand, (err: Error, stdout: string) => {
+    exec(execCommand, (err, stdout) => {
       if (err) throw err
       this.log(stdout) // TODO: Stream stdout
     })
