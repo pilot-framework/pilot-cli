@@ -91,7 +91,7 @@ const installBinaries = async () => {
 const copyFileToEC2 = async () => {
   const ipAddress = String(await awsExec.getServerIP())
   return new Promise((res, rej) => {
-    exec(`scp -i ~/.pilot/aws/ssh/tf-cloud-init ~/.pilot/gcp/service/pilot-user-file.json pilot@${ipAddress}:~/.config/pilot-user-file.json`, (error, stdout) => {
+    exec(`scp -i ${paths.TF_CLOUD_INIT} ~/.pilot/gcp/service/pilot-user-file.json pilot@${ipAddress}:~/.config/pilot-user-file.json`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
