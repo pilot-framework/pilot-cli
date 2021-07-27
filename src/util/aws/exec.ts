@@ -3,7 +3,6 @@ import { readFile, writeFile } from 'fs'
 import paths from '../paths'
 import waypoint from '../waypoint'
 import creds from './creds'
-// const fs = require('fs')
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -172,10 +171,6 @@ const getWaypointAuthToken = async (ipAddress: string): Promise<string> => {
   })
 }
 
-// interface ReadFileCallback<T1, T2 = void> {
-//   (param1: T1): T2;
-// }
-
 interface ReadFileCallback {
   (data: string): void
 }
@@ -238,20 +233,18 @@ const configureRunner = async () => {
 
   await timeout(2000)
 
-  let envVars: Array<string> = []
-
-  readMetadata((rawMetadata: string) => {
+  readMetadata(async (rawMetadata: string) => {
     const metadata = JSON.parse(rawMetadata)
 
-    envVars = [
+    let envVars = [
       `AWS_ACCESS_KEY_ID=${metadata.awsAccessKey}`,
       `AWS_SECRET_ACCESS_KEY=${metadata.awsSecretKey}`,
       `AWS_DEFAULT_REGION=${metadata.awsRegion}`,
       `DOCKER_HOST=tcp://${metadata.ipAddress}`,
     ]
-  })
 
-  await waypoint.setEnvVars(envVars)
+    await waypoint.setEnvVars(envVars)
+  })
 }
 
 export default {
