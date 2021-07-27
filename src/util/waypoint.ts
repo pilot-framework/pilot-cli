@@ -46,11 +46,23 @@ const setDockerHost = async () => {
   await setEnvVar(`DOCKER_HOST=${dockerHost}`)
 }
 
-const setEnvVar = async (envStr: string) => {
-  return new Promise((res, rej) => {
-    exec(`${paths.WAYPOINT_EXEC} config set -runner ${envStr}`, (error, stdout) => {
+const setEnvVars = async (envVars: Array<string>): Promise<boolean> => {
+  return new Promise<boolean>((res, rej) => {
+    exec(`${paths.WAYPOINT_EXEC} config set -runner ${envVars.join(" ")}`, (error) => {
       if (error) rej(error)
-      res(stdout)
+      res(true)
+    })
+  })
+  .catch(err => {
+    throw err
+  })
+}
+
+const setEnvVar = async (envStr: string): Promise<boolean> => {
+  return new Promise<boolean>((res, rej) => {
+    exec(`${paths.WAYPOINT_EXEC} config set -runner ${envStr}`, (error) => {
+      if (error) rej(error)
+      res(true)
     })
   })
   .catch(err => {
@@ -76,5 +88,6 @@ export default {
   dockerCopy,
   setDockerHost,
   setEnvVar,
+  setEnvVars,
   getEnvVars,
 }
