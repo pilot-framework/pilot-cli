@@ -2,6 +2,7 @@ import {Command, flags} from '@oclif/command'
 import paths from '../util/paths'
 import { exec } from 'child_process'
 import { readFile } from 'fs'
+import * as open from 'open'
 
 export default class Ui extends Command {
   static description = 'Opens the Waypoint UI on the default browser'
