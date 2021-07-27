@@ -294,13 +294,8 @@ const createServiceAccount = () => {
   return create('aws iam create-user --user-name pilot-user')
 }
 
-const pilotRoleExists = () => {
-  return exists('aws iam get-role --role-name pilotService')
-}
-
-const createIAMRole = () => {
-  // TODO: look into roles/permissions to assign to pilot-user
-  return create('aws iam create-user --user-name pilot-user')
+const addPolicy = () => {
+  return create(`aws iam put-user-policy --user-name pilot-user --policy-name PilotService --policy-document file://${paths.PILOT_AWS_POLICY}`)
 }
 
 const createAccessKey = () => {
@@ -324,7 +319,7 @@ const setEnvVar = (envStr: string) => {
 
 export default {
   createAccessKey,
-  createIAMRole,
+  addPolicy,
   createKeyPair,
   createServiceAccount,
   deleteKeyPair,
@@ -341,5 +336,4 @@ export default {
   setContext,
   configureRunner,
   serviceAccountExists,
-  pilotRoleExists,
 }

@@ -13,6 +13,7 @@ const PILOT_AWS_CONFIG: string = path.join(CONFIG, '/aws/config')
 const PILOT_AWS_CREDENTIALS: string = path.join(CONFIG, '/aws/credentials')
 const PILOT_GCP: string = path.join(CONFIG, '/gcp')
 const PILOT_GCP_CONFIG: string = path.join(CONFIG, '/gcp/config')
+const PILOT_AWS_POLICY: string = path.join(appRoot.toString(), '/templates/pilotAWSPolicy.json')
 const AWS_CREDENTIALS: string = path.join(HOME, '/.aws/credentials')
 const AWS_CONFIG: string = path.join(HOME, '/.aws/config')
 const AWS_INSTANCES: string = path.join(appRoot.toString(), '/instances/aws')
@@ -24,7 +25,6 @@ const EC2_KEY_PAIR: string = path.join(CONFIG, '/aws/ssh/PilotKeyPair.pem')
 const TERRAFORM_EXEC: string = path.join(appRoot.toString(), '/bin/terraform/terraform')
 const WAYPOINT_EXEC: string = path.join(appRoot.toString(), '/bin/waypoint/waypoint')
 
-
 export default {
   HOME,
   CONFIG,
@@ -33,6 +33,7 @@ export default {
   PILOT_AWS_SSH,
   PILOT_AWS_CONFIG,
   PILOT_AWS_CREDENTIALS,
+  PILOT_AWS_POLICY,
   PILOT_GCP,
   appRoot,
   AWS_CREDENTIALS,
