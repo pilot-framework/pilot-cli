@@ -1,7 +1,5 @@
 import {exec} from 'child_process'
 import paths from '../paths'
-const {google} = require('googleapis');
-const compute = google.compute('v1');
 const fs = require('fs')
 let cmd = "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"
 
