@@ -1,14 +1,15 @@
-import {exec} from 'child_process'
+import { exec } from 'child_process'
+import { readFile, writeFile } from 'fs'
 import paths from '../paths'
+import waypoint from '../waypoint'
 import creds from './creds'
-const fs = require('fs')
 
-const timeout = (ms: number) => {
+const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const sshKeyGen = () => {
-  return new Promise((res, rej) => {
+const sshKeyGen = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
     exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.TF_CLOUD_INIT}`, (error, _) => {
       if (error) rej(error)
       res('success')
@@ -19,8 +20,8 @@ const sshKeyGen = () => {
   })
 }
 
-const getServerIP = () => {
-  return new Promise((res, rej) => {
+const getServerIP = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw public_ip`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
@@ -31,64 +32,63 @@ const getServerIP = () => {
   })
 }
 
-const getInstanceID = callback => {
-  return new Promise((res, rej) => {
+const getInstanceID = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw instance_id`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
   })
-  .then(result => {
-    callback(result)
-  })
   .catch(error => {
     throw error
   })
 }
 
-const getServerStatus = (instanceID: string, callback) => {
-  return new Promise((res, rej) => {
+const getServerStatus = async (instanceID: string): Promise<string> => {
+  return new Promise<string>((res, rej) => {
     exec(`aws ec2 describe-instance-status --instance-ids ${instanceID}`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
   })
-  .then(result => {
-    callback(result)
+  .catch(error => {
+    throw error
+  })
+}
+
+// TODO: Determine reasonable timeout
+const serverReachability = async (timeout: number): Promise<boolean> => {
+  const instanceID = await getInstanceID()
+  let pingServer: NodeJS.Timeout
+  let time = 0
+
+  return new Promise<boolean>((res, _) => {
+    pingServer = setInterval(async () => {    
+      let instanceStatus = JSON.parse(await getServerStatus(instanceID))
+      let reachabilityStatus = instanceStatus.InstanceStatuses[0].InstanceStatus.Details[0].Status
+
+      if (time % 30 === 0 && time > 0) console.log(`STATUS: ${reachabilityStatus}, TIME: ${time}S`)
+
+      if (reachabilityStatus === 'passed') {
+        clearInterval(pingServer)
+        res(true)
+      } else if (time >= timeout) {
+        clearInterval(pingServer)
+        res(false)
+      }
+
+      time += 10
+    }, 10000)
   })
   .catch(error => {
     throw error
   })
 }
 
-const installWaypoint = async () => {
-  let instanceID
-  let instanceStatus
-  let reachabilityStatus
-  let seconds = 0
+const installWaypoint = async (): Promise<string> => {
+  const ipAddr = await getServerIP()
 
-  while (reachabilityStatus !== 'passed') {
-    /* eslint-disable no-await-in-loop */
-    await timeout(10000)
-    seconds += 10
-    if (seconds % 30 === 0) {
-      console.log(`${reachabilityStatus} ${seconds} seconds`)
-    }
-    await getInstanceID((result: string) => {
-      instanceID = result
-    })
-    await getServerStatus(instanceID, (result: string) => {
-      instanceStatus = JSON.parse(result)
-    })
-
-    reachabilityStatus = instanceStatus.InstanceStatuses[0].InstanceStatus.Details[0].Status
-    /* eslint-enable no-await-in-loop */
-  }
-
-  console.log(`${reachabilityStatus} ${seconds} seconds`)
-  const ipAddr = String(await getServerIP())
-
-  return new Promise((res, rej) => {
+  return new Promise<string>((res, rej) => {
     exec(`ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
@@ -99,8 +99,8 @@ const installWaypoint = async () => {
   })
 }
 
-const deleteKeyPair = () => {
-  return new Promise((res, rej) => {
+const deleteKeyPair = (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
     exec('aws ec2 delete-key-pair --key-name PilotKeyPair', (error, _) => {
       if (error) rej(error)
     })
@@ -112,8 +112,8 @@ const deleteKeyPair = () => {
   })
 }
 
-const createKeyPair = () => {
-  return new Promise((res, rej) => {
+const createKeyPair = (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
     exec(`aws ec2 create-key-pair --key-name PilotKeyPair --query 'KeyMaterial' --output text > ${paths.EC2_KEY_PAIR}`, (error, _) => {
       if (error) rej(error)
       res('success')
@@ -124,8 +124,8 @@ const createKeyPair = () => {
   })
 }
 
-const terraInit = () => {
-  return new Promise((res, rej) => {
+const terraInit = (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} init`, (error, _) => {
       if (error) rej(error)
       res('success')
@@ -136,8 +136,8 @@ const terraInit = () => {
   })
 }
 
-const terraApply = () => {
-  return new Promise((res, rej) => {
+const terraApply = (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} apply -auto-approve`, (error, _) => {
       if (error) rej(error)
       res('success')
@@ -148,8 +148,8 @@ const terraApply = () => {
   })
 }
 
-const terraDestroy = () => {
-  return new Promise((res, rej) => {
+const terraDestroy = (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} destroy -auto-approve`, (error, _) => {
       if (error) rej(error)
       res('success')
@@ -160,8 +160,8 @@ const terraDestroy = () => {
   })
 }
 
-const getWaypointAuthToken = async (ipAddress: string) => {
-  return new Promise((res, rej) => {
+const getWaypointAuthToken = async (ipAddress: string): Promise<string> => {
+  return new Promise<string>((res, rej) => {
     exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} "waypoint token new"`, (error, data) => {
       if (error) rej(error)
       res(data)
@@ -172,39 +172,24 @@ const getWaypointAuthToken = async (ipAddress: string) => {
   })
 }
 
-interface ReadFileCallback<T1, T2 = void> {
-  (param1: T1): T2;
+interface ReadFileCallback {
+  (data: string): void
 }
 
-const readFile = (filepath: string, callback: ReadFileCallback<string>) => {
-  fs.readFile(filepath, 'utf8', (err: Error, data: string) => {
+const readMetadata = (callback: ReadFileCallback) => {
+  readFile(paths.PILOT_AWS_METADATA, 'utf8', (err, data) => {
     if (err) throw err
     callback(data)
   })
 }
 
-const readMetadata = (callback: ReadFileCallback<string>) => {
-  // fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err: Error, data: string) => {
-  //   if (err) throw err
-  //   callback(data)
-  // })
-  readFile(paths.PILOT_AWS_METADATA, (data) => callback(data))
-}
-
 const updateMetadata = async () => {
-  const ipAddress = String(await getServerIP())
-  let instanceID: string
-  await getInstanceID((result: string) => {
-    instanceID = result
-  })
+  const ipAddress = await getServerIP()
+  const instanceID = await getInstanceID()
+  const waypointAuthToken = await getWaypointAuthToken(ipAddress)
 
-  let waypointAuthToken: string
-  await getWaypointAuthToken(ipAddress).then((result: string) => {
-    waypointAuthToken = result
-  })
-
-  readMetadata((data: string) => {
-    const metadata: object = JSON.parse(data)
+  readMetadata((data) => {
+    const metadata = JSON.parse(data)
 
     metadata.ipAddress = `${ipAddress}`
     metadata.instanceID = instanceID
@@ -213,7 +198,7 @@ const updateMetadata = async () => {
     metadata.awsSecretKey = creds.getAWSSecretKey()
     metadata.awsRegion = creds.getAWSRegion()
 
-    fs.writeFileSync(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err: Error) => {
+    writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err) => {
       if (err) throw err
     })
   })
@@ -230,10 +215,11 @@ const setContext = async () => {
 
   await timeout(2000)
 
-  readMetadata((metadata: string) => {
-    metadata = JSON.parse(metadata)
-    const execCommand = `${paths.WAYPOINT_EXEC} context create -server-tls-skip-verify -set-default -server-auth-token=${metadata.waypointAuthToken} -server-addr=${metadata.ipAddress}:9701 -server-require-auth pilot-aws`
-    exec(execCommand, (err: Error) => {
+  readMetadata((rawMetadata) => {
+    const metadata = JSON.parse(rawMetadata)
+    const execCommand = `${paths.WAYPOINT_EXEC} context create -server-tls-skip-verify -set-default \\
+    -server-auth-token=${metadata.waypointAuthToken} -server-addr=${metadata.ipAddress}:9701 -server-require-auth pilot-aws`
+    exec(execCommand, (err) => {
       if (err) throw err
     })
   })
@@ -244,16 +230,21 @@ const configureRunner = async () => {
   // AWS_ACCESS_KEY_ID=<PKEY>
   // AWS_SECRET_ACCESS_KEY=<SKEY>
   // AWS_DEFAULT_REGION=<REGION>
-  // TODO: set docker host
+  // DOCKER_HOST=tcp://<EC2_IP>:2375
 
   await timeout(2000)
 
-  readMetadata((metadata: string) => {
-    metadata = JSON.parse(metadata)
-    const execCommand = `${paths.WAYPOINT_EXEC} config set -runner AWS_ACCESS_KEY_ID=${metadata.awsAccessKey} AWS_SECRET_ACCESS_KEY=${metadata.awsSecretKey} AWS_DEFAULT_REGION=${metadata.awsRegion}`
-    exec(execCommand, (err: Error) => {
-      if (err) throw err
-    })
+  readMetadata(async (rawMetadata: string) => {
+    const metadata = JSON.parse(rawMetadata)
+
+    let envVars = [
+      `AWS_ACCESS_KEY_ID=${metadata.awsAccessKey}`,
+      `AWS_SECRET_ACCESS_KEY=${metadata.awsSecretKey}`,
+      `AWS_DEFAULT_REGION=${metadata.awsRegion}`,
+      `DOCKER_HOST=tcp://${metadata.ipAddress}:2375`,
+    ]
+
+    await waypoint.setEnvVars(envVars)
   })
 }
 
@@ -300,7 +291,7 @@ const addPolicy = () => {
 
 const createAccessKey = async () => {
   const keyData = await create('aws iam create-access-key --user-name pilot-user')
-  fs.writeFileSync(paths.PILOT_AWS_USER_KEYS, keyData, (err: Error) => {
+  writeFile(paths.PILOT_AWS_USER_KEYS, keyData, (err) => {
     if (err) throw err
   })
 }
@@ -314,6 +305,7 @@ export default {
   getServerIP,
   getServerStatus,
   getInstanceID,
+  serverReachability,
   installWaypoint,
   sshKeyGen,
   terraApply,

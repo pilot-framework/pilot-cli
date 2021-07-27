@@ -82,9 +82,7 @@ export default class Configure extends Command {
         this.log(err)
       }
 
-      for (const envVar of envVars) {
-        await waypoint.setEnvVar(envVar)
-      }
+      await waypoint.setEnvVars(envVars)
 
       cli.action.stop()
     } else {

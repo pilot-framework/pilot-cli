@@ -2,15 +2,12 @@ import cli from 'cli-ux'
 import paths from '../paths'
 import creds from './creds'
 import fsUtil from '../fs'
+import { existsSync, mkdirSync } from 'fs'
 import execUtil from './exec'
 
-const fs = require('fs')
-
-const CWD = process.cwd()
-
 const makeDir = (path: string) => {
-  if (!fs.existsSync(path)) {
-    fs.mkdirSync(path)
+  if (!existsSync(path)) {
+    mkdirSync(path)
   }
 }
 
@@ -18,15 +15,15 @@ export async function awsSetup() {
   // Check for AWS config
   // ~/.aws/config
   // ~/.aws/credentials
-  if (fs.existsSync(paths.PILOT_AWS_CREDENTIALS)) {
-    this.log('AWS Credentials detected')
-    if (!fs.existsSync(paths.PILOT_AWS_CONFIG)) {
-      this.log('AWS config not found at ~/.aws/config.')
+  if (existsSync(paths.PILOT_AWS_CREDENTIALS)) {
+    console.log('AWS Credentials detected')
+    if (!existsSync(paths.PILOT_AWS_CONFIG)) {
+      console.log('AWS config not found at ~/.aws/config.')
       return
     }
-    this.log('AWS Configuration detected')
+    console.log('AWS Configuration detected')
   } else {
-    this.log('No AWS configuration found. Please configure AWS CLI.')
+    console.log('No AWS configuration found. Please configure AWS CLI.')
     return
   }
 
@@ -35,37 +32,37 @@ export async function awsSetup() {
   const sKey = creds.getAWSSecretKey()
 
   if (awsRegion === '') {
-    this.log('No AWS Access Key configured')
+    console.log('No AWS Access Key configured')
     return
   }
 
   if (aKey === '') {
-    this.log('No AWS Access Key configured')
+    console.log('No AWS Access Key configured')
     return
   }
 
   if (sKey === '') {
-    this.log('No AWS Secret Key configured')
+    console.log('No AWS Secret Key configured')
     return
   }
 
-  this.log('Setting up resources...')
+  console.log('Setting up resources...')
 
   // Create templates directory
   makeDir(paths.appRoot + '/templates')
 
   fsUtil.genTerraformVars(`region="${awsRegion}"`)
-  this.log('Succesfully written terraform.tfvars')
+  console.log('Succesfully written terraform.tfvars')
 
   // Generate SSH Keys
-  if (!fs.existsSync(paths.TF_CLOUD_INIT)) {
+  if (!existsSync(paths.TF_CLOUD_INIT)) {
     await execUtil.sshKeyGen()
-    this.log('Successfully generated SSH keys')
+    console.log('Successfully generated SSH keys')
   }
 
   // Generate yaml file for cloud-init
   fsUtil.genCloudInitYaml()
-  this.log('Successfully generated cloud init')
+  console.log('Successfully generated cloud init')
 
   // Generate keypair to associate with EC2 for SSH access
   cli.action.start('Refreshing EC2 key pair')
@@ -80,8 +77,19 @@ export async function awsSetup() {
 
   // terrform apply --auto-approve
   cli.action.start('Provisioning resources')
-  this.log('This will take a few minutes.')
+  console.log('This will take a few minutes.')
   await execUtil.terraApply()
+  cli.action.stop()
+
+  // wait for EC2 initialization
+  cli.action.start('EC2 instance initializing...')
+
+  // times out after 6 mins
+  const reachable = await execUtil.serverReachability(360)
+
+  if (!reachable) {
+    cli.error("EC2 instance initialization timed out")
+  }
   cli.action.stop()
 
   // install waypoint post EC2 initialization
