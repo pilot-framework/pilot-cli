@@ -8,7 +8,7 @@ const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const sshKeyGen = (): Promise<string> => {
+const sshKeyGen = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.TF_CLOUD_INIT}`, (error, _) => {
       if (error) rej(error)
@@ -20,7 +20,7 @@ const sshKeyGen = (): Promise<string> => {
   })
 }
 
-const getServerIP = (): Promise<string> => {
+const getServerIP = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw public_ip`, (error, stdout) => {
       if (error) rej(error)
@@ -32,7 +32,7 @@ const getServerIP = (): Promise<string> => {
   })
 }
 
-const getInstanceID = (): Promise<string> => {
+const getInstanceID = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw instance_id`, (error, stdout) => {
       if (error) rej(error)
@@ -44,7 +44,7 @@ const getInstanceID = (): Promise<string> => {
   })
 }
 
-const getServerStatus = (instanceID: string): Promise<string> => {
+const getServerStatus = async (instanceID: string): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`aws ec2 describe-instance-status --instance-ids ${instanceID}`, (error, stdout) => {
       if (error) rej(error)
