@@ -1,8 +1,9 @@
-import {exec} from 'child_process'
+import { exec } from 'child_process'
+import { readFile, writeFile } from 'fs'
 import paths from '../paths'
 import waypoint from '../waypoint'
 import creds from './creds'
-const fs = require('fs')
+// const fs = require('fs')
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -171,19 +172,19 @@ const getWaypointAuthToken = async (ipAddress: string): Promise<string> => {
   })
 }
 
-interface ReadFileCallback<T1, T2 = void> {
-  (param1: T1): T2;
+// interface ReadFileCallback<T1, T2 = void> {
+//   (param1: T1): T2;
+// }
+
+interface ReadFileCallback {
+  (data: string): void
 }
 
-const readFile = (filepath: string, callback: ReadFileCallback<string>) => {
-  fs.readFile(filepath, 'utf8', (err: Error, data: string) => {
+const readMetadata = (callback: ReadFileCallback) => {
+  readFile(paths.PILOT_AWS_METADATA, 'utf8', (err, data) => {
     if (err) throw err
     callback(data)
   })
-}
-
-const readMetadata = (callback: ReadFileCallback<string>) => {
-  readFile(paths.PILOT_AWS_METADATA, (data) => callback(data))
 }
 
 const updateMetadata = async () => {
@@ -191,7 +192,7 @@ const updateMetadata = async () => {
   const instanceID = await getInstanceID()
   const waypointAuthToken = await getWaypointAuthToken(ipAddress)
 
-  readMetadata((data: string) => {
+  readMetadata((data) => {
     const metadata = JSON.parse(data)
 
     metadata.ipAddress = `${ipAddress}`
@@ -201,7 +202,7 @@ const updateMetadata = async () => {
     metadata.awsSecretKey = creds.getAWSSecretKey()
     metadata.awsRegion = creds.getAWSRegion()
 
-    fs.writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err: Error) => {
+    writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err) => {
       if (err) throw err
     })
   })
@@ -218,7 +219,7 @@ const setContext = async () => {
 
   await timeout(2000)
 
-  readMetadata((rawMetadata: string) => {
+  readMetadata((rawMetadata) => {
     const metadata = JSON.parse(rawMetadata)
     const execCommand = `${paths.WAYPOINT_EXEC} context create -server-tls-skip-verify -set-default \\
     -server-auth-token=${metadata.waypointAuthToken} -server-addr=${metadata.ipAddress}:9701 -server-require-auth pilot-aws`
