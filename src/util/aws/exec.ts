@@ -257,7 +257,7 @@ const configureRunner = async () => {
 }
 
 const exists = (command: string) => {
-  return new Promise((res, rej) => {
+  return new Promise<boolean>((res, rej) => {
     exec(command, err => {
       if (err) {
         if (err.toString().includes('NoSuchEntity')) {
@@ -273,13 +273,8 @@ const exists = (command: string) => {
   })
 }
 
-const serviceAccountExists = () => {
-  return exists('aws iam get-user --user-name pilot-user')
-}
-
-const createServiceAccount = () => {
-  return new Promise((res, rej) => {
-    const command = 'aws iam create-user --user-name pilot-user'
+const create = (command: string) => {
+  return new Promise<string>((res, rej) => {
     exec(command, (err, stdout) => {
       if (err) rej(err)
       res(stdout)
@@ -290,11 +285,45 @@ const createServiceAccount = () => {
   })
 }
 
+const serviceAccountExists = () => {
+  return exists('aws iam get-user --user-name pilot-user')
+}
+
+const createServiceAccount = () => {
+  return create('aws iam create-user --user-name pilot-user')
+}
+
 const pilotRoleExists = () => {
   return exists('aws iam get-role --role-name pilotService')
 }
 
+const createIAMRole = () => {
+  // TODO: look into roles/permissions to assign to pilot-user
+  return create('aws iam create-user --user-name pilot-user')
+}
+
+const createAccessKey = () => {
+  // TODO: after creating new access key/save the access/secret keys in ~./pilot/aws/service
+  // this way the user can still have access on their local machine to these keys
+  return create('aws iam create-access-key --user-name pilot-user')
+}
+
+const setEnvVar = (envStr: string) => {
+  return new Promise<string>((res, rej) => {
+    const command = `${paths.WAYPOINT_EXEC} config set -runner ${envStr}`
+    exec(command, (err, stdout) => {
+      if (err) rej(err)
+      res(stdout)
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
 export default {
+  createAccessKey,
+  createIAMRole,
   createKeyPair,
   createServiceAccount,
   deleteKeyPair,

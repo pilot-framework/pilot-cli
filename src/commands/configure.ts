@@ -40,7 +40,14 @@ export default class Setup extends Command {
         this.log('Created pilot-user service account')
       }
 
-      
+      if (await awsExec.pilotRoleExists()) {
+        this.log('Found existing Pilot role')
+      } else {
+        await awsExec.createIAMRole()
+        this.log('Created role for Pilot user')
+      }
+
+      // TODO: finish aws configure
 
       cli.action.stop()
     } else if (flags.gcp) {
