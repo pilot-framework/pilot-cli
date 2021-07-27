@@ -169,6 +169,7 @@ const bindIAMRole = async (gcpProjectID: string) => {
   .catch(error => {
     throw error
   })
+}
 
 export default {
   terraInit,
@@ -182,4 +183,3 @@ export default {
   createIAMRole,
   bindIAMRole,
 }
-
