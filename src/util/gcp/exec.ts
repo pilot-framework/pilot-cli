@@ -166,7 +166,9 @@ const createIAMRole = async (gcpProjectID: string) => {
 
 const bindIAMRole = async (gcpProjectID: string) => {
   return new Promise((res, rej) => {
-    exec(`gcloud projects add-iam-policy-binding ${gcpProjectID} --member="serviceAccount:pilot-user@${gcpProjectID}.iam.gserviceaccount.com" --role="projects/${gcpProjectID}/roles/pilotService"`, (error, stdout) => {
+    exec(`gcloud projects add-iam-policy-binding ${gcpProjectID} \\
+    --member="serviceAccount:pilot-user@${gcpProjectID}.iam.gserviceaccount.com" \\
+    --role="projects/${gcpProjectID}/roles/pilotService"`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
