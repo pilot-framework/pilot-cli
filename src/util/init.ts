@@ -1,25 +1,28 @@
 import paths from './paths'
 import fsUtil from '../util/fs'
-const fs = require('fs')
-
-// const CWD = process.cwd()
+import { 
+  mkdirSync,
+  existsSync,
+  appendFile,
+  copyFile,
+} from 'fs'
 
 const makeDir = (path: string) => {
-  if (!fs.existsSync(path)) {
-    fs.mkdirSync(path)
+  if (!existsSync(path)) {
+    mkdirSync(path)
   }
 }
 
 const createFile = (path: string, content: string) => {
-  fs.appendFile(path, content, (err: Error) => {
+  appendFile(path, content, (err) => {
     if (err) throw err
   })
 }
 
 export async function initialize() {
   // Create ~/.pilot file structure
-  if (fs.existsSync(paths.CONFIG)) {
-    this.log('Pilot configuration detected...')
+  if (existsSync(paths.CONFIG)) {
+    console.log('Pilot configuration detected...')
   } else {
     makeDir(paths.CONFIG)
     makeDir(paths.PILOT_AWS)
@@ -31,7 +34,7 @@ export async function initialize() {
   /**********************/
   /*  INSTALL BINARIES  */
   /**********************/
-  if (!fs.existsSync(paths.TERRAFORM_EXEC) && !fs.existsSync(paths.WAYPOINT_EXEC)) {
+  if (!existsSync(paths.TERRAFORM_EXEC) && !existsSync(paths.WAYPOINT_EXEC)) {
     console.log('Installing binaries...')
     await fsUtil.installBinaries()
   }
@@ -40,47 +43,47 @@ export async function initialize() {
   /*  AWS CONFIGURATION  */
   /***********************/
   // if ~/.aws directory exists, copy contents
-  if (fs.existsSync(paths.AWS_CONFIG) && !fs.existsSync(paths.PILOT_AWS_CONFIG)) {
-    this.log('AWS configuration detected...copying...')
-    fs.copyFile(paths.AWS_CONFIG, paths.PILOT_AWS_CONFIG, (err: Error) => {
+  if (existsSync(paths.AWS_CONFIG) && !existsSync(paths.PILOT_AWS_CONFIG)) {
+    console.log('AWS configuration detected...copying...')
+    copyFile(paths.AWS_CONFIG, paths.PILOT_AWS_CONFIG, (err) => {
       if (err) {
-        this.log('ERROR: ', err)
+        console.log('ERROR: ', err)
       } else {
-        this.log('AWS config copied!')
+        console.log('AWS config copied!')
       }
     })
   } else {
-    this.log('AWS CLI configuration detected')
+    console.log('AWS CLI configuration detected')
   }
 
-  if (fs.existsSync(paths.AWS_CREDENTIALS)) {
-    this.log('AWS credentials detected...copying...')
-    fs.copyFile(paths.AWS_CREDENTIALS, paths.PILOT_AWS_CREDENTIALS, (err: Error) => {
+  if (existsSync(paths.AWS_CREDENTIALS)) {
+    console.log('AWS credentials detected...copying...')
+    copyFile(paths.AWS_CREDENTIALS, paths.PILOT_AWS_CREDENTIALS, (err) => {
       if (err) {
-        this.log('ERROR: ', err)
+        console.log('ERROR: ', err)
       } else {
-        this.log('AWS credentials copied!')
+        console.log('AWS credentials copied!')
       }
     })
   } else {
-    this.error('ERROR: Please configure AWS CLI with access keys. Run \'aws configure\'')
+    console.error('ERROR: Please configure AWS CLI with access keys. Run \'aws configure\'')
   }
 
   /***********************/
   /*  GCP CONFIGURATION  */
   /***********************/
-  if (fs.existsSync(paths.GCP_CONFIG) && !fs.existsSync(paths.PILOT_GCP_CONFIG)) {
-    this.log('gcloud configuration detected...copying...')
-    fs.copyFile(paths.GCP_CONFIG, paths.PILOT_GCP_CONFIG, (err: Error) => {
+  if (existsSync(paths.GCP_CONFIG) && !existsSync(paths.PILOT_GCP_CONFIG)) {
+    console.log('gcloud configuration detected...copying...')
+    copyFile(paths.GCP_CONFIG, paths.PILOT_GCP_CONFIG, (err) => {
       if (err) {
-        this.log('ERROR: ', err)
+        console.log('ERROR: ', err)
       } else {
-        this.log('gcloud config copy success!')
+        console.log('gcloud config copy success!')
       }
     })
-  } else if (!fs.existsSync(paths.GCP_CONFIG)) {
-    this.log('No gcloud configuration detected')
+  } else if (!existsSync(paths.GCP_CONFIG)) {
+    console.log('No gcloud configuration detected')
   } else {
-    this.log('gcloud configuration detected')
+    console.log('gcloud configuration detected')
   }
 }
