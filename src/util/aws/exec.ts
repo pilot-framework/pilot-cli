@@ -66,8 +66,9 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
     pingServer = setInterval(async () => {    
       let instanceStatus = JSON.parse(await getServerStatus(instanceID))
       let reachabilityStatus = instanceStatus.InstanceStatuses[0].InstanceStatus.Details[0].Status
-  
-      if (time % 30 === 0) console.log(`STATUS: ${reachabilityStatus}, TIME: ${time}S`)
+
+      if (time % 30 === 0 && time > 0) console.log(`STATUS: ${reachabilityStatus}, TIME: ${time}S`)
+
       if (reachabilityStatus === 'passed') {
         clearInterval(pingServer)
         res(true)
@@ -240,7 +241,7 @@ const configureRunner = async () => {
       `AWS_ACCESS_KEY_ID=${metadata.awsAccessKey}`,
       `AWS_SECRET_ACCESS_KEY=${metadata.awsSecretKey}`,
       `AWS_DEFAULT_REGION=${metadata.awsRegion}`,
-      `DOCKER_HOST=tcp://${metadata.ipAddress}`,
+      `DOCKER_HOST=tcp://${metadata.ipAddress}:2375`,
     ]
 
     await waypoint.setEnvVars(envVars)
