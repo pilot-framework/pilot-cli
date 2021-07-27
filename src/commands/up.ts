@@ -1,31 +1,34 @@
 import {Command, flags} from '@oclif/command'
-const {exec} = require('child_process')
+import { ChildProcess } from 'child_process'
 import paths from '../util/paths'
 
+const {spawn} = require('child_process')
 
 export default class Up extends Command {
   static description = 'Deploys your project'
 
   static flags = {
     help: flags.help({char: 'h'}),
-    remote: flags.boolean({char: 'r',
-      description: 'Deploys the project in the server'}),
   }
 
   static args = [{name: 'project'}, {name: 'path'}]
 
   async run() {
-    const {args, flags} = this.parse(Up)
-    let execCommand: string
-    if (flags.remote) {
-      execCommand = `${paths.WAYPOINT_EXEC} up ${args.project}`
-    } else {
-      execCommand = `cd ${args.path} && ${paths.WAYPOINT_EXEC} up`
-    }
+    const {args} = this.parse(Up)
 
-    exec(execCommand, (err: Error, stdout: string) => {
-      if (err) throw err
-      this.log(stdout) // TODO: Stream stdout
+    const execArgs = ['up', `${args.project}`]
+    const waypointUp = spawn(`${paths.WAYPOINT_EXEC}`, execArgs)
+
+    waypointUp.stdout.on('data', data => {
+      console.log(data.toString())
+    })
+
+    waypointUp.stderr.on('data', data => {
+      console.error(data.toString())
+    })
+
+    waypointUp.on('exit', code => {
+      console.log(`Child process exited with code: ${code}`)
     })
   }
 }

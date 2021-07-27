@@ -39,7 +39,9 @@ runcmd:
   - sudo mkdir /etc/systemd/system/docker.service.d
   - echo "[Service]" | sudo tee /etc/systemd/system/docker.service.d/override.conf > /dev/null
   - echo "ExecStart=" | sudo tee -a /etc/systemd/system/docker.service.d/override.conf > /dev/null
-  - echo "ExecStart=/usr/bin/dockerd" | sudo tee -a /etc/systemd/system/docker.service.d/override.conf > /dev/null`
+  - echo "ExecStart=/usr/bin/dockerd" | sudo tee -a /etc/systemd/system/docker.service.d/override.conf > /dev/null
+  - sudo systemctl daemon-reload
+  - sudo systemctl restart docker.service`
 
 export default {
   yamlConfig,

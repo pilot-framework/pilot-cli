@@ -244,6 +244,7 @@ const configureRunner = async () => {
   // AWS_ACCESS_KEY_ID=<PKEY>
   // AWS_SECRET_ACCESS_KEY=<SKEY>
   // AWS_DEFAULT_REGION=<REGION>
+  // TODO: set docker host
 
   await timeout(2000)
 

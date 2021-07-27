@@ -132,6 +132,10 @@ resource "aws_instance" "waypoint" {
   associate_public_ip_address = true
   user_data                   = data.template_file.user_data.rendered
 
+  root_block_device {
+    volume_size = 20
+  }
+
   tags = {
     Name = "Pilot Waypoint Server"
   }

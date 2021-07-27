@@ -1,7 +1,11 @@
 import {exec} from 'child_process'
 import paths from '../paths'
+import waypoint from '../waypoint'
+import fsUtil from '../fs'
 const fs = require('fs')
-let cmd = "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"
+
+//const createDockerGroup = "newgrp docker"
+const waypointServerInstall = "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"
 
 let echo = "echo hello world"
 
@@ -65,17 +69,31 @@ const installWaypoint = async () => {
       status = data.status
     })
   }
-
+  /*
   return new Promise((res, rej) => {
     console.log(status)
-    exec(cmd, (error, stdout, stderr) => {
-      if (error) console.log(error)
+    exec(createDockerGroup, (error,stdout) => {
+      if (error) throw error
       res(stdout)
     })
   })
   .catch(error => {
     throw error
    })
+   */  
+
+  /* 
+  return new Promise((res, rej) => {
+    console.log(status)
+    exec(waypointServerInstall, (error,stdout) => {
+      if (error) throw error
+      res(stdout)
+    })
+  })
+  .catch(error => {
+    throw error
+   })
+  */
 }
 
 const serviceAccountExists = (gcpProjectID: string) => {
@@ -142,12 +160,18 @@ const serviceAccountKeyGen = async (gcpProjectID: string) => {
   })
 }
 
+/*
 const createIAMRole = async (gcpProjectID: string) => {
   return new Promise((res, rej) => {
     exec(`gcloud iam roles create pilotService \\
     --project ${gcpProjectID} --title "Pilot Framework IAM Role" \\
     --description "This role has the necessary permissions that the Pilot service account uses to deploy applications" \\
-    --permissions compute.addresses.list,compute.backendBuckets.create,compute.backendBuckets.delete,compute.backendBuckets.get,compute.backendBuckets.use,compute.globalAddresses.create,compute.globalAddresses.delete,compute.globalAddresses.get,compute.globalAddresses.use,compute.globalForwardingRules.create,compute.globalForwardingRules.delete,compute.globalForwardingRules.get,compute.globalOperations.get,compute.regions.list,compute.sslCertificates.create,compute.sslCertificates.delete,compute.sslCertificates.get,compute.sslCertificates.list,compute.targetHttpsProxies.create,compute.targetHttpsProxies.delete,compute.targetHttpsProxies.get,compute.targetHttpsProxies.use,compute.urlMaps.create,compute.urlMaps.delete,compute.urlMaps.get,compute.urlMaps.list,compute.urlMaps.use,storage.buckets.create,storage.buckets.delete \\
+    --permissions compute.addresses.list,compute.backendBuckets.create,compute.backendBuckets.delete,compute.backendBuckets.get,\\
+    compute.backendBuckets.use,compute.globalAddresses.create,compute.globalAddresses.delete,compute.globalAddresses.get,compute.globalAddresses.use,\\
+    compute.globalForwardingRules.create,compute.globalForwardingRules.delete,compute.globalForwardingRules.get,compute.globalOperations.get,\\
+    compute.regions.list,compute.sslCertificates.create,compute.sslCertificates.delete,compute.sslCertificates.get,compute.sslCertificates.list,\\
+    compute.targetHttpsProxies.create,compute.targetHttpsProxies.delete,compute.targetHttpsProxies.get,compute.targetHttpsProxies.use,compute.urlMaps.create,\\
+    compute.urlMaps.delete,compute.urlMaps.get,compute.urlMaps.list,compute.urlMaps.use,storage.buckets.create,storage.buckets.delete \\
     --quiet`, (error, stdout) => {
       if (error) rej(error)
     })
@@ -156,6 +180,7 @@ const createIAMRole = async (gcpProjectID: string) => {
     throw error
   })
 }
+*/
 
 const bindIAMRole = async (gcpProjectID: string) => {
   return new Promise((res, rej) => {
@@ -169,6 +194,34 @@ const bindIAMRole = async (gcpProjectID: string) => {
   })
 }
 
+const pilotUserInit = async (gcpProjectID: string) => {
+  let userExists = await serviceAccountExists(gcpProjectID)
+
+  if (!userExists) {
+    createServiceAccount(gcpProjectID)
+      .catch(err => console.log(err))
+  }
+
+  let roleExists = await pilotRoleExists(gcpProjectID)
+
+  if (!roleExists) {
+    createIAMRole(gcpProjectID)
+      .catch(err => console.log(err))
+  }
+
+  await bindIAMRole(gcpProjectID)
+
+  await serviceAccountKeyGen(gcpProjectID)
+
+  await fsUtil.copyFileToEC2()
+
+  await waypoint.dockerCopy()
+
+  await waypoint.dockerConfig(gcpProjectID)
+
+  await waypoint.dockerAuth(gcpProjectID)
+}
+
 export default {
   terraInit,
   terraApply,
@@ -178,6 +231,7 @@ export default {
   serviceAccountKeyGen,
   pilotRoleExists,
   createServiceAccount,
-  createIAMRole,
+  //createIAMRole,
   bindIAMRole,
+  pilotUserInit,
 }

@@ -41,9 +41,26 @@ const dockerAuth = async (gcpProjectID: string) => {
   })
 }
 
+const setDockerHost = async () => {
+  const dockerHost = `tcp://${await awsExec.getServerIP()}:2375`
+  await setEnvVar(`DOCKER_HOST=${dockerHost}`)
+}
+
 const setEnvVar = async (envStr: string) => {
   return new Promise((res, rej) => {
     exec(`${paths.WAYPOINT_EXEC} config set -runner ${envStr}`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+  .catch(err => {
+    throw err
+  })
+}
+
+const getEnvVars = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.WAYPOINT_EXEC} config get -runner`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
@@ -57,5 +74,7 @@ export default {
   dockerAuth,
   dockerConfig,
   dockerCopy,
+  setDockerHost,
   setEnvVar,
+  getEnvVars,
 }
