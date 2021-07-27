@@ -67,7 +67,7 @@ resource "google_compute_instance" "default" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-9"
+      image = "ubuntu-os-cloud/ubuntu-2004-lts"
     }
   }
 
@@ -84,15 +84,13 @@ resource "google_compute_instance" "default" {
       #!/bin/sh
 
       sudo curl -fsSL https://get.docker.com -o get-docker.sh 
-      sudo sh get-docker.sh 
+      sudo sh get-docker.sh           
       sudo apt-get install -y software-properties-common
       curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
       sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
       sudo apt-get update && sudo apt-get install -y waypoint
-      curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-      sudo apt-get install -y nodejs
-      sudo apt install -y awscli
-      sudo apt install -y yarn      
+      sudo groupadd docker
+      sudo usermod -a -G docker $USER
     EOF
   }
 

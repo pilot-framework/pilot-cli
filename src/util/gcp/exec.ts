@@ -3,7 +3,9 @@ import paths from '../paths'
 const {google} = require('googleapis');
 const compute = google.compute('v1');
 const fs = require('fs')
-let cmd = "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"
+
+//const createDockerGroup = "newgrp docker"
+const waypointServerInstall = "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"
 
 let echo = "echo hello world"
 
@@ -67,17 +69,31 @@ const installWaypoint = async () => {
       status = data.status
     })
   }
-
+  /*
   return new Promise((res, rej) => {
     console.log(status)
-    exec(cmd, (error, stdout, stderr) => {
-      if (error) console.log(error)
+    exec(createDockerGroup, (error,stdout) => {
+      if (error) throw error
       res(stdout)
     })
   })
   .catch(error => {
     throw error
    })
+   */  
+
+  /* 
+  return new Promise((res, rej) => {
+    console.log(status)
+    exec(waypointServerInstall, (error,stdout) => {
+      if (error) throw error
+      res(stdout)
+    })
+  })
+  .catch(error => {
+    throw error
+   })
+  */
 }
 
 const serviceAccountExists = (gcpProjectID: string) => {
@@ -144,6 +160,7 @@ const serviceAccountKeyGen = async (gcpProjectID: string) => {
   })
 }
 
+/*
 const createIAMRole = async (gcpProjectID: string) => {
   return new Promise((res, rej) => {
     exec(`gcloud iam roles create pilotService \\
@@ -152,8 +169,10 @@ const createIAMRole = async (gcpProjectID: string) => {
     --permissions compute.addresses.list,compute.backendBuckets.create,compute.backendBuckets.delete,compute.backendBuckets.get,compute.backendBuckets.use,compute.globalAddresses.create,compute.globalAddresses.delete,compute.globalAddresses.get,compute.globalAddresses.use,compute.globalForwardingRules.create,compute.globalForwardingRules.delete,compute.globalForwardingRules.get,compute.globalOperations.get,compute.regions.list,compute.sslCertificates.create,compute.sslCertificates.delete,compute.sslCertificates.get,compute.sslCertificates.list,compute.targetHttpsProxies.create,compute.targetHttpsProxies.delete,compute.targetHttpsProxies.get,compute.targetHttpsProxies.use,compute.urlMaps.create,compute.urlMaps.delete,compute.urlMaps.get,compute.urlMaps.list,compute.urlMaps.use,storage.buckets.create,storage.buckets.delete \\
     --quiet`, (error, stdout) => {
       if (error) rej(error)
-  })
+    })
+  }
 }
+*/
 
 const bindIAMRole = async (gcpProjectID: string) => {
   return new Promise((res, rej) => {
@@ -165,6 +184,7 @@ const bindIAMRole = async (gcpProjectID: string) => {
   .catch(error => {
     throw error
   })
+}
 
 export default {
   terraInit,
@@ -175,7 +195,7 @@ export default {
   serviceAccountKeyGen,
   pilotRoleExists,
   createServiceAccount,
-  createIAMRole,
+  //createIAMRole,
   bindIAMRole,
 }
 
