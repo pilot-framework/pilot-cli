@@ -132,8 +132,7 @@ resource "aws_instance" "waypoint" {
   associate_public_ip_address = true
   user_data                   = data.template_file.user_data.rendered
 
-  ebs_block_device {
-    device_name = "/dev/sdb"
+  root_block_device {
     volume_size = 20
   }
 
