@@ -22,10 +22,10 @@ export default class Ui extends Command {
         if (err) throw err
       })
     } else {
-      fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err: Error, data) => {
+      fs.readFile(paths.PILOT_AWS_METADATA, 'utf8', (err: Error, data: string) => {
         if (err) throw err
 
-        const metadata: object = JSON.parse(data)
+        const metadata = JSON.parse(data)
         open(`https://${metadata.ipAddress}:9702`)
       })
     }
