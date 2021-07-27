@@ -304,19 +304,6 @@ const createAccessKey = () => {
   return create('aws iam create-access-key --user-name pilot-user')
 }
 
-const setEnvVar = (envStr: string) => {
-  return new Promise<string>((res, rej) => {
-    const command = `${paths.WAYPOINT_EXEC} config set -runner ${envStr}`
-    exec(command, (err, stdout) => {
-      if (err) rej(err)
-      res(stdout)
-    })
-  })
-  .catch(error => {
-    throw error
-  })
-}
-
 export default {
   createAccessKey,
   addPolicy,
