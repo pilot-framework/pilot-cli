@@ -15,7 +15,7 @@ const dockerCopy = async (): Promise<string> => {
     throw err
   })
 }
-  
+
 const dockerConfig = async (gcpProjectID: string): Promise<string> => {
   const ipAddress = await awsExec.getServerIP()
   return new Promise<string>((res, rej) => {
@@ -29,7 +29,7 @@ const dockerConfig = async (gcpProjectID: string): Promise<string> => {
     throw err
   })
 }
-  
+
 const dockerAuth = async (gcpProjectID: string): Promise<string> => {
   const ipAddress = await awsExec.getServerIP()
   return new Promise<string>((res, rej) => {
@@ -111,6 +111,18 @@ const getToken = async (): Promise<string> => {
   })
 }
 
+const getProjects = async (): Promise<Array<string>> => {
+  return new Promise<Array<string>>((res, rej) => {
+    exec(`${paths.WAYPOINT_EXEC} project list`, (err, data) => {
+      if (err) throw err
+      res(data.split(/\n/))
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
+
 export default {
   dockerAuth,
   dockerConfig,
@@ -120,4 +132,5 @@ export default {
   setEnvVar,
   setEnvVars,
   getEnvVars,
+  getProjects,
 }
