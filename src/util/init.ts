@@ -68,8 +68,8 @@ export async function initialize() {
       }
     })
   } else if (!existsSync(paths.GCP_CONFIG)) {
-    console.log('No gcloud configuration detected')
+    console.error('No gcloud configuration detected')
   } else {
-    console.error('gcloud configuration detected')
+    console.log('gcloud configuration detected')
   }
 }
