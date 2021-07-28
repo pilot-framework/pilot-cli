@@ -295,7 +295,12 @@ const addPolicy = () => {
 
 const createAccessKey = async () => {
   const keyData = await create('aws iam create-access-key --user-name pilot-user')
-  writeFileSync(paths.PILOT_AWS_USER_KEYS, keyData)
+  return new Promise<string>((res, rej) => {
+    writeFile(paths.PILOT_AWS_USER_KEYS, keyData, err => {
+      if (err) rej(err)
+      res('success')
+    })
+  })
 }
 
 const pilotUserInit = async () => {
