@@ -102,7 +102,7 @@ const downloadFile = async (url: string, dest: string, callback: Function): Prom
   })
 }
 
-const installBinaries = async () => {
+const installBinaries = async (): Promise<void> => {
   const system = `${platform()}${arch()}`
 
   let terraform_url: string
@@ -141,12 +141,15 @@ const installBinaries = async () => {
   }
   }
 
-  await downloadFile(terraform_url, terraform_dest, () => {
-    decompress(terraform_dest, './bin/terraform/')
-  })
-  
-  await downloadFile(waypoint_url, waypoint_dest, () => {
-    decompress(waypoint_dest, './bin/waypoint/')
+  return new Promise<void>((res, _) => {
+    downloadFile(terraform_url, terraform_dest, async () => {
+      await decompress(terraform_dest, './bin/terraform/')
+    })
+
+    downloadFile(waypoint_url, waypoint_dest, async () => {
+      await decompress(waypoint_dest, './bin/waypoint/')
+      res()
+    })
   })
 }
 
