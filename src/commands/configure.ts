@@ -51,21 +51,7 @@ export default class Configure extends Command {
       cli.action.start('Configuring IAM user and role for Pilot on AWS...')
 
       try {
-        if (await awsExec.serviceAccountExists()) {
-          this.log('Found existing pilot-user account')
-        } else {
-          await awsExec.createServiceAccount()
-          this.log('Created pilot-user service account')
-        }
-
-        await awsExec.addPolicy()
-        this.log('Attached Pilot policy to service account')
-
-        await awsExec.createAccessKey()
-        this.log('Created access keys')
-
-        const keys = await fs.readPilotKeys()
-        await waypoint.setEnvVar(`AWS_ACCESS_KEY_ID=${keys.AccessKey.AccessKeyId} AWS_SECRET_ACCESS_KEY=${keys.AccessKey.SecretAccessKey} AWS_DEFAULT_REGION=${creds.getAWSRegion()}`)
+        await awsExec.pilotUserInit()
       } catch (error) {
         throw error
       }
