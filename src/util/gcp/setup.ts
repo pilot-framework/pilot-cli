@@ -1,36 +1,31 @@
 import cli from 'cli-ux'
 import paths from '../paths'
 import execUtil from './exec'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync } from 'fs'
 import fs from '../fs'
-
-const makeDir = (path: string) => {
-  if (!existsSync(path)) {
-    mkdirSync(path)
-  }
-}
+import waypoint from '../waypoint'
 
 export async function gcpSetup() {
   // Check for gcloud config
-  // ~/.config/gcloud/configurations/config_default
+  // ~/.pilot/gcp/config
   try {
-    if (existsSync(paths.PILOT_AWS_CREDENTIALS)) {
-      console.log('gcloud Credentials detected')
-      if (!existsSync(paths.PILOT_AWS_CONFIG)) {
-        console.log('AWS config not found at ~/.aws/config.')
-        return
-      }
-      console.log('gcloud Configuration detected')
-    } else {
-      console.log(`No gcloud configuration found. Please configure gcloud in ${paths.GCP_CONFIG}.`)
-      return
-    }
+    // if (existsSync(paths.PILOT_GCP_CONFIG)) {
+    //   console.log('gcloud Credentials detected')
+    //   if (!existsSync(paths.PILOT_AWS_CONFIG)) {
+    //     console.log('AWS config not found at ~/.aws/config.')
+    //     return
+    //   }
+    //   console.log('gcloud Configuration detected')
+    // } else {
+    //   console.log(`No gcloud configuration found. Please configure gcloud in ${paths.GCP_CONFIG}.`)
+    //   return
+    // }
 
     console.log('Setting up resources...')
 
     await fs.mkDir(paths.appRoot + '/templates')
 
-    if (!existsSync(paths.TF_CLOUD_INIT)) {
+    if (!existsSync(paths.PILOT_SSH)) {
       await fs.sshKeyGen()
       console.log('Successfully generated SSH keys')
     }
@@ -45,7 +40,7 @@ export async function gcpSetup() {
     await execUtil.pilotUserInit("gcp-pilot-testing", false)
     cli.action.stop()
 
-      // terraform init
+    // terraform init
     cli.action.start('Initializing Terraform')
     await execUtil.terraInit()
     cli.action.stop()
@@ -78,6 +73,7 @@ export async function gcpSetup() {
 
     cli.action.start('Configuring runner')
     await execUtil.pilotUserInit("gcp-pilot-testing", true)
+    await waypoint.setDefaultContext()
     await execUtil.configureRunner()
     cli.action.stop()
   } catch (err) {

@@ -76,7 +76,7 @@ const installWaypoint = async (): Promise<string> => {
   const ipAddr = await getServerIP()
 
   return new Promise<string>((res, rej) => {
-    exec(`ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no \\
+    exec(`ssh pilot@${ipAddr} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no \\
     "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
@@ -150,7 +150,7 @@ const terraDestroy = async (): Promise<string> => {
 
 const getWaypointAuthToken = async (ipAddress: string): Promise<string> => {
   return new Promise<string>((res, rej) => {
-    exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} "waypoint token new"`, (error, data) => {
+    exec(`ssh pilot@${ipAddress} -i ${paths.PILOT_SSH} "waypoint token new"`, (error, data) => {
       if (error) rej(error)
       res(data)
     })

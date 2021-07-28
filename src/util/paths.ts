@@ -14,6 +14,7 @@ const PILOT_AWS_POLICY: string = join(appRoot.toString(), '/templates/pilotAWSPo
 const PILOT_AWS_USER_KEYS: string = join(CONFIG, '/aws/pilot_keys')
 const PILOT_GCP: string = join(CONFIG, '/gcp')
 const PILOT_GCP_CONFIG: string = join(CONFIG, '/gcp/config')
+const PILOT_GCP_SERVICE: string = join(CONFIG, '/gcp/service')
 const PILOT_GCP_POLICY_TEMPLATE: string = join(appRoot.toString(), '/templates/pilotGCPPolicy.csv')
 const PILOT_GCP_SERVICE_FILE: string = join(CONFIG, '/gcp/service/pilot-user-file.json')
 const PILOT_GCP_POLICY: string = join(CONFIG, '/gcp/service/policy.csv')
@@ -22,7 +23,7 @@ const AWS_CONFIG: string = join(HOME, '/.aws/config')
 const AWS_INSTANCES: string = join(appRoot.toString(), '/instances/aws')
 const GCP_CONFIG: string = join(HOME, '/.config/gcloud/configurations/config_default')
 const GCP_INSTANCES: string = join(appRoot.toString(), '/instances/gcp')
-const TF_CLOUD_INIT: string = join(CONFIG, '/aws/ssh/tf-cloud-init')
+const PILOT_SSH: string = join(CONFIG, '/pilot-ssh')
 const SSH_DOCKER_WAYPOINT_INIT: string = join(appRoot.toString(), '/templates/ssh-docker-waypoint-init.yaml')
 const EC2_KEY_PAIR: string = join(CONFIG, '/aws/ssh/PilotKeyPair.pem')
 const TERRAFORM_EXEC: string = join(appRoot.toString(), '/bin/terraform/terraform')
@@ -39,6 +40,7 @@ export default {
   PILOT_AWS_POLICY,
   PILOT_AWS_USER_KEYS,
   PILOT_GCP,
+  PILOT_GCP_SERVICE,
   PILOT_GCP_POLICY,
   PILOT_GCP_POLICY_TEMPLATE,
   PILOT_GCP_SERVICE_FILE,
@@ -51,7 +53,7 @@ export default {
   EC2_KEY_PAIR,
   SSH_DOCKER_WAYPOINT_INIT,
   TERRAFORM_EXEC,
-  TF_CLOUD_INIT,
+  PILOT_SSH,
   PILOT_GCP_CONFIG,
   WAYPOINT_EXEC,
 }

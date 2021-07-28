@@ -50,7 +50,7 @@ export async function awsSetup() {
     console.log('Succesfully written terraform.tfvars')
 
     // Generate SSH Keys
-    if (!existsSync(paths.TF_CLOUD_INIT)) {
+    if (!existsSync(paths.PILOT_SSH)) {
       await fsUtil.sshKeyGen()
       console.log('Successfully generated SSH keys')
     }
