@@ -3,11 +3,6 @@ import paths from '../paths'
 import waypoint from '../waypoint'
 import fsUtil from '../fs'
 
-//const createDockerGroup = "newgrp docker"
-const waypointServerInstall = "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"
-
-let echo = "echo hello world"
-
 const terraInit = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} init`, (error, _) => {
@@ -149,7 +144,8 @@ const createServiceAccount = async (gcpProjectID: string): Promise<string> => {
 
 const serviceAccountKeyGen = async (gcpProjectID: string): Promise<string> => {
   return new Promise<string>((res, rej) => {
-    exec(`gcloud iam service-accounts keys create ~/.pilot/gcp/service/pilot-user-file.json --iam-account=pilot-user@${gcpProjectID}.iam.gserviceaccount.com`, (error, stdout) => {
+    exec(`gcloud iam service-accounts keys create ${paths.PILOT_GCP_SERVICE_FILE} \\
+    --iam-account=pilot-user@${gcpProjectID}.iam.gserviceaccount.com`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
@@ -160,16 +156,13 @@ const serviceAccountKeyGen = async (gcpProjectID: string): Promise<string> => {
 }
 
 const createIAMRole = async (gcpProjectID: string): Promise<string> => {
+  const policy = await fsUtil.fileToString(paths.PILOT_GCP_SERVICE_FILE)
+
   return new Promise<string>((res, rej) => {
     exec(`gcloud iam roles create pilotService \\
     --project ${gcpProjectID} --title "Pilot Framework IAM Role" \\
     --description "This role has the necessary permissions that the Pilot service account uses to deploy applications" \\
-    --permissions compute.addresses.list,compute.backendBuckets.create,compute.backendBuckets.delete,compute.backendBuckets.get,\\
-    compute.backendBuckets.use,compute.globalAddresses.create,compute.globalAddresses.delete,compute.globalAddresses.get,compute.globalAddresses.use,\\
-    compute.globalForwardingRules.create,compute.globalForwardingRules.delete,compute.globalForwardingRules.get,compute.globalOperations.get,\\
-    compute.regions.list,compute.sslCertificates.create,compute.sslCertificates.delete,compute.sslCertificates.get,compute.sslCertificates.list,\\
-    compute.targetHttpsProxies.create,compute.targetHttpsProxies.delete,compute.targetHttpsProxies.get,compute.targetHttpsProxies.use,compute.urlMaps.create,\\
-    compute.urlMaps.delete,compute.urlMaps.get,compute.urlMaps.list,compute.urlMaps.use,storage.buckets.create,storage.buckets.delete \\
+    --permissions ${policy} \\
     --quiet`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)

@@ -99,7 +99,7 @@ const installWaypoint = async (): Promise<string> => {
   })
 }
 
-const deleteKeyPair = (): Promise<string> => {
+const deleteKeyPair = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec('aws ec2 delete-key-pair --key-name PilotKeyPair', (error, _) => {
       if (error) rej(error)
@@ -112,7 +112,7 @@ const deleteKeyPair = (): Promise<string> => {
   })
 }
 
-const createKeyPair = (): Promise<string> => {
+const createKeyPair = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`aws ec2 create-key-pair --key-name PilotKeyPair --query 'KeyMaterial' --output text > ${paths.EC2_KEY_PAIR}`, (error, _) => {
       if (error) rej(error)
@@ -124,7 +124,7 @@ const createKeyPair = (): Promise<string> => {
   })
 }
 
-const terraInit = (): Promise<string> => {
+const terraInit = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} init`, (error, _) => {
       if (error) rej(error)
@@ -136,7 +136,7 @@ const terraInit = (): Promise<string> => {
   })
 }
 
-const terraApply = (): Promise<string> => {
+const terraApply = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} apply -auto-approve`, (error, _) => {
       if (error) rej(error)
@@ -148,7 +148,7 @@ const terraApply = (): Promise<string> => {
   })
 }
 
-const terraDestroy = (): Promise<string> => {
+const terraDestroy = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} destroy -auto-approve`, (error, _) => {
       if (error) rej(error)
@@ -187,6 +187,9 @@ const updateMetadata = async () => {
   const ipAddress = await getServerIP()
   const instanceID = await getInstanceID()
   const waypointAuthToken = await getWaypointAuthToken(ipAddress)
+  const awsAccessKey = await creds.getAWSAccessKey()
+  const awsSecretKey = await creds.getAWSSecretKey()
+  const awsRegion = await creds.getAWSRegion()
 
   readMetadata((data) => {
     const metadata = JSON.parse(data)
@@ -194,9 +197,9 @@ const updateMetadata = async () => {
     metadata.ipAddress = `${ipAddress}`
     metadata.instanceID = instanceID
     metadata.waypointAuthToken = waypointAuthToken.trim()
-    metadata.awsAccessKey = creds.getAWSAccessKey()
-    metadata.awsSecretKey = creds.getAWSSecretKey()
-    metadata.awsRegion = creds.getAWSRegion()
+    metadata.awsAccessKey = awsAccessKey
+    metadata.awsSecretKey = awsSecretKey
+    metadata.awsRegion = awsRegion
 
     writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err) => {
       if (err) throw err

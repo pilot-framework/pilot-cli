@@ -1,34 +1,83 @@
 import paths from './paths'
-import templates from './aws/templates'
-import { string } from '@oclif/command/lib/flags'
+import {
+  appendFile,
+  createWriteStream,
+  existsSync,
+  mkdir,
+  readFile,
+  writeFile,
+} from 'fs'
+import { platform, arch } from 'os'
+import { join } from 'path'
 import awsExec from './aws/exec'
-import {exec} from 'child_process'
-import { Http2ServerResponse } from 'http2'
+import { exec } from 'child_process'
+import { get } from 'https'
+import templates from './aws/templates'
 
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-const https = require('https')
 const decompress = require('decompress')
 
-const genTerraformVars = async (data: string) =>
-  fs.writeFileSync(path.join(paths.AWS_INSTANCES, '/terraform.tfvars'), data, (err: Error) => {
-    if (err) throw new Error('Unable to write Terraform .tfvars file')
+const createFile = async (path: string, content: string): Promise<void> => {
+  return new Promise<void>((res, rej) => {
+    appendFile(path, content, (err) => {
+      if (err) rej(err)
+      res()
+    })
   })
-
-const genCloudInitYaml = async () =>
-  fs.writeFileSync(paths.SSH_DOCKER_WAYPOINT_INIT, templates.yamlConfig(fs.readFileSync(paths.TF_CLOUD_INIT + '.pub')), (err: Error) => {
-    if (err) throw new Error('Unable to write tf-cloud-init.yaml file')
+  .catch(err => {
+    throw err
   })
-
-const getPrivateKey = () => {
-  return fs.readFileSync(paths.TF_CLOUD_INIT)
 }
 
-const downloadFile = async (url: string, dest: string, callback: Function) => {
-  return new Promise(() => {
-    const file = fs.createWriteStream(dest)
-    https.get(url, (res: Http2ServerResponse) => {
+const mkDir = async (path: string): Promise<void> => {
+  return new Promise<void>((res, rej) => {
+    if (!existsSync(path)) {
+      mkdir(path, (err) => {
+        if (err) rej(err)
+        res()
+      })
+    } else {
+      res()
+    }
+  })
+  .catch(err => {
+    throw err
+  })
+}
+
+const fileToString = async (filename: string): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    readFile(filename, (err, data) => {
+      if (err) rej(err)
+      res(data.toString())
+    })
+  })
+  .catch(err => {
+    throw err
+  })
+}
+
+const genTerraformVars = async (data: string) => {
+  writeFile(join(paths.AWS_INSTANCES, '/terraform.tfvars'), data, (err) => {
+    if (err) throw new Error('Unable to write Terraform .tfvars file')
+  })
+}
+
+const genCloudInitYaml = async () => {
+  const data = await fileToString(paths.TF_CLOUD_INIT + '.pub')
+
+  writeFile(paths.SSH_DOCKER_WAYPOINT_INIT, templates.yamlConfig(data), (err) => {
+    if (err) throw err
+  })
+}
+
+const getPrivateKey = async () => {
+  return await fileToString(paths.TF_CLOUD_INIT)
+}
+
+const downloadFile = async (url: string, dest: string, callback: Function): Promise<void> => {
+  return new Promise<void>(() => {
+    const file = createWriteStream(dest)
+    get(url, (res) => {
       res.pipe(file)
       res.on('end', () => {
         callback()
@@ -41,10 +90,7 @@ const downloadFile = async (url: string, dest: string, callback: Function) => {
 }
 
 const installBinaries = async () => {
-  const platform = os.platform()
-  const arch = os.arch()
-
-  const system = `${platform}${arch}`
+  const system = `${platform()}${arch()}`
 
   let terraform_url: string
   let terraform_dest: string
@@ -77,23 +123,24 @@ const installBinaries = async () => {
   }
 
   default: {
-    console.log(`${platform} ${arch} is not supported`)
+    console.log(`${platform()} ${arch()} is not supported`)
     return
   }
   }
 
-  downloadFile(terraform_url, terraform_dest, () => {
+  await downloadFile(terraform_url, terraform_dest, () => {
     decompress(terraform_dest, './bin/terraform/')
-    downloadFile(waypoint_url, waypoint_dest, () => {
-      decompress(waypoint_dest, './bin/waypoint/')
-    })
+  })
+  
+  await downloadFile(waypoint_url, waypoint_dest, () => {
+    decompress(waypoint_dest, './bin/waypoint/')
   })
 }
 
-const copyFileToEC2 = async () => {
+const copyFileToEC2 = async (): Promise<string> => {
   const ipAddress = await awsExec.getServerIP()
-  return new Promise((res, rej) => {
-    exec(`scp -i ${paths.TF_CLOUD_INIT} ~/.pilot/gcp/service/pilot-user-file.json pilot@${ipAddress}:~/.config/pilot-user-file.json`, (error, stdout) => {
+  return new Promise<string>((res, rej) => {
+    exec(`scp -i ${paths.TF_CLOUD_INIT} ${paths.PILOT_GCP_SERVICE_FILE} pilot@${ipAddress}:~/.config/pilot-user-file.json`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
@@ -103,8 +150,8 @@ const copyFileToEC2 = async () => {
   })
 }
 
-const readPilotKeys = () => {
-  return JSON.parse(fs.readFileSync(paths.PILOT_AWS_USER_KEYS))
+const readPilotKeys = async () => {
+  return JSON.parse(await fileToString(paths.PILOT_AWS_USER_KEYS))
 }
 
 export default {
@@ -115,4 +162,7 @@ export default {
   installBinaries,
   copyFileToEC2,
   readPilotKeys,
+  fileToString,
+  mkDir,
+  createFile,
 }
