@@ -32,7 +32,7 @@ export default class New extends Command {
 
     if (args.type === 'project') {
       this.log(`Initializing a new ${args.type} will scaffold a new directory.`)
-      const responses = await inquirer.prompt([
+      const project = await inquirer.prompt([
         {
           name: 'name',
           message: 'Project name:',
@@ -40,7 +40,8 @@ export default class New extends Command {
         },
       ])
 
-      this.log(`Created project: ${responses.name}`)
+      await waypoint.newProject(project.name)
+      this.log(`Created project: ${project.name}`)
       this.log('A project needs at least one application. You can initialize an application by running \'pilot new app\'')
     }
 
