@@ -146,7 +146,10 @@ const installWaypoint = async () => {
   try {
     // wait for docker daemon to finish coming online
     await timeout(10000)
-    await sshExec("waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos")
+    const pgrep = await sshExec("pgrep docker")
+    console.log("PID:", pgrep)
+    const install = await sshExec("waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos")
+    console.log(install)
   } catch (err) {
     console.log(err)
   }
