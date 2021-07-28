@@ -50,7 +50,7 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
 
   return new Promise<boolean>((res, _) => {
     pingServer = setInterval(async () => {
-      let instanceStatus = await getServerStatus("us-east1-b", "pilot-321119")
+      let instanceStatus = await getServerStatus("us-east1-b", "gcp-pilot-testing")
       let waypointInstalled = "not found"
       let dockerStatus = ''
       try {
@@ -58,9 +58,7 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
         dockerStatus = await sshExec("systemctl is-active docker")
       } catch (err) {
         // Don't want to throw an error in case the SSH key is still propagating
-        if (err.message.includes("Connection refused")) {
-          console.log("Waiting on SSH key propagation...")
-        } else {
+        if (!err.message.includes("Connection refused")) {
           throw err
         }
       }
@@ -114,11 +112,9 @@ const getServerIP = async (zone: string, gcpProjectID: string): Promise<string> 
 }
 
 const sshExec = async (cmd: string): Promise<string> => {
-  const ipAddress = await getServerIP("us-east1-b", "pilot-321119")
+  const ipAddress = await getServerIP("us-east1-b", "gcp-pilot-testing")
   return new Promise<string>((res, rej) => {
     exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no "${cmd}"`, (error, data) => {
-      console.log("SSH DATA: ", data)
-      console.log("SSH ERROR: ", error)
       if (error) {
         if (error.message.includes("NASTY!")) {
           // this is a non-critical error, don't reject
@@ -140,19 +136,16 @@ const getWaypointAuthToken = async (ipAddress: string): Promise<string> => {
 }
 
 const setContext = async () => {
-  const ipAddress = await getServerIP("us-east1-b", "pilot-321119")
+  const ipAddress = await getServerIP("us-east1-b", "gcp-pilot-testing")
   const token = await getWaypointAuthToken(ipAddress)
 
   await waypoint.setContext(ipAddress, token)
 }
 
 const installWaypoint = async () => {
-  console.log("in installWaypoint. before try")
   try {
     // wait for docker daemon to finish coming online
     await timeout(10000)
-    // const dockerd = await sshExec("pgrep docker")
-    // console.log(dockerd)
     await sshExec("waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos")
   } catch (err) {
     console.log(err)
@@ -160,7 +153,7 @@ const installWaypoint = async () => {
 }
 
 const configureRunner = async () => {
-  const ipAddress = await getServerIP("us-east1-b", "pilot-321119")
+  const ipAddress = await getServerIP("us-east1-b", "gcp-pilot-testing")
   const envVars = [
     `DOCKER_HOST=tcp://${ipAddress}:2375`,
     "GOOGLE_APPLICATION_CREDENTIALS=/root/.config/pilot-user-file.json",

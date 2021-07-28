@@ -9,7 +9,7 @@ const dockerCopy = async (provider: string): Promise<string> => {
   if (provider === "aws")
     ipAddress = await awsExec.getServerIP()
   else if (provider === "gcp") {
-    ipAddress = await  gcpExec.getServerIP("us-east1-b", "pilot-321119")
+    ipAddress = await  gcpExec.getServerIP("us-east1-b", "gcp-pilot-testing")
   }
 
   return new Promise<string>((res, rej) => {
@@ -30,7 +30,7 @@ const dockerConfig = async (gcpProjectID: string, provider: string): Promise<str
   if (provider === "aws")
     ipAddress = await awsExec.getServerIP()
   else if (provider === "gcp") {
-    ipAddress = await  gcpExec.getServerIP("us-east1-b", "pilot-321119")
+    ipAddress = await  gcpExec.getServerIP("us-east1-b", "gcp-pilot-testing")
   }
 
   return new Promise<string>((res, rej) => {
@@ -51,7 +51,7 @@ const dockerAuth = async (gcpProjectID: string, provider: string): Promise<strin
   if (provider === "aws")
     ipAddress = await awsExec.getServerIP()
   else if (provider === "gcp") {
-    ipAddress = await  gcpExec.getServerIP("us-east1-b", "pilot-321119")
+    ipAddress = await  gcpExec.getServerIP("us-east1-b", "gcp-pilot-testing")
   }
 
   return new Promise<string>((res, rej) => {
