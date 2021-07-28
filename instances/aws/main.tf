@@ -75,12 +75,25 @@ resource "aws_security_group" "sg_22_80" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-
   ingress {
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = 9701
+    to_port     = 9701
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 9702
+    to_port     = 9702
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 2375
+    to_port     = 2375
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # TODO: Change to instance ip address
   }
 
   egress {
@@ -91,18 +104,37 @@ resource "aws_security_group" "sg_22_80" {
   }
 }
 
+# TODO: Permission denied! May not be able to set permissions in TF
+# resource "local_file" "docker_daemon" {
+#   content = "{\"hosts\": [\"tcp://0.0.0.0:2375\", \"unix:///var/run/docker.sock\"]}"
+#   filename = "/etc/docker/daemon.json"
+# }
+
+# resource "local_file" "docker_override_conf" {
+#   content = <<-EOF
+#     [Service]
+#     ExecStart=
+#     ExecStart=/usr/bin/dockerd
+#   EOF
+#   filename = "/etc/systemd/system/docker.service.d/override.conf"
+# }
+
 data "template_file" "user_data" {
   template = file("../../templates/ssh-docker-waypoint-init.yaml")
 }
 
 resource "aws_instance" "waypoint" {
   ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "t2.micro"
+  instance_type               = "t2.medium"
   key_name                    = var.aws_key_pair
   subnet_id                   = aws_subnet.subnet_public.id
   vpc_security_group_ids      = [aws_security_group.sg_22_80.id]
   associate_public_ip_address = true
   user_data                   = data.template_file.user_data.rendered
+
+  root_block_device {
+    volume_size = 20
+  }
 
   tags = {
     Name = "Pilot Waypoint Server"
@@ -111,4 +143,8 @@ resource "aws_instance" "waypoint" {
 
 output "public_ip" {
   value = aws_instance.waypoint.public_ip
+}
+
+output "instance_id" {
+  value = aws_instance.waypoint.id
 }
