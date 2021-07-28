@@ -13,7 +13,7 @@ import awsExec from './aws/exec'
 import gcpExec from './gcp/exec'
 import { exec } from 'child_process'
 import { get } from 'https'
-import templates from './aws/templates'
+import templates from './templates'
 
 const decompress = require('decompress')
 

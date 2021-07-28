@@ -1,15 +1,9 @@
 import cli from 'cli-ux'
 import paths from '../paths'
 import execUtil from './exec'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync } from 'fs'
 import fs from '../fs'
 import waypoint from '../waypoint'
-
-const makeDir = (path: string) => {
-  if (!existsSync(path)) {
-    mkdirSync(path)
-  }
-}
 
 export async function gcpSetup() {
   // Check for gcloud config
