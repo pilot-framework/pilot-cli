@@ -15,6 +15,7 @@ const PILOT_AWS_USER_KEYS: string = join(CONFIG, '/aws/pilot_keys')
 const PILOT_GCP: string = join(CONFIG, '/gcp')
 const PILOT_GCP_CONFIG: string = join(CONFIG, '/gcp/config')
 const PILOT_GCP_SERVICE_FILE: string = join(CONFIG, '/gcp/service/pilot-user-file.json')
+const PILOT_GCP_POLICY: string = join(CONFIG, '/gcp/service/policy.csv')
 const AWS_CREDENTIALS: string = join(HOME, '/.aws/credentials')
 const AWS_CONFIG: string = join(HOME, '/.aws/config')
 const AWS_INSTANCES: string = join(appRoot.toString(), '/instances/aws')
@@ -37,6 +38,7 @@ export default {
   PILOT_AWS_POLICY,
   PILOT_AWS_USER_KEYS,
   PILOT_GCP,
+  PILOT_GCP_POLICY,
   PILOT_GCP_SERVICE_FILE,
   appRoot,
   AWS_CREDENTIALS,
