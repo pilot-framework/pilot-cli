@@ -86,11 +86,37 @@ const getEnvVars = async (): Promise<string> => {
   })
 }
 
+const setContext = async (ipAddress: string, token: string): Promise<void> => {
+  return new Promise<void>((res, rej) => {
+    exec(`${paths.WAYPOINT_EXEC} context create -server-tls-skip-verify -set-default \\
+    -server-auth-token=${token} -server-addr=${ipAddress}:9701 -server-require-auth pilot-server`, (err) => {
+      if (err) throw err
+      res()
+    })
+  })
+  .catch(err => {
+    throw err
+  })
+}
+
+const getToken = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.WAYPOINT_EXEC} token new`, (err, data) => {
+      if (err) throw err
+      res(data.trim())
+    })
+  })
+  .catch(err => {
+    throw err
+  })
+}
+
 export default {
   dockerAuth,
   dockerConfig,
   dockerCopy,
   setDockerHost,
+  setContext,
   setEnvVar,
   setEnvVars,
   getEnvVars,

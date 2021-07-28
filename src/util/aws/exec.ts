@@ -8,18 +8,6 @@ const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const sshKeyGen = async (): Promise<string> => {
-  return new Promise<string>((res, rej) => {
-    exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.TF_CLOUD_INIT}`, (error, _) => {
-      if (error) rej(error)
-      res('success')
-    })
-  })
-  .catch(error => {
-    throw error
-  })
-}
-
 const getServerIP = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw public_ip`, (error, stdout) => {
@@ -67,8 +55,6 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
       let instanceStatus = JSON.parse(await getServerStatus(instanceID))
       let reachabilityStatus = instanceStatus.InstanceStatuses[0].InstanceStatus.Details[0].Status
 
-      if (time % 30 === 0 && time > 0) console.log(`STATUS: ${reachabilityStatus}, TIME: ${time}S`)
-
       if (reachabilityStatus === 'passed') {
         clearInterval(pingServer)
         res(true)
@@ -89,7 +75,8 @@ const installWaypoint = async (): Promise<string> => {
   const ipAddr = await getServerIP()
 
   return new Promise<string>((res, rej) => {
-    exec(`ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"`, (error, stdout) => {
+    exec(`ssh pilot@${ipAddr} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no \\
+    "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
@@ -310,7 +297,6 @@ export default {
   getInstanceID,
   serverReachability,
   installWaypoint,
-  sshKeyGen,
   terraApply,
   terraDestroy,
   terraInit,

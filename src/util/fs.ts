@@ -10,11 +10,24 @@ import {
 import { platform, arch } from 'os'
 import { join } from 'path'
 import awsExec from './aws/exec'
+import gcpExec from './gcp/exec'
 import { exec } from 'child_process'
 import { get } from 'https'
 import templates from './aws/templates'
 
 const decompress = require('decompress')
+
+const sshKeyGen = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.TF_CLOUD_INIT}`, (error, _) => {
+      if (error) rej(error)
+      res('success')
+    })
+  })
+  .catch(error => {
+    throw error
+  })
+}
 
 const createFile = async (path: string, content: string): Promise<void> => {
   return new Promise<void>((res, rej) => {
@@ -137,8 +150,14 @@ const installBinaries = async () => {
   })
 }
 
-const copyFileToEC2 = async (): Promise<string> => {
-  const ipAddress = await awsExec.getServerIP()
+const copyFileToVM = async (provider: string): Promise<string> => {
+  let ipAddress: string
+
+  if (provider === "aws")
+    ipAddress = await awsExec.getServerIP()
+  else if (provider === "gcp") {
+    ipAddress = await  gcpExec.getServerIP("us-east1-b")
+  }
   return new Promise<string>((res, rej) => {
     exec(`scp -i ${paths.TF_CLOUD_INIT} ${paths.PILOT_GCP_SERVICE_FILE} pilot@${ipAddress}:~/.config/pilot-user-file.json`, (error, stdout) => {
       if (error) rej(error)
@@ -160,9 +179,10 @@ export default {
   getPrivateKey,
   downloadFile,
   installBinaries,
-  copyFileToEC2,
+  copyFileToVM,
   readPilotKeys,
   fileToString,
   mkDir,
   createFile,
+  sshKeyGen,
 }

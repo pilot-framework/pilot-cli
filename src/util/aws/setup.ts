@@ -51,7 +51,7 @@ export async function awsSetup() {
 
     // Generate SSH Keys
     if (!existsSync(paths.TF_CLOUD_INIT)) {
-      await execUtil.sshKeyGen()
+      await fsUtil.sshKeyGen()
       console.log('Successfully generated SSH keys')
     }
 

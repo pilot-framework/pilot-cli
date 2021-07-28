@@ -9,7 +9,7 @@ terraform {
 
 # TODO: project, region, and zone will be custom to the google project
 provider "google" {
-  project = "pilot"
+  project = "gcp-pilot-testing"
   region = "us-east1"
   zone = "us-east1-b"
 }
@@ -26,20 +26,12 @@ data "google_billing_account" "acct" {
 # }
 
 data "google_project" "pilot" {
-  project_id = "pilot-321119" # TODO: Make dynamic through variables.tf
+  project_id = "gcp-pilot-testing" # TODO: Make dynamic through variables.tf
 }
 
-resource "google_project_service" "iamService" {
-  
-  project = data.google_project.pilot.project_id
-  service = "iam.googleapis.com"
-
-  timeouts {
-    create = "30m"
-    update = "40m"
-  }
-
-  disable_dependent_services = true  
+data "google_service_account" "pilot_user" {
+  # Should automatically pull project info from provider
+  account_id = "pilot-user"
 }
 
 resource "google_project_service" "computeEngine" {
@@ -66,20 +58,6 @@ resource "google_project_service" "crm" {
   disable_dependent_services = true  
 }
 
-resource "google_service_account" "service_account" {
-  account_id   = "pilot-service-account"
-  project = data.google_project.pilot.project_id
-}
-
-resource "google_service_account_key" "mykey" {
-  service_account_id = google_service_account.service_account.name
-}
-
-data "google_service_account_key" "mykey" {
-  name            = google_service_account_key.mykey.name
-  public_key_type = "TYPE_X509_PEM_FILE"
-}
-
 resource "google_compute_instance" "pilot-instance" {
   name         = "pilot-gcp-instance"
   machine_type = "e2-medium"
@@ -101,28 +79,16 @@ resource "google_compute_instance" "pilot-instance" {
   }
 
   metadata = {
-    # ssh-keys= "pilotuser:${file("~/.ssh/google_compute_engine.pub")}"
-    startup-script = <<EOF
-      #!/bin/sh
-
-      sudo curl -fsSL https://get.docker.com -o get-docker.sh 
-      sudo sh get-docker.sh           
-      sudo apt-get install -y software-properties-common
-      curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-      sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-      sudo apt-get update && sudo apt-get install -y waypoint
-      sudo groupadd docker
-      sudo usermod -a -G docker $USER
-    EOF
+    user-data = file("../../templates/ssh-docker-waypoint-init.yaml")
   }
 
   service_account {
-    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
-    email  = google_service_account.service_account.email
-    scopes = ["cloud-platform"]
+    email  = data.google_service_account.pilot_user.email
+    scopes = [ "cloud-platform" ]
   }
 
   depends_on = [google_project_service.computeEngine]
+  allow_stopping_for_update = true
 }
 
 resource "google_compute_network" "pilot-network" {
@@ -142,6 +108,6 @@ resource "google_compute_firewall" "pilot-firewall" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "8080", "1000-2000", "9701", "9702"]
+    ports    = ["22", "80", "8080", "1000-2000", "9701", "9702", "2375"]
   }
 }
