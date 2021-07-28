@@ -32,7 +32,7 @@ export async function initialize() {
   // if ~/.aws directory exists, copy contents
   if (existsSync(paths.AWS_CONFIG) && !existsSync(paths.PILOT_AWS_CONFIG)) {
     console.log('AWS configuration detected...copying...')
-    copyFile(paths.AWS_CONFIG, paths.PILOT_AWS_CONFIG, (err) => {
+    copyFile(paths.AWS_CONFIG, paths.PILOT_AWS_CONFIG, err => {
       if (err) {
         console.error('ERROR: ', err)
       } else {
@@ -45,7 +45,7 @@ export async function initialize() {
 
   if (existsSync(paths.AWS_CREDENTIALS)) {
     console.log('AWS credentials detected...copying...')
-    copyFile(paths.AWS_CREDENTIALS, paths.PILOT_AWS_CREDENTIALS, (err) => {
+    copyFile(paths.AWS_CREDENTIALS, paths.PILOT_AWS_CREDENTIALS, err => {
       if (err) {
         console.error('ERROR: ', err)
       } else {

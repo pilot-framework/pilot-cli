@@ -36,8 +36,8 @@ export async function gcpSetup() {
 
     // Configure GCP IAM user / role
     // TODO: DYNAMIC PROJECT
-    cli.action.start("Configuring IAM user and role for Pilot on GCP")
-    await execUtil.pilotUserInit("gcp-pilot-testing", false)
+    cli.action.start('Configuring IAM user and role for Pilot on GCP')
+    await execUtil.pilotUserInit('gcp-pilot-testing', false)
     cli.action.stop()
 
     // terraform init
@@ -72,11 +72,11 @@ export async function gcpSetup() {
     cli.action.stop()
 
     cli.action.start('Configuring runner')
-    await execUtil.pilotUserInit("gcp-pilot-testing", true)
+    await execUtil.pilotUserInit('gcp-pilot-testing', true)
     await waypoint.setDefaultContext()
     await execUtil.configureRunner()
     cli.action.stop()
-  } catch (err) {
-    cli.error(err)
+  } catch (error) {
+    cli.error(error)
   }
 }

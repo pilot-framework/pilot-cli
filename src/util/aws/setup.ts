@@ -4,6 +4,7 @@ import creds from './creds'
 import fsUtil from '../fs'
 import { existsSync } from 'fs'
 import execUtil from './exec'
+import waypoint from '../waypoint'
 
 export async function awsSetup() {
   try {
@@ -83,7 +84,7 @@ export async function awsSetup() {
     const reachable = await execUtil.serverReachability(360)
 
     if (!reachable) {
-      cli.error("EC2 instance initialization timed out")
+      cli.error('EC2 instance initialization timed out')
     }
     cli.action.stop()
 
@@ -102,9 +103,10 @@ export async function awsSetup() {
     cli.action.stop
 
     cli.action.start('Configuring runner')
+    await waypoint.setDefaultContext()
     await execUtil.configureRunner()
     cli.action.stop
-  } catch (err) {
-    cli.error(err)
+  } catch (error) {
+    cli.error(error)
   }
 }

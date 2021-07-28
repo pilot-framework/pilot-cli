@@ -1,4 +1,4 @@
-import {Command, flags} from '@oclif/command'
+import { Command, flags } from '@oclif/command'
 import gcpExec from '../util/gcp/exec'
 import awsExec from '../util/aws/exec'
 import { cli } from 'cli-ux'
@@ -8,9 +8,9 @@ export default class Configure extends Command {
   static description = 'Configure remote Waypoint Server with credentials for selected cloud provider.\nThis typically only needs to be run once for each provider.'
 
   static flags = {
-    help: flags.help({char: 'h'}),
-    aws: flags.boolean({description: 'Configure server with AWS Pilot IAM credentials'}),
-    gcp: flags.boolean({description: 'Configure server with GCP Pilot IAM credentials'}),
+    help: flags.help({ char: 'h' }),
+    aws: flags.boolean({ description: 'Configure server with AWS Pilot IAM credentials' }),
+    gcp: flags.boolean({ description: 'Configure server with GCP Pilot IAM credentials' }),
     project: flags.string({
       char: 'p',
       description: 'Project ID for GCP Project that the service account and IAM role will be created for',
@@ -31,17 +31,17 @@ export default class Configure extends Command {
 
     if (flags.list) {
       try {
-        let list = await waypoint.getEnvVars()
+        const list = await waypoint.getEnvVars()
 
         this.log(list)
-      } catch (err) {
-        this.log(err)
+      } catch (error) {
+        this.log(error)
       }
 
       return
     }
 
-    let envVars: Array<string> = []
+    const envVars: Array<string> = []
 
     if (flags.aws) {
       cli.action.start('Configuring IAM user and role for Pilot on AWS...')
@@ -54,14 +54,14 @@ export default class Configure extends Command {
 
       cli.action.stop()
     } else if (flags.gcp) {
-      cli.action.start("Configuring IAM user and role for Pilot on GCP...")
+      cli.action.start('Configuring IAM user and role for Pilot on GCP...')
 
       try {
         await gcpExec.pilotUserInit(String(flags.project), true)
 
-        envVars.push("GOOGLE_APPLICATION_CREDENTIALS=/root/.config/pilot-user-file.json")
-      } catch (err) {
-        this.log(err)
+        envVars.push('GOOGLE_APPLICATION_CREDENTIALS=/root/.config/pilot-user-file.json')
+      } catch (error) {
+        this.log(error)
       }
 
       await waypoint.setEnvVars(envVars)
