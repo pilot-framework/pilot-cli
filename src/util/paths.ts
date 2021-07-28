@@ -14,6 +14,7 @@ const PILOT_AWS_POLICY: string = join(appRoot.toString(), '/templates/pilotAWSPo
 const PILOT_AWS_USER_KEYS: string = join(CONFIG, '/aws/pilot_keys')
 const PILOT_GCP: string = join(CONFIG, '/gcp')
 const PILOT_GCP_CONFIG: string = join(CONFIG, '/gcp/config')
+const PILOT_GCP_SERVICE: string = join(CONFIG, '/gcp/service')
 const PILOT_GCP_POLICY_TEMPLATE: string = join(appRoot.toString(), '/templates/pilotGCPPolicy.csv')
 const PILOT_GCP_SERVICE_FILE: string = join(CONFIG, '/gcp/service/pilot-user-file.json')
 const PILOT_GCP_POLICY: string = join(CONFIG, '/gcp/service/policy.csv')
@@ -39,6 +40,7 @@ export default {
   PILOT_AWS_POLICY,
   PILOT_AWS_USER_KEYS,
   PILOT_GCP,
+  PILOT_GCP_SERVICE,
   PILOT_GCP_POLICY,
   PILOT_GCP_POLICY_TEMPLATE,
   PILOT_GCP_SERVICE_FILE,

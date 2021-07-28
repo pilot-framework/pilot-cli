@@ -13,8 +13,9 @@ export async function initialize() {
     await fsUtil.mkDir(paths.CONFIG)
     await fsUtil.mkDir(paths.PILOT_AWS)
     await fsUtil.mkDir(paths.PILOT_AWS_SSH)
-    await fsUtil.mkDir(paths.PILOT_GCP)
     await fsUtil.createFile(paths.PILOT_AWS_METADATA, '{}')
+    await fsUtil.mkDir(paths.PILOT_GCP)
+    await fsUtil.mkDir(paths.PILOT_GCP_SERVICE)
   }
 
   /**********************/
@@ -60,7 +61,7 @@ export async function initialize() {
   /***********************/
   if (existsSync(paths.GCP_CONFIG) && !existsSync(paths.PILOT_GCP_CONFIG)) {
     console.log('gcloud configuration detected...copying...')
-    copyFile(paths.GCP_CONFIG, paths.PILOT_GCP_CONFIG, (err) => {
+    copyFile(paths.GCP_CONFIG, paths.PILOT_GCP_CONFIG, err => {
       if (err) {
         console.error('ERROR: ', err)
       } else {
@@ -72,4 +73,12 @@ export async function initialize() {
   } else {
     console.log('gcloud configuration detected')
   }
+
+  copyFile(paths.PILOT_GCP_POLICY_TEMPLATE, paths.PILOT_GCP_POLICY, err => {
+    if (err) {
+      console.error('ERROR: ', err)
+    } else {
+      console.log('gcloud policyconfig copy success!')
+    }
+  })
 }

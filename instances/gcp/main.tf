@@ -9,7 +9,7 @@ terraform {
 
 # TODO: project, region, and zone will be custom to the google project
 provider "google" {
-  project = "gcp-pilot-testing"
+  project = "pilot"
   region = "us-east1"
   zone = "us-east1-b"
 }
@@ -26,7 +26,7 @@ data "google_billing_account" "acct" {
 # }
 
 data "google_project" "pilot" {
-  project_id = "gcp-pilot-testing" # TODO: Make dynamic through variables.tf
+  project_id = "pilot-321119" # TODO: Make dynamic through variables.tf
 }
 
 data "google_service_account" "pilot_user" {
@@ -108,6 +108,6 @@ resource "google_compute_firewall" "pilot-firewall" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "8080", "1000-2000", "9701", "9702", "2375Z"]
+    ports    = ["22", "80", "8080", "1000-2000", "9701", "9702", "2375"]
   }
 }

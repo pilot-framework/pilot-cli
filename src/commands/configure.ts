@@ -1,12 +1,8 @@
 import {Command, flags} from '@oclif/command'
-import { exec } from 'child_process'
-import paths from '../util/paths'
 import gcpExec from '../util/gcp/exec'
 import awsExec from '../util/aws/exec'
 import { cli } from 'cli-ux'
-import fs from '../util/fs'
 import waypoint from '../util/waypoint'
-import creds from '../util/aws/creds'
 
 export default class Configure extends Command {
   static description = 'Configure remote Waypoint Server with credentials for selected cloud provider.\nThis typically only needs to be run once for each provider.'
