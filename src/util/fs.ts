@@ -102,7 +102,7 @@ const downloadFile = async (url: string, dest: string, callback: Function): Prom
   })
 }
 
-const installBinaries = async () => {
+const installBinaries = async (): Promise<void> => {
   const system = `${platform()}${arch()}`
 
   let terraform_url: string
