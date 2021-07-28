@@ -1,16 +1,37 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 3.0"
+    }
+  }
+}
+
+# TODO: project, region, and zone will be custom to the google project
+provider "google" {
+  project = "pilot"
+  region = "us-east1"
+  zone = "us-east1-b"
+}
+
 data "google_billing_account" "acct" {
-  display_name = "My Billing Account"
+  display_name = "pilot-billing"
   open         = true
 }
 
-resource "google_project" "my_project" {
-  name       = "pilot-10"
-  project_id = "pilot-10"
-  billing_account = data.google_billing_account.acct.id
+# resource "google_project" "my_project" {
+#   name       = "pilot"
+#   project_id = "pilot-321119"
+#   billing_account = data.google_billing_account.acct.id
+# }
+
+data "google_project" "pilot" {
+  project_id = "pilot-321119" # TODO: Make dynamic through variables.tf
 }
 
 resource "google_project_service" "iamService" {
-  project = "${google_project.my_project.project_id}"
+  
+  project = data.google_project.pilot.project_id
   service = "iam.googleapis.com"
 
   timeouts {
@@ -22,7 +43,7 @@ resource "google_project_service" "iamService" {
 }
 
 resource "google_project_service" "computeEngine" {
-  project = "${google_project.my_project.project_id}"
+  project = data.google_project.pilot.project_id
   service = "compute.googleapis.com"
 
   timeouts {
@@ -34,7 +55,7 @@ resource "google_project_service" "computeEngine" {
 }
 
 resource "google_project_service" "crm" {
-  project = "${google_project.my_project.project_id}"
+  project = data.google_project.pilot.project_id
   service = "cloudresourcemanager.googleapis.com"
 
   timeouts {
@@ -47,7 +68,7 @@ resource "google_project_service" "crm" {
 
 resource "google_service_account" "service_account" {
   account_id   = "pilot-service-account"
-  project = "${google_project.my_project.project_id}"
+  project = data.google_project.pilot.project_id
 }
 
 resource "google_service_account_key" "mykey" {
@@ -59,11 +80,11 @@ data "google_service_account_key" "mykey" {
   public_key_type = "TYPE_X509_PEM_FILE"
 }
 
-resource "google_compute_instance" "default" {
+resource "google_compute_instance" "pilot-instance" {
   name         = "pilot-gcp-instance"
   machine_type = "e2-medium"
-  zone         = "us-central1-a"
-  project = "${google_project.my_project.project_id}"
+  zone         = "us-east1-b" # TODO: get defaults from .pilot config
+  project = data.google_project.pilot.project_id
 
   boot_disk {
     initialize_params {
@@ -72,7 +93,7 @@ resource "google_compute_instance" "default" {
   }
 
   network_interface {
-    network = "default"
+    network = google_compute_network.pilot-network.self_link
 
     access_config {
       // Ephemeral IP
@@ -80,6 +101,7 @@ resource "google_compute_instance" "default" {
   }
 
   metadata = {
+    # ssh-keys= "pilotuser:${file("~/.ssh/google_compute_engine.pub")}"
     startup-script = <<EOF
       #!/bin/sh
 
@@ -103,17 +125,16 @@ resource "google_compute_instance" "default" {
   depends_on = [google_project_service.computeEngine]
 }
 
-resource "google_compute_network" "default" {
+resource "google_compute_network" "pilot-network" {
   name = "pilot-network"
-  project = "${google_project.my_project.project_id}"
-
+  project = data.google_project.pilot.project_id
   depends_on = [google_project_service.computeEngine]
 }
 
-resource "google_compute_firewall" "default" {
+resource "google_compute_firewall" "pilot-firewall" {
   name    = "pilot-firewall"
-  project = "${google_project.my_project.project_id}"
-  network = google_compute_network.default.name
+  project = data.google_project.pilot.project_id
+  network = google_compute_network.pilot-network.name
 
   allow {
     protocol = "icmp"
@@ -121,8 +142,6 @@ resource "google_compute_firewall" "default" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "8080", "1000-2000", "9701", "9702"]
+    ports    = ["22", "80", "8080", "1000-2000", "9701", "9702"]
   }
-
-  source_tags = ["web"]
 }
