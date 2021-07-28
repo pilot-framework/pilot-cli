@@ -23,7 +23,7 @@ const AWS_CONFIG: string = join(HOME, '/.aws/config')
 const AWS_INSTANCES: string = join(appRoot.toString(), '/instances/aws')
 const GCP_CONFIG: string = join(HOME, '/.config/gcloud/configurations/config_default')
 const GCP_INSTANCES: string = join(appRoot.toString(), '/instances/gcp')
-const TF_CLOUD_INIT: string = join(CONFIG, '/aws/ssh/tf-cloud-init')
+const PILOT_SSH: string = join(CONFIG, '/pilot-ssh')
 const SSH_DOCKER_WAYPOINT_INIT: string = join(appRoot.toString(), '/templates/ssh-docker-waypoint-init.yaml')
 const EC2_KEY_PAIR: string = join(CONFIG, '/aws/ssh/PilotKeyPair.pem')
 const TERRAFORM_EXEC: string = join(appRoot.toString(), '/bin/terraform/terraform')
@@ -53,7 +53,7 @@ export default {
   EC2_KEY_PAIR,
   SSH_DOCKER_WAYPOINT_INIT,
   TERRAFORM_EXEC,
-  TF_CLOUD_INIT,
+  PILOT_SSH,
   PILOT_GCP_CONFIG,
   WAYPOINT_EXEC,
 }

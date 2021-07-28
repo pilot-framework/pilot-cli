@@ -114,7 +114,7 @@ const getServerIP = async (zone: string, gcpProjectID: string): Promise<string> 
 const sshExec = async (cmd: string): Promise<string> => {
   const ipAddress = await getServerIP("us-east1-b", "gcp-pilot-testing")
   return new Promise<string>((res, rej) => {
-    exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no "${cmd}"`, (error, data) => {
+    exec(`ssh pilot@${ipAddress} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no "${cmd}"`, (error, data) => {
       if (error) {
         if (error.message.includes("NASTY!")) {
           // this is a non-critical error, don't reject

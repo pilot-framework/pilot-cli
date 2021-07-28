@@ -19,7 +19,7 @@ const decompress = require('decompress')
 
 const sshKeyGen = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
-    exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.TF_CLOUD_INIT}`, (error, _) => {
+    exec(`ssh-keygen -t rsa -C "autopilot" -q -N "" -f ${paths.PILOT_SSH}`, (error, _) => {
       if (error) rej(error)
       res('success')
     })
@@ -76,7 +76,7 @@ const genTerraformVars = async (data: string) => {
 }
 
 const genCloudInitYaml = async () => {
-  const data = await fileToString(paths.TF_CLOUD_INIT + '.pub')
+  const data = await fileToString(paths.PILOT_SSH + '.pub')
 
   writeFile(paths.SSH_DOCKER_WAYPOINT_INIT, templates.yamlConfig(data), (err) => {
     if (err) throw err
@@ -84,7 +84,7 @@ const genCloudInitYaml = async () => {
 }
 
 const getPrivateKey = async () => {
-  return await fileToString(paths.TF_CLOUD_INIT)
+  return await fileToString(paths.PILOT_SSH)
 }
 
 const downloadFile = async (url: string, dest: string, callback: Function): Promise<void> => {
@@ -162,7 +162,7 @@ const copyFileToVM = async (provider: string): Promise<string> => {
     ipAddress = await  gcpExec.getServerIP("us-east1-b", "gcp-pilot-testing")
   }
   return new Promise<string>((res, rej) => {
-    exec(`scp -o StrictHostKeyChecking=no -i ${paths.TF_CLOUD_INIT} ${paths.PILOT_GCP_SERVICE_FILE} pilot@${ipAddress}:~/.config/pilot-user-file.json`, (error, stdout) => {
+    exec(`scp -o StrictHostKeyChecking=no -i ${paths.PILOT_SSH} ${paths.PILOT_GCP_SERVICE_FILE} pilot@${ipAddress}:~/.config/pilot-user-file.json`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })

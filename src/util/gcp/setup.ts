@@ -7,7 +7,7 @@ import waypoint from '../waypoint'
 
 export async function gcpSetup() {
   // Check for gcloud config
-  // ~/.config/gcloud/configurations/config_default
+  // ~/.pilot/gcp/config
   try {
     // if (existsSync(paths.PILOT_GCP_CONFIG)) {
     //   console.log('gcloud Credentials detected')
@@ -25,7 +25,7 @@ export async function gcpSetup() {
 
     await fs.mkDir(paths.appRoot + '/templates')
 
-    if (!existsSync(paths.TF_CLOUD_INIT)) {
+    if (!existsSync(paths.PILOT_SSH)) {
       await fs.sshKeyGen()
       console.log('Successfully generated SSH keys')
     }

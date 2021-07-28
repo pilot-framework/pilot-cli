@@ -13,7 +13,7 @@ const dockerCopy = async (provider: string): Promise<string> => {
   }
 
   return new Promise<string>((res, rej) => {
-    exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no \\
+    exec(`ssh pilot@${ipAddress} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no \\
     "docker cp ~/.config/pilot-user-file.json waypoint-runner:/root/.config/pilot-user-file.json"`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
@@ -34,7 +34,7 @@ const dockerConfig = async (gcpProjectID: string, provider: string): Promise<str
   }
 
   return new Promise<string>((res, rej) => {
-    exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no \\
+    exec(`ssh pilot@${ipAddress} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no \\
     "docker exec waypoint-runner gcloud config set account pilot-user@${gcpProjectID}.iam.gserviceaccount.com"`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
@@ -55,7 +55,7 @@ const dockerAuth = async (gcpProjectID: string, provider: string): Promise<strin
   }
 
   return new Promise<string>((res, rej) => {
-    exec(`ssh pilot@${ipAddress} -i ${paths.TF_CLOUD_INIT} -o StrictHostKeyChecking=no \\
+    exec(`ssh pilot@${ipAddress} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no \\
     "docker exec waypoint-runner gcloud auth activate-service-account pilot-user@${gcpProjectID}.iam.gserviceaccount.com \\
     --key-file=/root/.config/pilot-user-file.json"`, (error, stdout) => {
       if (error) rej(error)
