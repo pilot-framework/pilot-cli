@@ -16,7 +16,7 @@ node_modules
 **/*.pem
 **/*.pub
 **/*.yaml
-tf-cloud-init
+pilot-ssh
 bin/terraform/
 bin/terraform_1.0.3_linux_amd64.zip
 bin/waypoint/
