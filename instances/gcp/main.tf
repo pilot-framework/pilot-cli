@@ -101,7 +101,6 @@ resource "google_compute_instance" "pilot-instance" {
   }
 
   metadata = {
-    # ssh-keys= "pilotuser:${file("~/.ssh/google_compute_engine.pub")}"
     startup-script = <<EOF
       #!/bin/sh
 
@@ -111,8 +110,14 @@ resource "google_compute_instance" "pilot-instance" {
       curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
       sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
       sudo apt-get update && sudo apt-get install -y waypoint
-      sudo groupadd docker
-      sudo usermod -a -G docker $USER
+      waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos
+      echo {\\"hosts\\": [\\"tcp://0.0.0.0:2375\\", \\"unix:///var/run/docker.sock\\"]} | sudo tee /etc/docker/daemon.json > /dev/null
+      sudo mkdir /etc/systemd/system/docker.service.d
+      echo "[Service]" | sudo tee /etc/systemd/system/docker.service.d/override.conf > /dev/null
+      echo "ExecStart=" | sudo tee -a /etc/systemd/system/docker.service.d/override.conf > /dev/null
+      echo "ExecStart=/usr/bin/dockerd" | sudo tee -a /etc/systemd/system/docker.service.d/override.conf > /dev/null
+      sudo systemctl daemon-reload
+      sudo systemctl restart docker.service
     EOF
   }
 
