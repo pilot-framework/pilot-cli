@@ -4,8 +4,9 @@ import execUtil from './exec'
 import { existsSync } from 'fs'
 import fs from '../fs'
 import waypoint from '../waypoint'
+import { SetupOpts } from '../../commands/setup'
 
-export async function gcpSetup() {
+export async function gcpSetup(opts: SetupOpts) {
   // Check for gcloud config
   // ~/.pilot/gcp/config
   try {
@@ -60,7 +61,7 @@ export async function gcpSetup() {
 
     // install waypoint post gcloud initialization
     cli.action.start('Setting up your remote Waypoint server')
-    await execUtil.installWaypoint()
+    await execUtil.installWaypoint(opts)
     cli.action.stop()
 
     cli.action.start('Setting context')
