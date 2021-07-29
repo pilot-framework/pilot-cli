@@ -5,8 +5,9 @@ import fsUtil from '../fs'
 import { existsSync } from 'fs'
 import execUtil from './exec'
 import waypoint from '../waypoint'
+import { SetupOpts } from '../../commands/setup'
 
-export async function awsSetup() {
+export async function awsSetup(opts: SetupOpts) {
   try {
     // Check for AWS config
     // ~/.aws/config
@@ -100,7 +101,7 @@ export async function awsSetup() {
 
     // install waypoint post EC2 initialization
     cli.action.start('Setting up your remote Waypoint server')
-    await execUtil.installWaypoint()
+    await execUtil.installWaypoint(opts)
     cli.action.stop()
 
     // Store metadata to ~/.pilot/aws/metadata

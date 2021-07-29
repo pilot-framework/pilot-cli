@@ -4,6 +4,7 @@ import paths from '../paths'
 import waypoint from '../waypoint'
 import creds from './creds'
 import fsUtil from '../fs'
+import { SetupOpts } from '../../commands/setup'
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -106,12 +107,20 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
     })
 }
 
-const installWaypoint = async (): Promise<string> => {
+const installWaypoint = async (opts: SetupOpts): Promise<string> => {
   const ipAddr = await getServerIP()
+
+  let image = '-docker-server-image=pilotframework/pilot-waypoint'
+
+  if (opts.dev) {
+    image = `${image}:dev`
+  } else if (opts.bare) {
+    image = ''
+  }
 
   return new Promise<string>((res, rej) => {
     exec(`ssh pilot@${ipAddr} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no \\
-    "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"`, (error, stdout) => {
+    "waypoint install -platform=docker ${image} -accept-tos"`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
