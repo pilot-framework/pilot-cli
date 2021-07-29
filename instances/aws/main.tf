@@ -93,7 +93,7 @@ resource "aws_security_group" "sg_22_80" {
     from_port   = 2375
     to_port     = 2375
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # TODO: Change to instance ip address
+    cidr_blocks = [aws_vpc.vpc.cidr_block]
   }
 
   egress {
@@ -103,21 +103,6 @@ resource "aws_security_group" "sg_22_80" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
-# TODO: Permission denied! May not be able to set permissions in TF
-# resource "local_file" "docker_daemon" {
-#   content = "{\"hosts\": [\"tcp://0.0.0.0:2375\", \"unix:///var/run/docker.sock\"]}"
-#   filename = "/etc/docker/daemon.json"
-# }
-
-# resource "local_file" "docker_override_conf" {
-#   content = <<-EOF
-#     [Service]
-#     ExecStart=
-#     ExecStart=/usr/bin/dockerd
-#   EOF
-#   filename = "/etc/systemd/system/docker.service.d/override.conf"
-# }
 
 data "template_file" "user_data" {
   template = file("../../templates/ssh-docker-waypoint-init.yaml")
