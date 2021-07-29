@@ -15,6 +15,7 @@
     "decompress": "^4.2.1",
     "inquirer": "^6.5.2",
     "open": "^8.2.1",
+    "ora": "^5.4.1",
     "tslib": "^1"
   },
   "devDependencies": {

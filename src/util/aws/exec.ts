@@ -307,7 +307,13 @@ const pilotUserInit = async () => {
   console.log('Created access keys')
 
   const keys = await fsUtil.readPilotKeys()
-  await waypoint.setEnvVar(`AWS_ACCESS_KEY_ID=${keys.AccessKey.AccessKeyId} AWS_SECRET_ACCESS_KEY=${keys.AccessKey.SecretAccessKey} AWS_DEFAULT_REGION=${await creds.getAWSRegion()}`)
+  const envVars = [
+    `AWS_ACCESS_KEY_ID=${keys.AccessKey.AccessKeyId}`,
+    `AWS_SECRET_ACCESS_KEY=${keys.AccessKey.SecretAccessKey}`,
+    `AWS_DEFAULT_REGION=${await creds.getAWSRegion()}`,
+  ]
+
+  await waypoint.setEnvVars(envVars)
 }
 
 export default {

@@ -24,11 +24,6 @@ export default class Configure extends Command {
   async run() {
     const { flags } = this.parse(Configure)
 
-    if (flags.project === undefined && flags.gcp) {
-      this.log('Please specify a project like so: "pilot configure --gcp -p=PROJECT_ID"')
-      return
-    }
-
     if (flags.list) {
       try {
         const list = await waypoint.getEnvVars()
