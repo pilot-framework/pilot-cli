@@ -86,18 +86,6 @@ const setEnvVars = async (envVars: Array<string>): Promise<boolean> => {
     })
 }
 
-const setEnvVar = async (envStr: string): Promise<boolean> => {
-  return new Promise<boolean>((res, rej) => {
-    exec(`${paths.WAYPOINT_EXEC} config set -runner ${envStr}`, error => {
-      if (error) rej(error)
-      res(true)
-    })
-  })
-    .catch(error => {
-      throw error
-    })
-}
-
 const getEnvVars = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.WAYPOINT_EXEC} config get -runner`, (error, stdout) => {
@@ -153,7 +141,6 @@ export default {
   dockerCopy,
   setContext,
   setDefaultContext,
-  setEnvVar,
   setEnvVars,
   getEnvVars,
   getToken,
