@@ -1,15 +1,17 @@
 import { exec } from 'child_process'
 import awsExec from './aws/exec'
+import fs from './fs'
 import creds from './gcp/creds'
 import gcpExec from './gcp/exec'
 import paths from './paths'
 
-const dockerCopy = async (provider: string): Promise<string> => {
+const dockerCopy = async (): Promise<string> => {
+  const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
   let ipAddress: string
 
-  if (provider === 'aws')
+  if (serverPlatform === 'aws')
     ipAddress = await awsExec.getServerIP()
-  else if (provider === 'gcp') {
+  else if (serverPlatform === 'gcp') {
     ipAddress = await gcpExec.getServerIP()
   }
 
@@ -25,13 +27,14 @@ const dockerCopy = async (provider: string): Promise<string> => {
     })
 }
 
-const dockerConfig = async (provider: string): Promise<string> => {
+const dockerConfig = async (): Promise<string> => {
+  const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
   const defaultProject = await creds.getGCPProject()
   let ipAddress: string
 
-  if (provider === 'aws')
+  if (serverPlatform === 'aws')
     ipAddress = await awsExec.getServerIP()
-  else if (provider === 'gcp') {
+  else if (serverPlatform === 'gcp') {
     ipAddress = await gcpExec.getServerIP()
   }
 
@@ -47,13 +50,14 @@ const dockerConfig = async (provider: string): Promise<string> => {
     })
 }
 
-const dockerAuth = async (provider: string): Promise<string> => {
+const dockerAuth = async (): Promise<string> => {
+  const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
   const defaultProject = await creds.getGCPProject()
   let ipAddress: string
 
-  if (provider === 'aws')
+  if (serverPlatform === 'aws')
     ipAddress = await awsExec.getServerIP()
-  else if (provider === 'gcp') {
+  else if (serverPlatform === 'gcp') {
     ipAddress = await gcpExec.getServerIP()
   }
 
