@@ -32,7 +32,7 @@ const sshKeyGen = async (): Promise<string> => {
 
 const createFile = async (path: string, content: string): Promise<void> => {
   return new Promise<void>((res, rej) => {
-    appendFile(path, content, error => {
+    writeFile(path, content, error => {
       if (error) rej(error)
       res()
     })
