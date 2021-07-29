@@ -1,5 +1,5 @@
 import { exec } from 'child_process'
-import { readFile, writeFileSync, writeFile } from 'fs'
+import { readFile, writeFile } from 'fs'
 import paths from '../paths'
 import waypoint from '../waypoint'
 import creds from './creds'
@@ -16,9 +16,9 @@ const getServerIP = async (): Promise<string> => {
       res(stdout)
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const getInstanceID = async (): Promise<string> => {
@@ -28,9 +28,9 @@ const getInstanceID = async (): Promise<string> => {
       res(stdout)
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const getServerStatus = async (instanceID: string): Promise<string> => {
@@ -40,9 +40,9 @@ const getServerStatus = async (instanceID: string): Promise<string> => {
       res(stdout)
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 // TODO: Determine reasonable timeout
@@ -53,8 +53,8 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
 
   return new Promise<boolean>((res, _) => {
     pingServer = setInterval(async () => {
-      let instanceStatus = JSON.parse(await getServerStatus(instanceID))
-      let reachabilityStatus = instanceStatus.InstanceStatuses[0].InstanceStatus.Details[0].Status
+      const instanceStatus = JSON.parse(await getServerStatus(instanceID))
+      const reachabilityStatus = instanceStatus.InstanceStatuses[0].InstanceStatus.Details[0].Status
 
       if (reachabilityStatus === 'passed') {
         clearInterval(pingServer)
@@ -67,9 +67,9 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
       time += 10
     }, 10000)
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const installWaypoint = async (): Promise<string> => {
@@ -82,9 +82,9 @@ const installWaypoint = async (): Promise<string> => {
       res(stdout)
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const deleteKeyPair = async (): Promise<string> => {
@@ -95,9 +95,9 @@ const deleteKeyPair = async (): Promise<string> => {
     // provide a 2 second buffer for deleting
     setTimeout(() => res('success'), 2000)
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const createKeyPair = async (): Promise<string> => {
@@ -107,9 +107,9 @@ const createKeyPair = async (): Promise<string> => {
       res('success')
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const terraInit = async (): Promise<string> => {
@@ -119,9 +119,9 @@ const terraInit = async (): Promise<string> => {
       res('success')
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const terraApply = async (): Promise<string> => {
@@ -131,9 +131,9 @@ const terraApply = async (): Promise<string> => {
       res('success')
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const terraDestroy = async (): Promise<string> => {
@@ -143,9 +143,9 @@ const terraDestroy = async (): Promise<string> => {
       res('success')
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const getWaypointAuthToken = async (ipAddress: string): Promise<string> => {
@@ -155,13 +155,13 @@ const getWaypointAuthToken = async (ipAddress: string): Promise<string> => {
       res(data)
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 interface ReadFileCallback {
-  (data: string): void
+  (data: string): void;
 }
 
 const readMetadata = (callback: ReadFileCallback) => {
@@ -179,7 +179,7 @@ const updateMetadata = async () => {
   const awsSecretKey = await creds.getAWSSecretKey()
   const awsRegion = await creds.getAWSRegion()
 
-  readMetadata((data) => {
+  readMetadata(data => {
     const metadata = JSON.parse(data)
 
     metadata.ipAddress = `${ipAddress}`
@@ -189,7 +189,7 @@ const updateMetadata = async () => {
     metadata.awsSecretKey = awsSecretKey
     metadata.awsRegion = awsRegion
 
-    writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), (err) => {
+    writeFile(paths.PILOT_AWS_METADATA, JSON.stringify(metadata), err => {
       if (err) throw err
     })
   })
@@ -206,11 +206,12 @@ const setContext = async () => {
 
   await timeout(2000)
 
-  readMetadata((rawMetadata) => {
+  // TODO: return promise
+  readMetadata(rawMetadata => {
     const metadata = JSON.parse(rawMetadata)
     const execCommand = `${paths.WAYPOINT_EXEC} context create -server-tls-skip-verify -set-default \\
-    -server-auth-token=${metadata.waypointAuthToken} -server-addr=${metadata.ipAddress}:9701 -server-require-auth pilot-aws`
-    exec(execCommand, (err) => {
+    -server-auth-token=${metadata.waypointAuthToken} -server-addr=${metadata.ipAddress}:9701 -server-require-auth pilot-server`
+    exec(execCommand, err => {
       if (err) throw err
     })
   })
@@ -225,10 +226,11 @@ const configureRunner = async () => {
 
   await timeout(2000)
 
+  // TODO: return promise
   readMetadata(async (rawMetadata: string) => {
     const metadata = JSON.parse(rawMetadata)
 
-    let envVars = [
+    const envVars = [
       `AWS_ACCESS_KEY_ID=${metadata.awsAccessKey}`,
       `AWS_SECRET_ACCESS_KEY=${metadata.awsSecretKey}`,
       `AWS_DEFAULT_REGION=${metadata.awsRegion}`,
@@ -251,9 +253,9 @@ const exists = (command: string) => {
       res(true)
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const create = (command: string) => {
@@ -263,9 +265,9 @@ const create = (command: string) => {
       res(stdout)
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const serviceAccountExists = () => {

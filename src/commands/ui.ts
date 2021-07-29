@@ -1,4 +1,4 @@
-import {Command, flags} from '@oclif/command'
+import { Command, flags } from '@oclif/command'
 import paths from '../util/paths'
 import { exec } from 'child_process'
 import { readFile } from 'fs'
@@ -8,18 +8,20 @@ export default class Ui extends Command {
   static description = 'Opens the Waypoint UI on the default browser'
 
   static flags = {
-    help: flags.help({char: 'h'}),
-    authenticate: flags.boolean({char: 'a',
-      description: 'Automatically log in to Waypoint UI'}),
+    help: flags.help({ char: 'h' }),
+    authenticate: flags.boolean({
+      char: 'a',
+      description: 'Automatically log in to Waypoint UI',
+    }),
   }
 
-  static args = [{name: 'file'}]
+  static args = [{ name: 'file' }]
 
   async run() {
-    const {flags} = this.parse(Ui)
+    const { flags } = this.parse(Ui)
     if (flags.authenticate) {
-      exec(`${paths.WAYPOINT_EXEC} ui -authenticate`, (err) => {
-        if (err) throw err
+      exec(`${paths.WAYPOINT_EXEC} ui -authenticate`, error => {
+        if (error) throw error
       })
     } else {
       readFile(paths.PILOT_AWS_METADATA, 'utf8', (err, data) => {

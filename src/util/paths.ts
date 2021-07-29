@@ -18,6 +18,7 @@ const PILOT_GCP_SERVICE: string = join(CONFIG, '/gcp/service')
 const PILOT_GCP_POLICY_TEMPLATE: string = join(appRoot.toString(), '/templates/pilotGCPPolicy.csv')
 const PILOT_GCP_SERVICE_FILE: string = join(CONFIG, '/gcp/service/pilot-user-file.json')
 const PILOT_GCP_POLICY: string = join(CONFIG, '/gcp/service/policy.csv')
+const PILOT_METADATA: string = join(CONFIG, '/metadata.json')
 const AWS_CREDENTIALS: string = join(HOME, '/.aws/credentials')
 const AWS_CONFIG: string = join(HOME, '/.aws/config')
 const AWS_INSTANCES: string = join(appRoot.toString(), '/instances/aws')
@@ -56,4 +57,5 @@ export default {
   PILOT_SSH,
   PILOT_GCP_CONFIG,
   WAYPOINT_EXEC,
+  PILOT_METADATA,
 }

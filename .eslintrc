@@ -1,4 +1,14 @@
 {
+  "rules": {
+    "no-console": "off",
+    "object-curly-spacing": "off",
+    "no-warning-comments": "off",
+    "no-negated-condition": "off",
+    "indent": [
+      "error",
+      2
+    ]
+  },
   "extends": [
     "oclif",
     "oclif-typescript"

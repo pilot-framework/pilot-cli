@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import paths from './paths'
 import {
   appendFile,
@@ -24,82 +25,92 @@ const sshKeyGen = async (): Promise<string> => {
       res('success')
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const createFile = async (path: string, content: string): Promise<void> => {
   return new Promise<void>((res, rej) => {
-    appendFile(path, content, (err) => {
-      if (err) rej(err)
+    appendFile(path, content, error => {
+      if (error) rej(error)
       res()
     })
   })
-  .catch(err => {
-    throw err
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const mkDir = async (path: string): Promise<void> => {
   return new Promise<void>((res, rej) => {
     if (!existsSync(path)) {
-      mkdir(path, (err) => {
-        if (err) rej(err)
+      mkdir(path, error => {
+        if (error) rej(error)
         res()
       })
     } else {
       res()
     }
   })
-  .catch(err => {
-    throw err
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const fileToString = async (filename: string): Promise<string> => {
   return new Promise<string>((res, rej) => {
-    readFile(filename, (err, data) => {
-      if (err) rej(err)
+    readFile(filename, (error, data) => {
+      if (error) rej(error)
       res(data.toString())
     })
   })
-  .catch(err => {
-    throw err
-  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const getPilotMetadata = async (): Promise<any> => {
+  const metadata = await fileToString(paths.PILOT_METADATA)
+
+  return JSON.parse(metadata)
+}
+
+const updateMetadata = async (metadata: object): Promise<void> => {
+  return createFile(paths.PILOT_METADATA, JSON.stringify(metadata))
 }
 
 const genTerraformVars = async (data: string) => {
-  writeFile(join(paths.AWS_INSTANCES, '/terraform.tfvars'), data, (err) => {
-    if (err) throw new Error('Unable to write Terraform .tfvars file')
+  writeFile(join(paths.AWS_INSTANCES, '/terraform.tfvars'), data, error => {
+    if (error) throw new Error('Unable to write Terraform .tfvars file')
   })
 }
 
 const genCloudInitYaml = async () => {
   const data = await fileToString(paths.PILOT_SSH + '.pub')
 
-  writeFile(paths.SSH_DOCKER_WAYPOINT_INIT, templates.yamlConfig(data), (err) => {
-    if (err) throw err
+  writeFile(paths.SSH_DOCKER_WAYPOINT_INIT, templates.yamlConfig(data), error => {
+    if (error) throw error
   })
 }
 
 const getPrivateKey = async () => {
-  return await fileToString(paths.PILOT_SSH)
+  return fileToString(paths.PILOT_SSH)
 }
 
 const downloadFile = async (url: string, dest: string, callback: Function): Promise<void> => {
   return new Promise<void>(() => {
     const file = createWriteStream(dest)
-    get(url, (res) => {
+    get(url, res => {
       res.pipe(file)
       res.on('end', () => {
         callback()
       })
     })
   })
-  .catch(error => {
-    throw error
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const installBinaries = async (): Promise<void> => {
@@ -111,34 +122,34 @@ const installBinaries = async (): Promise<void> => {
   let waypoint_dest: string
 
   switch (system) {
-  case 'linuxx64': {
-    terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_linux_amd64.zip'
-    terraform_dest = './bin/terraform_1.0.3_linux_amd64.zip'
-    waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_linux_amd64.zip'
-    waypoint_dest = './bin/waypoint_0.4.2_linux_amd64.zip'
-    break
-  }
+    case 'linuxx64': {
+      terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_linux_amd64.zip'
+      terraform_dest = './bin/terraform_1.0.3_linux_amd64.zip'
+      waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_linux_amd64.zip'
+      waypoint_dest = './bin/waypoint_0.4.2_linux_amd64.zip'
+      break
+    }
 
-  case 'linuxx32': {
-    terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_linux_386.zip'
-    terraform_dest = './bin/terraform_1.0.3_linux_386.zip'
-    waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_linux_386.zip'
-    waypoint_dest = './bin/waypoint_0.4.2_linux_386.zip'
-    break
-  }
+    case 'linuxx32': {
+      terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_linux_386.zip'
+      terraform_dest = './bin/terraform_1.0.3_linux_386.zip'
+      waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_linux_386.zip'
+      waypoint_dest = './bin/waypoint_0.4.2_linux_386.zip'
+      break
+    }
 
-  case 'darwinx64': {
-    terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_darwin_amd64.zip'
-    terraform_dest = './bin/terraform_1.0.3_darwin_amd64.zip'
-    waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_darwin_amd64.zip'
-    waypoint_dest = './bin/waypoint_0.4.2_darwin_amd64.zip'
-    break
-  }
+    case 'darwinx64': {
+      terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_darwin_amd64.zip'
+      terraform_dest = './bin/terraform_1.0.3_darwin_amd64.zip'
+      waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_darwin_amd64.zip'
+      waypoint_dest = './bin/waypoint_0.4.2_darwin_amd64.zip'
+      break
+    }
 
-  default: {
-    console.log(`${platform()} ${arch()} is not supported`)
-    return
-  }
+    default: {
+      console.log(`${platform()} ${arch()} is not supported`)
+      return
+    }
   }
 
   return new Promise<void>((res, _) => {
@@ -153,13 +164,14 @@ const installBinaries = async (): Promise<void> => {
   })
 }
 
-const copyFileToVM = async (provider: string): Promise<string> => {
+const copyFileToVM = async (): Promise<string> => {
+  const serverPlatform = (await getPilotMetadata()).serverPlatform
   let ipAddress: string
 
-  if (provider === "aws")
+  if (serverPlatform === 'aws')
     ipAddress = await awsExec.getServerIP()
-  else if (provider === "gcp") {
-    ipAddress = await  gcpExec.getServerIP("us-east1-b", "gcp-pilot-testing")
+  else if (serverPlatform === 'gcp') {
+    ipAddress = await gcpExec.getServerIP()
   }
   return new Promise<string>((res, rej) => {
     exec(`scp -o StrictHostKeyChecking=no -i ${paths.PILOT_SSH} ${paths.PILOT_GCP_SERVICE_FILE} pilot@${ipAddress}:~/.config/pilot-user-file.json`, (error, stdout) => {
@@ -167,9 +179,9 @@ const copyFileToVM = async (provider: string): Promise<string> => {
       res(stdout)
     })
   })
-  .catch(err => {
-    throw err
-  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const readPilotKeys = async () => {
@@ -188,4 +200,6 @@ export default {
   mkDir,
   createFile,
   sshKeyGen,
+  getPilotMetadata,
+  updateMetadata,
 }

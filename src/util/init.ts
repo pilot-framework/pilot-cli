@@ -1,5 +1,6 @@
 import paths from './paths'
 import fsUtil from '../util/fs'
+import gcpCreds from './gcp/creds'
 import {
   existsSync,
   copyFile,
@@ -16,6 +17,7 @@ export async function initialize() {
     await fsUtil.createFile(paths.PILOT_AWS_METADATA, '{}')
     await fsUtil.mkDir(paths.PILOT_GCP)
     await fsUtil.mkDir(paths.PILOT_GCP_SERVICE)
+    await fsUtil.updateMetadata({})
   }
 
   /**********************/
@@ -32,7 +34,7 @@ export async function initialize() {
   // if ~/.aws directory exists, copy contents
   if (existsSync(paths.AWS_CONFIG) && !existsSync(paths.PILOT_AWS_CONFIG)) {
     console.log('AWS configuration detected...copying...')
-    copyFile(paths.AWS_CONFIG, paths.PILOT_AWS_CONFIG, (err) => {
+    copyFile(paths.AWS_CONFIG, paths.PILOT_AWS_CONFIG, err => {
       if (err) {
         console.error('ERROR: ', err)
       } else {
@@ -45,7 +47,7 @@ export async function initialize() {
 
   if (existsSync(paths.AWS_CREDENTIALS)) {
     console.log('AWS credentials detected...copying...')
-    copyFile(paths.AWS_CREDENTIALS, paths.PILOT_AWS_CREDENTIALS, (err) => {
+    copyFile(paths.AWS_CREDENTIALS, paths.PILOT_AWS_CREDENTIALS, err => {
       if (err) {
         console.error('ERROR: ', err)
       } else {
@@ -59,26 +61,38 @@ export async function initialize() {
   /***********************/
   /*  GCP CONFIGURATION  */
   /***********************/
-  if (existsSync(paths.GCP_CONFIG) && !existsSync(paths.PILOT_GCP_CONFIG)) {
-    console.log('gcloud configuration detected...copying...')
-    copyFile(paths.GCP_CONFIG, paths.PILOT_GCP_CONFIG, err => {
-      if (err) {
-        console.error('ERROR: ', err)
-      } else {
-        console.log('gcloud config copy success!')
-      }
-    })
-  } else if (!existsSync(paths.GCP_CONFIG)) {
-    console.error('No gcloud configuration detected')
-  } else {
-    console.log('gcloud configuration detected')
+  if (!existsSync(paths.GCP_CONFIG)) {
+    console.log('No gcloud configuration detected. Ensure you\'ve properly set up your gcloud CLI configuration if deploying with GCP.')
+    return
   }
+  const defaultProject = await gcpCreds.getGCPProject()
+
+  if (defaultProject === '') {
+    console.error('ERROR: please set a default project to use via \'gcloud config set project PROJECT_ID\'')
+    return
+  }
+
+  const defaultZone = await gcpCreds.getGCPZone()
+
+  if (defaultZone === '') {
+    console.error('ERROR: please set a default zone to use via \'gcloud config set compute/zone ZONE\'')
+    return
+  }
+
+  console.log('gcloud configuration detected...copying...')
+  copyFile(paths.GCP_CONFIG, paths.PILOT_GCP_CONFIG, err => {
+    if (err) {
+      console.error('ERROR: ', err)
+    } else {
+      console.log('gcloud config copy success!')
+    }
+  })
 
   copyFile(paths.PILOT_GCP_POLICY_TEMPLATE, paths.PILOT_GCP_POLICY, err => {
     if (err) {
       console.error('ERROR: ', err)
     } else {
-      console.log('gcloud policyconfig copy success!')
+      console.log('gcloud policy copy success!')
     }
   })
 }
