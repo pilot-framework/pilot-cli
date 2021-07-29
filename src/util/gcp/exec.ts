@@ -136,7 +136,6 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
     })
 }
 
-// TODO: move to util/waypoint
 const getWaypointAuthToken = async (): Promise<string> => {
   return sshExec('waypoint token new')
 }
