@@ -94,6 +94,10 @@ export async function awsSetup() {
     }
     cli.action.stop()
 
+    cli.action.start('Setting docker connection port 2375')
+    await execUtil.setDockerConnection()
+    cli.action.stop()
+
     // install waypoint post EC2 initialization
     cli.action.start('Setting up your remote Waypoint server')
     await execUtil.installWaypoint()

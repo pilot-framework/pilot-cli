@@ -21,6 +21,40 @@ const getServerIP = async (): Promise<string> => {
     })
 }
 
+const getSecurityGroups = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec('aws ec2 describe-security-groups', (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const getPilotSecurityGroup = async (): Promise<string> => {
+  const securityGroups = await getSecurityGroups()
+  const sgPilot = JSON.parse(securityGroups).SecurityGroups.find((group: object) => group.GroupName === 'sg_pilot')
+
+  return new Promise<string>(res => res(sgPilot))
+}
+
+const setDockerConnection = async (): Promise<string> => {
+  const sgPilot = await getPilotSecurityGroup()
+  const ipAddr = await getServerIP()
+
+  return new Promise<string>((res, rej) => {
+    exec(`aws ec2 authorize-security-group-ingress --group-id ${sgPilot.GroupId} --protocol tcp --port 2375 --cidr ${ipAddr}/32`, error => {
+      if (error) rej(error)
+      res('Docker Connection Set. Port 2375')
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
 const getInstanceID = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw instance_id`, (error, stdout) => {
@@ -323,8 +357,11 @@ export default {
   createServiceAccount,
   deleteKeyPair,
   getServerIP,
+  getSecurityGroups,
+  getPilotSecurityGroup,
   getServerStatus,
   getInstanceID,
+  setDockerConnection,
   serverReachability,
   installWaypoint,
   terraApply,
