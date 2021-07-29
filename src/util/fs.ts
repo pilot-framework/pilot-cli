@@ -1,7 +1,6 @@
 /* eslint-disable indent */
 import paths from './paths'
 import {
-  appendFile,
   createWriteStream,
   existsSync,
   mkdir,

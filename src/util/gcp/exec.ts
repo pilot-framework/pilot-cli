@@ -313,11 +313,11 @@ const pilotUserInit = async (runner: boolean) => {
   if (runner) {
     await fsUtil.copyFileToVM()
 
-    await waypoint.dockerCopy('gcp')
+    await waypoint.dockerCopy()
 
-    await waypoint.dockerConfig('gcp')
+    await waypoint.dockerConfig()
 
-    await waypoint.dockerAuth('gcp')
+    await waypoint.dockerAuth()
   }
 }
 
