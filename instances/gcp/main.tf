@@ -9,7 +9,7 @@ terraform {
 
 # TODO: project, region, and zone will be custom to the google project
 provider "google" {
-  project = "gcp-pilot-testing"
+  project = "pilot"
   region = "us-east1"
   zone = "us-east1-b"
 }
@@ -21,12 +21,12 @@ data "google_billing_account" "acct" {
 
 # resource "google_project" "my_project" {
 #   name       = "pilot"
-#   project_id = "gcp-pilot-testing"
+#   project_id = "pilot-321119"
 #   billing_account = data.google_billing_account.acct.id
 # }
 
 data "google_project" "pilot" {
-  project_id = "gcp-pilot-testing" # TODO: Make dynamic through variables.tf
+  project_id = "pilot-321119" # TODO: Make dynamic through variables.tf
 }
 
 data "google_service_account" "pilot_user" {
@@ -63,6 +63,8 @@ resource "google_compute_instance" "pilot-instance" {
   machine_type = "e2-medium"
   zone         = "us-east1-b" # TODO: get defaults from .pilot config
   project = data.google_project.pilot.project_id
+
+  tags = [ "pilot-waypoint-server" ]
 
   boot_disk {
     initialize_params {
@@ -108,6 +110,19 @@ resource "google_compute_firewall" "pilot-firewall" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "8080", "1000-2000", "9701", "9702", "2375"]
+    ports    = ["22", "80", "8080", "1000-2000", "9701", "9702"]
   }
+}
+
+resource "google_compute_firewall" "pilot-firewall-docker" {
+  name    = "pilot-firewall-docker"
+  project = data.google_project.pilot.project_id
+  network = google_compute_network.pilot-network.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["2375"]
+  }
+
+  source_tags = [ "pilot-waypoint-server" ]
 }
