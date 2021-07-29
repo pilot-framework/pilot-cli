@@ -23,6 +23,12 @@ export async function awsSetup() {
       return
     }
 
+    const currentMetadata = await fsUtil.getPilotMetadata()
+
+    currentMetadata.serverPlatform = 'aws'
+
+    await fsUtil.updateMetadata(currentMetadata)
+
     const awsRegion = await creds.getAWSRegion()
     const aKey = await creds.getAWSAccessKey()
     const sKey = await creds.getAWSSecretKey()

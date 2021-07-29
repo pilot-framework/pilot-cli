@@ -2,6 +2,7 @@ import { exec } from 'child_process'
 import paths from '../paths'
 import waypoint from '../waypoint'
 import fsUtil from '../fs'
+import creds from './creds'
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -43,9 +44,12 @@ const terraDestroy = async (): Promise<string> => {
     })
 }
 
-const getServerIP = async (zone: string, gcpProjectID: string): Promise<string> => {
+const getServerIP = async (): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
+  const defaultZone = await creds.getGCPZone()
+
   return new Promise<string>((res, rej) => {
-    exec(`gcloud compute instances describe pilot-gcp-instance --project='${gcpProjectID}' --format='json(networkInterfaces)' --zone='${zone}'`, (error, stdout) => {
+    exec(`gcloud compute instances describe pilot-gcp-instance --project='${defaultProject}' --format='json(networkInterfaces)' --zone='${defaultZone}'`, (error, stdout) => {
       if (error) rej(error)
       if (stdout.trim() === '') {
         res('')
@@ -60,7 +64,7 @@ const getServerIP = async (zone: string, gcpProjectID: string): Promise<string> 
 }
 
 const sshExec = async (cmd: string): Promise<string> => {
-  const ipAddress = await getServerIP('us-east1-b', 'gcp-pilot-testing')
+  const ipAddress = await getServerIP()
   return new Promise<string>((res, rej) => {
     exec(`ssh pilot@${ipAddress} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no '${cmd}'`, (error, data) => {
       if (error) {
@@ -78,9 +82,12 @@ const sshExec = async (cmd: string): Promise<string> => {
     })
 }
 
-const getServerStatus = async (zone: string, gcpProjectID: string): Promise<string> => {
+const getServerStatus = async (): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
+  const defaultZone = await creds.getGCPZone()
+
   return new Promise<string>((res, rej) => {
-    exec(`gcloud compute instances describe pilot-gcp-instance --project='${gcpProjectID}' --format='json(status)' --zone='${zone}'`, (error, stdout) => {
+    exec(`gcloud compute instances describe pilot-gcp-instance --project='${defaultProject}' --format='json(status)' --zone='${defaultZone}'`, (error, stdout) => {
       if (error) rej(error)
       if (stdout.trim() === '') {
         res('')
@@ -94,14 +101,13 @@ const getServerStatus = async (zone: string, gcpProjectID: string): Promise<stri
     })
 }
 
-// TODO: dynamic zone, gcp project id
 const serverReachability = async (timeout: number): Promise<boolean> => {
   let pingServer: NodeJS.Timeout
   let time = 0
 
   return new Promise<boolean>((res, _) => {
     pingServer = setInterval(async () => {
-      const instanceStatus = await getServerStatus('us-east1-b', 'gcp-pilot-testing')
+      const instanceStatus = await getServerStatus()
       let waypointInstalled = 'not found'
       let dockerStatus = ''
       try {
@@ -130,13 +136,12 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
     })
 }
 
-// TODO: move to util/waypoint
 const getWaypointAuthToken = async (): Promise<string> => {
   return sshExec('waypoint token new')
 }
 
 const setContext = async () => {
-  const ipAddress = await getServerIP('us-east1-b', 'gcp-pilot-testing')
+  const ipAddress = await getServerIP()
   const token = await getWaypointAuthToken()
 
   await waypoint.setContext(ipAddress, token)
@@ -156,7 +161,7 @@ const installWaypoint = async () => {
 }
 
 const configureRunner = async () => {
-  const ipAddress = await getServerIP('us-east1-b', 'gcp-pilot-testing')
+  const ipAddress = await getServerIP()
   const envVars = [
     `DOCKER_HOST=tcp://${ipAddress}:2375`,
     'GOOGLE_APPLICATION_CREDENTIALS=/root/.config/pilot-user-file.json',
@@ -165,9 +170,11 @@ const configureRunner = async () => {
   await waypoint.setEnvVars(envVars)
 }
 
-const serviceAccountExists = async (gcpProjectID: string): Promise<boolean> => {
+const serviceAccountExists = async (): Promise<boolean> => {
+  const defaultProject = await creds.getGCPProject()
+
   return new Promise<boolean>((res, rej) => {
-    exec(`gcloud iam service-accounts describe pilot-user@${gcpProjectID}.iam.gserviceaccount.com --project=${gcpProjectID}`, (error, _) => {
+    exec(`gcloud iam service-accounts describe pilot-user@${defaultProject}.iam.gserviceaccount.com --project=${defaultProject}`, (error, _) => {
       if (error) {
         const errMsg = error.toString()
 
@@ -185,9 +192,11 @@ const serviceAccountExists = async (gcpProjectID: string): Promise<boolean> => {
     })
 }
 
-const pilotRoleExists = async (gcpProjectID: string): Promise<boolean> => {
+const pilotRoleExists = async (): Promise<boolean> => {
+  const defaultProject = await creds.getGCPProject()
+
   return new Promise<boolean>((res, rej) => {
-    exec(`gcloud iam roles describe pilotService --project ${gcpProjectID}`, (error, _) => {
+    exec(`gcloud iam roles describe pilotService --project ${defaultProject}`, (error, _) => {
       if (error) {
         const errMsg = error.toString()
 
@@ -205,9 +214,11 @@ const pilotRoleExists = async (gcpProjectID: string): Promise<boolean> => {
     })
 }
 
-const createServiceAccount = async (gcpProjectID: string): Promise<string> => {
+const createServiceAccount = async (): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
+
   return new Promise<string>((res, rej) => {
-    exec(`gcloud iam service-accounts create pilot-user --project ${gcpProjectID}`, (error, stdout) => {
+    exec(`gcloud iam service-accounts create pilot-user --project ${defaultProject}`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
@@ -217,10 +228,12 @@ const createServiceAccount = async (gcpProjectID: string): Promise<string> => {
     })
 }
 
-const serviceAccountKeyGen = async (gcpProjectID: string): Promise<string> => {
+const serviceAccountKeyGen = async (): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
+
   return new Promise<string>((res, rej) => {
     exec(`gcloud iam service-accounts keys create ${paths.PILOT_GCP_SERVICE_FILE} \\
-    --iam-account=pilot-user@${gcpProjectID}.iam.gserviceaccount.com`, (error, stdout) => {
+    --iam-account=pilot-user@${defaultProject}.iam.gserviceaccount.com`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
@@ -230,9 +243,11 @@ const serviceAccountKeyGen = async (gcpProjectID: string): Promise<string> => {
     })
 }
 
-const serviceAccountAuth = async (gcpProjectID: string): Promise<void> => {
+const serviceAccountAuth = async (): Promise<void> => {
+  const defaultProject = await creds.getGCPProject()
+
   return new Promise<void>((res, rej) => {
-    exec(`gcloud auth activate-service-account pilot-user@${gcpProjectID}.iam.gserviceaccount.com \\
+    exec(`gcloud auth activate-service-account pilot-user@${defaultProject}.iam.gserviceaccount.com \\
     --key-file=${paths.PILOT_GCP_SERVICE_FILE}`, error => {
       if (error) rej(error)
       res()
@@ -240,12 +255,13 @@ const serviceAccountAuth = async (gcpProjectID: string): Promise<void> => {
   })
 }
 
-const createIAMRole = async (gcpProjectID: string): Promise<string> => {
+const createIAMRole = async (): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
   const policy = await fsUtil.fileToString(paths.PILOT_GCP_POLICY)
 
   return new Promise<string>((res, rej) => {
     exec(`gcloud iam roles create pilotService \\
-    --project ${gcpProjectID} --title 'Pilot Framework IAM Role' \\
+    --project ${defaultProject} --title 'Pilot Framework IAM Role' \\
     --description 'This role has the necessary permissions that the Pilot service account uses to deploy applications' \\
     --permissions ${policy} \\
     --quiet`, (error, stdout) => {
@@ -258,11 +274,13 @@ const createIAMRole = async (gcpProjectID: string): Promise<string> => {
     })
 }
 
-const bindIAMRole = async (gcpProjectID: string): Promise<string> => {
+const bindIAMRole = async (): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
+
   return new Promise<string>((res, rej) => {
-    exec(`gcloud projects add-iam-policy-binding ${gcpProjectID} \\
-    --member='serviceAccount:pilot-user@${gcpProjectID}.iam.gserviceaccount.com' \\
-    --role='projects/${gcpProjectID}/roles/pilotService'`, (error, stdout) => {
+    exec(`gcloud projects add-iam-policy-binding ${defaultProject} \\
+    --member='serviceAccount:pilot-user@${defaultProject}.iam.gserviceaccount.com' \\
+    --role='projects/${defaultProject}/roles/pilotService'`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
@@ -272,38 +290,35 @@ const bindIAMRole = async (gcpProjectID: string): Promise<string> => {
     })
 }
 
-const pilotUserInit = async (gcpProjectID: string, runner: boolean) => {
-  const userExists = await serviceAccountExists(gcpProjectID)
+const pilotUserInit = async (runner: boolean) => {
+  const userExists = await serviceAccountExists()
 
   if (!userExists) {
-    await createServiceAccount(gcpProjectID)
+    await createServiceAccount()
       .catch(error => console.log(error))
   }
 
-  const roleExists = await pilotRoleExists(gcpProjectID)
+  const roleExists = await pilotRoleExists()
 
   if (!roleExists) {
-    await createIAMRole(gcpProjectID)
+    await createIAMRole()
       .catch(error => console.log(error))
   }
 
-  await bindIAMRole(gcpProjectID)
+  await bindIAMRole()
 
-  await serviceAccountKeyGen(gcpProjectID)
+  await serviceAccountKeyGen()
 
   // only execute these commands if needing to configure a waypoint runner
   if (runner) {
-    // TODO: allow for either vm
-    await fsUtil.copyFileToVM('gcp')
+    await fsUtil.copyFileToVM()
 
     await waypoint.dockerCopy('gcp')
 
-    await waypoint.dockerConfig(gcpProjectID, 'gcp')
+    await waypoint.dockerConfig('gcp')
 
-    await waypoint.dockerAuth(gcpProjectID, 'gcp')
-  } // else {
-  //   await serviceAccountAuth(gcpProjectID)
-  // }
+    await waypoint.dockerAuth('gcp')
+  }
 }
 
 export default {

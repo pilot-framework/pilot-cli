@@ -9,17 +9,16 @@ export async function gcpSetup() {
   // Check for gcloud config
   // ~/.pilot/gcp/config
   try {
-    // if (existsSync(paths.PILOT_GCP_CONFIG)) {
-    //   console.log('gcloud Credentials detected')
-    //   if (!existsSync(paths.PILOT_AWS_CONFIG)) {
-    //     console.log('AWS config not found at ~/.aws/config.')
-    //     return
-    //   }
-    //   console.log('gcloud Configuration detected')
-    // } else {
-    //   console.log(`No gcloud configuration found. Please configure gcloud in ${paths.GCP_CONFIG}.`)
-    //   return
-    // }
+    if (!existsSync(paths.PILOT_GCP_CONFIG)) {
+      console.error('ERROR: no gcloud configuration found. Please run \'pilot init\'')
+      return
+    }
+
+    const currentMetadata = await fs.getPilotMetadata()
+
+    currentMetadata.serverPlatform = 'gcp'
+
+    await fs.updateMetadata(currentMetadata)
 
     console.log('Setting up resources...')
 
@@ -35,9 +34,8 @@ export async function gcpSetup() {
     console.log('Successfully generated cloud init')
 
     // Configure GCP IAM user / role
-    // TODO: DYNAMIC PROJECT
     cli.action.start('Configuring IAM user and role for Pilot on GCP')
-    await execUtil.pilotUserInit('gcp-pilot-testing', false)
+    await execUtil.pilotUserInit(false)
     cli.action.stop()
 
     // terraform init
@@ -65,14 +63,12 @@ export async function gcpSetup() {
     await execUtil.installWaypoint()
     cli.action.stop()
 
-    // TODO: metadata
-
     cli.action.start('Setting context')
     await execUtil.setContext()
     cli.action.stop()
 
     cli.action.start('Configuring runner')
-    await execUtil.pilotUserInit('gcp-pilot-testing', true)
+    await execUtil.pilotUserInit(true)
     await waypoint.setDefaultContext()
     await execUtil.configureRunner()
     cli.action.stop()
