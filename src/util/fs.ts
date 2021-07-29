@@ -160,7 +160,7 @@ const copyFileToVM = async (provider: string): Promise<string> => {
   if (provider === 'aws')
     ipAddress = await awsExec.getServerIP()
   else if (provider === 'gcp') {
-    ipAddress = await gcpExec.getServerIP('us-east1-b', 'gcp-pilot-testing')
+    ipAddress = await gcpExec.getServerIP()
   }
   return new Promise<string>((res, rej) => {
     exec(`scp -o StrictHostKeyChecking=no -i ${paths.PILOT_SSH} ${paths.PILOT_GCP_SERVICE_FILE} pilot@${ipAddress}:~/.config/pilot-user-file.json`, (error, stdout) => {

@@ -1,5 +1,6 @@
 import { exec } from 'child_process'
 import awsExec from './aws/exec'
+import creds from './gcp/creds'
 import gcpExec from './gcp/exec'
 import paths from './paths'
 
@@ -9,7 +10,7 @@ const dockerCopy = async (provider: string): Promise<string> => {
   if (provider === 'aws')
     ipAddress = await awsExec.getServerIP()
   else if (provider === 'gcp') {
-    ipAddress = await gcpExec.getServerIP('us-east1-b', 'gcp-pilot-testing')
+    ipAddress = await gcpExec.getServerIP()
   }
 
   return new Promise<string>((res, rej) => {
@@ -24,18 +25,19 @@ const dockerCopy = async (provider: string): Promise<string> => {
     })
 }
 
-const dockerConfig = async (gcpProjectID: string, provider: string): Promise<string> => {
+const dockerConfig = async (provider: string): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
   let ipAddress: string
 
   if (provider === 'aws')
     ipAddress = await awsExec.getServerIP()
   else if (provider === 'gcp') {
-    ipAddress = await gcpExec.getServerIP('us-east1-b', 'gcp-pilot-testing')
+    ipAddress = await gcpExec.getServerIP()
   }
 
   return new Promise<string>((res, rej) => {
     exec(`ssh pilot@${ipAddress} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no \\
-    'docker exec waypoint-runner gcloud config set account pilot-user@${gcpProjectID}.iam.gserviceaccount.com'`, (error, stdout) => {
+    'docker exec waypoint-runner gcloud config set account pilot-user@${defaultProject}.iam.gserviceaccount.com'`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
@@ -45,18 +47,19 @@ const dockerConfig = async (gcpProjectID: string, provider: string): Promise<str
     })
 }
 
-const dockerAuth = async (gcpProjectID: string, provider: string): Promise<string> => {
+const dockerAuth = async (provider: string): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
   let ipAddress: string
 
   if (provider === 'aws')
     ipAddress = await awsExec.getServerIP()
   else if (provider === 'gcp') {
-    ipAddress = await gcpExec.getServerIP('us-east1-b', 'gcp-pilot-testing')
+    ipAddress = await gcpExec.getServerIP()
   }
 
   return new Promise<string>((res, rej) => {
     exec(`ssh pilot@${ipAddress} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no \\
-    'docker exec waypoint-runner gcloud auth activate-service-account pilot-user@${gcpProjectID}.iam.gserviceaccount.com \\
+    'docker exec waypoint-runner gcloud auth activate-service-account pilot-user@${defaultProject}.iam.gserviceaccount.com \\
     --key-file=/root/.config/pilot-user-file.json'`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
