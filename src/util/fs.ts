@@ -70,6 +70,16 @@ const fileToString = async (filename: string): Promise<string> => {
     })
 }
 
+const getPilotMetadata = async (): Promise<any> => {
+  const metadata = await fileToString(paths.PILOT_METADATA)
+
+  return JSON.parse(metadata)
+}
+
+const updateMetadata = async (metadata: object): Promise<void> => {
+  return createFile(paths.PILOT_METADATA, JSON.stringify(metadata))
+}
+
 const genTerraformVars = async (data: string) => {
   writeFile(join(paths.AWS_INSTANCES, '/terraform.tfvars'), data, error => {
     if (error) throw new Error('Unable to write Terraform .tfvars file')
@@ -154,12 +164,13 @@ const installBinaries = async (): Promise<void> => {
   })
 }
 
-const copyFileToVM = async (provider: string): Promise<string> => {
+const copyFileToVM = async (): Promise<string> => {
+  const serverPlatform = (await getPilotMetadata()).serverPlatform
   let ipAddress: string
 
-  if (provider === 'aws')
+  if (serverPlatform === 'aws')
     ipAddress = await awsExec.getServerIP()
-  else if (provider === 'gcp') {
+  else if (serverPlatform === 'gcp') {
     ipAddress = await gcpExec.getServerIP()
   }
   return new Promise<string>((res, rej) => {
@@ -189,4 +200,6 @@ export default {
   mkDir,
   createFile,
   sshKeyGen,
+  getPilotMetadata,
+  updateMetadata,
 }

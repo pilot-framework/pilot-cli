@@ -17,6 +17,7 @@ export async function initialize() {
     await fsUtil.createFile(paths.PILOT_AWS_METADATA, '{}')
     await fsUtil.mkDir(paths.PILOT_GCP)
     await fsUtil.mkDir(paths.PILOT_GCP_SERVICE)
+    await fsUtil.updateMetadata({})
   }
 
   /**********************/

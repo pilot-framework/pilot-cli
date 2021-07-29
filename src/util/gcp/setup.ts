@@ -14,6 +14,12 @@ export async function gcpSetup() {
       return
     }
 
+    const currentMetadata = await fs.getPilotMetadata()
+
+    currentMetadata.serverPlatform = 'gcp'
+
+    await fs.updateMetadata(currentMetadata)
+
     console.log('Setting up resources...')
 
     await fs.mkDir(paths.appRoot + '/templates')

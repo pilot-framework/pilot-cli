@@ -57,7 +57,7 @@ export default class Configure extends Command {
       cli.action.start('Configuring IAM user and role for Pilot on GCP...')
 
       try {
-        await gcpExec.pilotUserInit(String(flags.project), true)
+        await gcpExec.pilotUserInit(true)
 
         envVars.push('GOOGLE_APPLICATION_CREDENTIALS=/root/.config/pilot-user-file.json')
       } catch (error) {

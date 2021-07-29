@@ -311,8 +311,7 @@ const pilotUserInit = async (runner: boolean) => {
 
   // only execute these commands if needing to configure a waypoint runner
   if (runner) {
-    // TODO: allow for either vm
-    await fsUtil.copyFileToVM('gcp')
+    await fsUtil.copyFileToVM()
 
     await waypoint.dockerCopy('gcp')
 
