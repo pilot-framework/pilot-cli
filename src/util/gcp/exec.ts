@@ -9,6 +9,31 @@ const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+const setDockerConnection = async () => {
+  const ipAddress = await getServerIP()
+  return new Promise<string>((res, rej) => {
+    exec(`gcloud compute firewall-rules create docker-connection --network pilot-network --action allow --source-ranges ${ipAddress}/32 --rules tcp:2375`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const removeDockerConnection = async () => {
+  return new Promise<string>((res, rej) => {
+    exec('gcloud compute firewall-rules delete docker-connection -q', (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
 const terraInit = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} init`, (error, _) => {
@@ -34,6 +59,8 @@ const terraApply = async (): Promise<string> => {
 }
 
 const terraDestroy = async (): Promise<string> => {
+  await removeDockerConnection()
+
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} destroy -auto-approve`, (error, _) => {
       if (error) rej(error)
@@ -369,4 +396,6 @@ export default {
   setContext,
   getServerIP,
   configureRunner,
+  setDockerConnection,
+  removeDockerConnection,
 }
