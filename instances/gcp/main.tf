@@ -37,6 +37,7 @@ data "google_service_account" "pilot_user" {
 resource "google_project_service" "computeEngine" {
   project = data.google_project.pilot.project_id
   service = "compute.googleapis.com"
+  disable_on_destroy = false
 
   timeouts {
     create = "30m"
@@ -49,6 +50,7 @@ resource "google_project_service" "computeEngine" {
 resource "google_project_service" "crm" {
   project = data.google_project.pilot.project_id
   service = "cloudresourcemanager.googleapis.com"
+
 
   timeouts {
     create = "30m"
