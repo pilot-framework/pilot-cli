@@ -3,6 +3,7 @@ import paths from '../paths'
 import waypoint from '../waypoint'
 import fsUtil from '../fs'
 import creds from './creds'
+import { SetupOpts } from '../../commands/setup'
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -147,13 +148,21 @@ const setContext = async () => {
   await waypoint.setContext(ipAddress, token)
 }
 
-const installWaypoint = async () => {
+const installWaypoint = async (opts: SetupOpts) => {
+  let image = '-docker-server-image=pilotframework/pilot-waypoint'
+
+  if (opts.dev) {
+    image = `${image}:dev`
+  } else if (opts.bare) {
+    image = ''
+  }
+
   try {
     // wait for docker daemon to finish coming online
     await timeout(30000)
     const pgrep = await sshExec('pgrep docker')
     console.log('PID:', pgrep)
-    const install = await sshExec('waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos')
+    const install = await sshExec(`waypoint install -platform=docker ${image} -accept-tos`)
     console.log(install)
   } catch (error) {
     console.log(error)
@@ -257,13 +266,32 @@ const serviceAccountAuth = async (): Promise<void> => {
 
 const createIAMRole = async (): Promise<string> => {
   const defaultProject = await creds.getGCPProject()
-  const policy = await fsUtil.fileToString(paths.PILOT_GCP_POLICY)
+  const permissions = await fsUtil.fileToString(paths.PILOT_GCP_POLICY)
 
   return new Promise<string>((res, rej) => {
     exec(`gcloud iam roles create pilotService \\
-    --project ${defaultProject} --title 'Pilot Framework IAM Role' \\
-    --description 'This role has the necessary permissions that the Pilot service account uses to deploy applications' \\
-    --permissions ${policy} \\
+    --title="Pilot Framework IAM Role" \\
+    --description="This role has the necessary permissions that the Pilot service account uses to deploy applications" \\
+    --project=${defaultProject} \\
+    --permissions=${permissions} \\
+    --quiet`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const updateIAMRole = async (): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
+  const permissions = await fsUtil.fileToString(paths.PILOT_GCP_POLICY)
+
+  return new Promise<string>((res, rej) => {
+    exec(`gcloud iam roles update pilotService \\
+    --project=${defaultProject} \\
+    --add-permissions=${permissions} \\
     --quiet`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
@@ -302,6 +330,9 @@ const pilotUserInit = async (runner: boolean) => {
 
   if (!roleExists) {
     await createIAMRole()
+      .catch(error => console.log(error))
+  } else {
+    await updateIAMRole()
       .catch(error => console.log(error))
   }
 

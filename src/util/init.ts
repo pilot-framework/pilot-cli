@@ -6,7 +6,7 @@ import {
   copyFile,
 } from 'fs'
 
-export async function initialize() {
+export async function initialize(overridePolicyPath: string | null) {
   // Create ~/.pilot file structure
   if (existsSync(paths.CONFIG)) {
     console.log('Pilot configuration detected...')
@@ -88,7 +88,13 @@ export async function initialize() {
     }
   })
 
-  copyFile(paths.PILOT_GCP_POLICY_TEMPLATE, paths.PILOT_GCP_POLICY, err => {
+  let templatePath = paths.PILOT_GCP_POLICY_TEMPLATE
+
+  if (overridePolicyPath) {
+    templatePath = overridePolicyPath
+  }
+
+  copyFile(templatePath, paths.PILOT_GCP_POLICY, err => {
     if (err) {
       console.error('ERROR: ', err)
     } else {
