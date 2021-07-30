@@ -6,24 +6,35 @@ import { existsSync } from 'fs'
 import execUtil from './exec'
 import waypoint from '../waypoint'
 import { SetupOpts } from '../../commands/setup'
+import { pilotSpinner, successText, failText, pilotText } from '../cli'
+
+const timeout = (ms: number): Promise<number> => {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 export async function awsSetup(opts: SetupOpts) {
+  const spinner = pilotSpinner()
+
   try {
+    spinner.start('Setting up initial resources')
+    timeout(1500)
+
     // Check for AWS config
     // ~/.aws/config
     // ~/.aws/credentials
     if (existsSync(paths.PILOT_AWS_CREDENTIALS)) {
-      console.log('AWS Credentials detected')
+      spinner.text = 'AWS Credentials detected'
       if (!existsSync(paths.PILOT_AWS_CONFIG)) {
-        console.log('AWS config not found at ~/.aws/config.')
+        spinner.fail(failText('AWS config not found at ~/.aws/config.'))
         return
       }
-      console.log('AWS Configuration detected')
+      spinner.text = 'AWS Configuration detected'
     } else {
-      console.log('No AWS configuration found. Please configure AWS CLI.')
+      spinner.fail(failText('No AWS configuration found. Please configure AWS CLI.'))
       return
     }
 
+    spinner.text = 'Configuring initial metadata'
     const currentMetadata = await fsUtil.getPilotMetadata()
 
     currentMetadata.serverPlatform = 'aws'
@@ -35,88 +46,91 @@ export async function awsSetup(opts: SetupOpts) {
     const sKey = await creds.getAWSSecretKey()
 
     if (awsRegion === '') {
-      console.log('No AWS Access Key configured')
+      spinner.fail(failText('No AWS Access Key configured'))
       return
     }
 
     if (aKey === '') {
-      console.log('No AWS Access Key configured')
+      spinner.fail(failText('No AWS Access Key configured'))
       return
     }
 
     if (sKey === '') {
-      console.log('No AWS Secret Key configured')
+      spinner.fail(failText('No AWS Secret Key configured'))
       return
     }
+    spinner.succeed(successText('Initial resources configured'))
 
-    console.log('Setting up resources...')
+    spinner.start('Preparing resources for EC2 provisioning')
 
     // Create templates directory
     await fsUtil.mkDir(paths.appRoot + '/templates')
 
+    spinner.text = 'Generating Terraform tfvars file'
     await fsUtil.genTerraformVars(`region="${awsRegion}"`)
-    console.log('Succesfully written terraform.tfvars')
+    spinner.succeed(successText('Terraform tfvars file created'))
 
     // Generate SSH Keys
     if (!existsSync(paths.PILOT_SSH)) {
+      spinner.start('Generating SSH keys')
       await fsUtil.sshKeyGen()
-      console.log('Successfully generated SSH keys')
+      spinner.succeed(successText('Successfully generated SSH keys'))
     }
 
     // Generate yaml file for cloud-init
+    spinner.start('Generating cloud-init files')
     await fsUtil.genCloudInitYaml()
-    console.log('Successfully generated cloud init')
+    spinner.succeed(successText('Successfully generated cloud init'))
 
     // Generate keypair to associate with EC2 for SSH access
-    cli.action.start('Refreshing EC2 key pair')
+    spinner.start('Refreshing EC2 key pair')
     await execUtil.deleteKeyPair()
     await execUtil.createKeyPair()
-    cli.action.stop()
+    spinner.succeed(successText('EC2 key pair configured'))
 
     // terraform init
-    cli.action.start('Initializing Terraform')
+    spinner.start('Initializing Terraform')
     await execUtil.terraInit()
-    cli.action.stop()
+    spinner.succeed(successText('Terraform initialized'))
 
     // terrform apply --auto-approve
-    cli.action.start('Provisioning resources')
-    console.log('This will take a few minutes.')
+    spinner.start('Provisioning resources. This can take a few minutes...\u2615')
     await execUtil.terraApply()
-    cli.action.stop()
 
     // wait for EC2 initialization
-    cli.action.start('EC2 instance initializing...')
+    spinner.text = 'EC2 instance initializing...\u2615'
 
     // times out after 6 mins
     const reachable = await execUtil.serverReachability(360)
 
     if (!reachable) {
-      cli.error('EC2 instance initialization timed out')
+      spinner.fail(failText('EC2 instance initialization timed out'))
+      return
     }
-    cli.action.stop()
+    spinner.succeed(successText('EC2 instance provisioned'))
 
-    cli.action.start('Setting docker connection port 2375')
+    spinner.start('Setting docker connection port 2375')
     await execUtil.setDockerConnection()
-    cli.action.stop()
+    spinner.succeed(successText('Docker connection port configured'))
 
     // install waypoint post EC2 initialization
-    cli.action.start('Setting up your remote Waypoint server')
+    spinner.start('Setting up your remote Waypoint server')
     await execUtil.installWaypoint(opts)
-    cli.action.stop()
+    spinner.succeed(successText('Remote Waypoint server configured'))
 
     // Store metadata to ~/.pilot/aws/metadata
-    cli.action.start('Generating local configs')
+    spinner.start('Generating local configs')
     await execUtil.updateMetadata()
-    cli.action.stop()
 
-    cli.action.start('Setting context')
+    spinner.text = 'Setting context'
     await execUtil.setContext()
-    cli.action.stop
 
-    cli.action.start('Configuring runner')
+    spinner.text = ('Configuring runner')
     await waypoint.setDefaultContext()
     await execUtil.configureRunner()
-    cli.action.stop
+    spinner.succeed(successText('Final configurations completed'))
+
+    console.log(pilotText('\nWe\'re ready for takeoff...\u2708'))
   } catch (error) {
     cli.error(error)
   }

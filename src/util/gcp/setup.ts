@@ -88,6 +88,8 @@ export async function gcpSetup(opts: SetupOpts) {
     await waypoint.setDefaultContext()
     await execUtil.configureRunner()
     spinner.succeed(successText('Final configurations completed'))
+
+    console.log(pilotText('\nWe\'re ready for takeoff...\u2708'))
   } catch (error) {
     cli.error(error)
   }
