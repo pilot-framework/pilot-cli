@@ -3,6 +3,7 @@ import { HCLAttributes } from '../util/types'
 import waypoint from '../util/waypoint'
 import tmpl from '../util/templates'
 import fs from '../util/fs'
+import gcpCreds from './gcp/creds'
 import { cwd } from 'process'
 import { join } from 'path'
 
@@ -44,6 +45,7 @@ const appInit = async () => {
   console.clear()
 
   const appChoices: Array<HCLAttributes> = []
+  const gcpProjID = projectChoices.provider === 'GCP' ? await gcpCreds.getGCPProject() : ''
   for (let count = 1; count <= projectChoices.amount; count += 1) {
     // eslint-disable-next-line no-await-in-loop
     const choices: any | undefined = await inquirer.prompt([
@@ -70,6 +72,7 @@ const appInit = async () => {
       {
         name: 'project',
         message: 'GCP project ID:',
+        default: `${gcpProjID}`,
         type: 'input',
         when: () => projectChoices.provider === 'GCP',
       },
