@@ -5,8 +5,6 @@ import paths from '../util/paths'
 import fs from '../util/fs'
 import cli from '../util/cli'
 import chalk from 'chalk'
-const ora = require('ora')
-
 
 export default class Server extends Command {
   static description = 'Used to interact with the remote management server'
@@ -27,9 +25,7 @@ export default class Server extends Command {
 
   async run() {
     const {flags} = this.parse(Server)
-    const spinner = ora()
-    spinner.color = 'magenta'
-    spinner.spinner = cli.planeSpinner
+    const spinner = cli.pilotSpinner()
 
     if (!flags.ssh && !flags.destroy) this.log('Run "pilot server -h" for command listing')
 
