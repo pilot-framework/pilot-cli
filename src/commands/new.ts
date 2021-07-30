@@ -5,7 +5,6 @@ import tmpl from '../util/templates'
 import fs from '../util/fs'
 import { cwd } from 'process'
 import { join } from 'path'
-import { appendFile } from 'fs'
 
 export default class New extends Command {
   static description = 'Initializes a project or application to be used with Pilot'
