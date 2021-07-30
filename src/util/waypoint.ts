@@ -69,6 +69,15 @@ const dockerAuth = async (): Promise<string> => {
       res(stdout)
     })
   })
+    .then(() => {
+      return new Promise<string>((res, rej) => {
+        exec(`ssh pilot@${ipAddress} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no \\
+        'docker exec waypoint-runner gcloud auth configure-docker --quiet'`, (error, stdout) => {
+          if (error) rej(error)
+          res(stdout)
+        })
+      })
+    })
     .catch(error => {
       throw error
     })
