@@ -260,30 +260,6 @@ const setContext = async () => {
   })
 }
 
-const configureRunner = async () => {
-  // waypoint config set -runner
-  // AWS_ACCESS_KEY_ID=<PKEY>
-  // AWS_SECRET_ACCESS_KEY=<SKEY>
-  // AWS_DEFAULT_REGION=<REGION>
-  // DOCKER_HOST=tcp://<EC2_IP>:2375
-
-  await timeout(2000)
-
-  // TODO: return promise
-  readMetadata(async (rawMetadata: string) => {
-    const metadata = JSON.parse(rawMetadata)
-
-    const envVars = [
-      `AWS_ACCESS_KEY_ID=${metadata.awsAccessKey}`,
-      `AWS_SECRET_ACCESS_KEY=${metadata.awsSecretKey}`,
-      `AWS_DEFAULT_REGION=${metadata.awsRegion}`,
-      `DOCKER_HOST=tcp://${metadata.ipAddress}:2375`,
-    ]
-
-    await waypoint.setEnvVars(envVars)
-  })
-}
-
 const exists = (command: string) => {
   return new Promise<boolean>((res, rej) => {
     exec(command, err => {
@@ -357,6 +333,36 @@ const pilotUserInit = async () => {
   ]
 
   await waypoint.setEnvVars(envVars)
+}
+
+const configureRunner = async () => {
+  // waypoint config set -runner
+  // AWS_ACCESS_KEY_ID=<PKEY>
+  // AWS_SECRET_ACCESS_KEY=<SKEY>
+  // AWS_DEFAULT_REGION=<REGION>
+  // DOCKER_HOST=tcp://<EC2_IP>:2375
+
+  await timeout(2000)
+
+  return new Promise<void>((res, rej) => {
+    try {
+      readMetadata(async (rawMetadata: string) => {
+        const metadata = JSON.parse(rawMetadata)
+        await pilotUserInit()
+        const envVars = [
+          `DOCKER_HOST=tcp://${metadata.ipAddress}:2375`,
+        ]
+
+        await waypoint.setEnvVars(envVars)
+        res()
+      })
+    } catch (error) {
+      rej(error)
+    }
+  })
+    .catch(error => {
+      throw error
+    })
 }
 
 export default {
