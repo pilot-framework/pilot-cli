@@ -135,6 +135,30 @@ const getToken = async (): Promise<string> => {
     })
 }
 
+const newProject = async (projectName: string): Promise<void> => {
+  return new Promise<void>((res, rej) => {
+    exec(`${paths.WAYPOINT_EXEC} project apply ${projectName}`, err => {
+      if (err) rej(err)
+      res()
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const getProjects = async (): Promise<Array<string>> => {
+  return new Promise<Array<string>>((res, rej) => {
+    exec(`${paths.WAYPOINT_EXEC} project list`, (err, data) => {
+      if (err) rej(err)
+      res(data.split(/\n/))
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
 export default {
   dockerAuth,
   dockerConfig,
@@ -143,5 +167,7 @@ export default {
   setDefaultContext,
   setEnvVars,
   getEnvVars,
+  getProjects,
+  newProject,
   getToken,
 }
