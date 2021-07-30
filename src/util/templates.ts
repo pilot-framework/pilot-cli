@@ -59,6 +59,122 @@ runcmd:
   - sudo systemctl daemon-reload
   - sudo systemctl restart docker.service`
 
+interface HCLAttributes {
+  appName: string;
+  entryDir: string;
+  region: string;
+  bucket: string;
+  project: string;
+  domain: string;
+}
+
+const appAWSFrontendHCL = (attrs: HCLAttributes) =>
+  `# Name of your application
+app "${attrs.appName}" {
+  build {
+      # The template uses a default build plugin provided by Pilot
+      # to build your static files for deployment
+      use "yarn" {
+          # The application entrypoint in relation to the root of your project/repo
+          # example: directory = "./sub_dir/my_app"
+          directory = "./${attrs.entryDir}"
+      }
+  }
+
+  deploy {
+      # The template uses a default deploy plugin provided by Pilot
+      # to deploy your static assets to a S3 bucket with static web hosting enabled
+      use "pilot-cloudfront" {
+          # Your chosen AWS region
+          region = "${attrs.region}"
+          # This should be a globally unique bucket name
+          bucket = "${attrs.bucket}"
+          # Location of build files in relation to root of project/repo
+          directory = "./${attrs.entryDir}/build/"
+      }
+  }
+
+  release {
+      # The template uses a default release plugin provided by Pilot
+      # to deploy your static site to a Cloudfront distribution
+      use "pilot-cloudfront" {}
+  }
+}`
+
+const appGCPFrontendHCL = (attrs: HCLAttributes) =>
+  `# Name of your application
+app "${attrs.appName}" {
+  build {
+      # The template uses a default build plugin provided by Pilot
+      # to build your static files for deployment
+      use "yarn" {
+          # The application entrypoint in relation to the root of your project/repo
+          # example: directory = "./sub_dir/my_app"
+          directory = "./${attrs.entryDir}"
+      }
+  }
+
+  deploy {
+      # The template uses a default deploy plugin provided by Pilot
+      # to deploy your static assets to a Cloud Storage bucket
+      use "pilot-cloud-cdn" {
+          # Your GCP Project ID - this will be the default Project ID if used with Pilot
+          project = "${attrs.project}"
+          # This should be a globally unique bucket name
+          bucket = "${attrs.bucket}"
+          # Your chosen GCP region
+          region = "${attrs.region}"
+          # Location of build files in relation to root of project/repo
+          directory = "./${attrs.entryDir}/build"
+      }
+  }
+
+  release {
+      # The template uses a default release plugin provided by Pilot
+      # to deploy your static site to a Cloud CDN distribution
+      use "pilot-cloud-cdn" {
+          domain = "${attrs.domain}"
+      }
+  }
+}`
+
+const standardHCLTemplate = () =>
+  `# The name of your project. A project typically maps 1:1 to a VCS repository.
+# This name must be unique for your Waypoint server. If you're running in
+# local mode, this must be unique to your machine.
+project = "my-project"
+
+# Labels can be specified for organizational purposes.
+# labels = { "foo" = "bar" }
+
+# An application to deploy.
+app "web" {
+    # Build specifies how an application should be deployed. In this case,
+    # we'll build using a Dockerfile and keeping it in a local registry.
+    build {
+        use "docker" {}
+
+        # Uncomment below to use a remote docker registry to push your built images.
+        #
+        # registry {
+        #   use "docker" {
+        #     image = "registry.example.com/image"
+        #     tag   = "latest"
+        #   }
+        # }
+
+    }
+
+    # Deploy to Docker
+    deploy {
+        use "docker" {}
+    }
+}
+`
+
 export default {
   yamlConfig,
+  appAWSFrontendHCL,
+  appGCPFrontendHCL,
+  standardHCLTemplate,
 }
