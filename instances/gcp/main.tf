@@ -47,6 +47,19 @@ resource "google_project_service" "computeEngine" {
   disable_dependent_services = true  
 }
 
+resource "google_project_service" "cloudRun" {
+  project = data.google_project.pilot.project_id
+  service = "run.googleapis.com"
+  disable_on_destroy = false
+
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+
+  disable_dependent_services = true  
+}
+
 resource "google_project_service" "crm" {
   project = data.google_project.pilot.project_id
   service = "cloudresourcemanager.googleapis.com"
