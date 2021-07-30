@@ -71,7 +71,7 @@ export async function gcpSetup(opts: SetupOpts) {
     // terrform apply --auto-approve
     spinner.start('Provisioning resources. This can take a few minutes...\u2615')
     await execUtil.terraApply()
-  
+
     // console.log('Please allow a few minutes for the remote server\'s configuration')
 
     spinner.text = ('GCE instance initializing...\u2615')
@@ -94,7 +94,6 @@ export async function gcpSetup(opts: SetupOpts) {
 
     spinner.start('Setting context...')
     await execUtil.setContext()
-    spinner.
 
     spinner.text = 'Configuring runner...'
     await execUtil.pilotUserInit(true)
