@@ -1,3 +1,5 @@
+import { HCLAttributes } from './types'
+
 const yamlConfig = (sshPubKey: string) =>
   `#cloud-config
 # Add groups to the system
@@ -59,45 +61,36 @@ runcmd:
   - sudo systemctl daemon-reload
   - sudo systemctl restart docker.service`
 
-interface HCLAttributes {
-  appName: string;
-  entryDir: string;
-  region: string;
-  bucket: string;
-  project: string;
-  domain: string;
-}
-
 const appAWSFrontendHCL = (attrs: HCLAttributes) =>
   `# Name of your application
 app "${attrs.appName}" {
   build {
-      # The template uses a default build plugin provided by Pilot
-      # to build your static files for deployment
-      use "yarn" {
-          # The application entrypoint in relation to the root of your project/repo
-          # example: directory = "./sub_dir/my_app"
-          directory = "./${attrs.entryDir}"
-      }
+    # The template uses a default build plugin provided by Pilot
+    # to build your static files for deployment
+    use "yarn" {
+      # The application entrypoint in relation to the root of your project/repo
+      # example: directory = "./sub_dir/my_app"
+      directory = "./${attrs.entryDir}"
+    }
   }
 
   deploy {
-      # The template uses a default deploy plugin provided by Pilot
-      # to deploy your static assets to a S3 bucket with static web hosting enabled
-      use "pilot-cloudfront" {
-          # Your chosen AWS region
-          region = "${attrs.region}"
-          # This should be a globally unique bucket name
-          bucket = "${attrs.bucket}"
-          # Location of build files in relation to root of project/repo
-          directory = "./${attrs.entryDir}/build/"
-      }
+    # The template uses a default deploy plugin provided by Pilot
+    # to deploy your static assets to a S3 bucket with static web hosting enabled
+    use "pilot-cloudfront" {
+      # Your chosen AWS region
+      region = "${attrs.region}"
+      # This should be a globally unique bucket name
+      bucket = "${attrs.bucket}"
+      # Location of build files in relation to root of project/repo
+      directory = ".${attrs.entryDir !== '' ? '/' + attrs.entryDir : ''}/build/"
+    }
   }
 
   release {
-      # The template uses a default release plugin provided by Pilot
-      # to deploy your static site to a Cloudfront distribution
-      use "pilot-cloudfront" {}
+    # The template uses a default release plugin provided by Pilot
+    # to deploy your static site to a Cloudfront distribution
+    use "pilot-cloudfront" {}
   }
 }`
 
@@ -105,36 +98,115 @@ const appGCPFrontendHCL = (attrs: HCLAttributes) =>
   `# Name of your application
 app "${attrs.appName}" {
   build {
-      # The template uses a default build plugin provided by Pilot
-      # to build your static files for deployment
-      use "yarn" {
-          # The application entrypoint in relation to the root of your project/repo
-          # example: directory = "./sub_dir/my_app"
-          directory = "./${attrs.entryDir}"
-      }
+    # The template uses a default build plugin provided by Pilot
+    # to build your static files for deployment
+    use "yarn" {
+      # The application entrypoint in relation to the root of your project/repo
+      # example: directory = "./sub_dir/my_app"
+      directory = "./${attrs.entryDir}"
+    }
   }
 
   deploy {
-      # The template uses a default deploy plugin provided by Pilot
-      # to deploy your static assets to a Cloud Storage bucket
-      use "pilot-cloud-cdn" {
-          # Your GCP Project ID - this will be the default Project ID if used with Pilot
-          project = "${attrs.project}"
-          # This should be a globally unique bucket name
-          bucket = "${attrs.bucket}"
-          # Your chosen GCP region
-          region = "${attrs.region}"
-          # Location of build files in relation to root of project/repo
-          directory = "./${attrs.entryDir}/build"
-      }
+    # The template uses a default deploy plugin provided by Pilot
+    # to deploy your static assets to a Cloud Storage bucket
+    use "pilot-cloud-cdn" {
+      # Your GCP Project ID - this will be the default Project ID if used with Pilot
+      project = "${attrs.project}"
+      # This should be a globally unique bucket name
+      bucket = "${attrs.bucket}"
+      # Your chosen GCP region
+      region = "${attrs.region}"
+      # Location of build files in relation to root of project/repo
+      directory = "./${attrs.entryDir}/build"
+    }
   }
 
   release {
-      # The template uses a default release plugin provided by Pilot
-      # to deploy your static site to a Cloud CDN distribution
-      use "pilot-cloud-cdn" {
-          domain = "${attrs.domain}"
+    # The template uses a default release plugin provided by Pilot
+    # to deploy your static site to a Cloud CDN distribution
+    use "pilot-cloud-cdn" {
+        domain = "${attrs.domain}"
+    }
+  }
+}`
+
+const appAWSBackendHCL = (attrs: HCLAttributes) =>
+  `# See the following for additional information on Waypoint's built-in ECS plugin:
+# https://www.waypointproject.io/plugins/aws-ecs
+
+app "${attrs.appName}" {
+  # The application entrypoint in relation to the root of your project/repo
+  # example: path = "./sub_dir/my_app"
+  path = "./${attrs.entryDir}"
+
+  build {
+    # Builds an image based off of your source code using Cloud Native Buildpacks
+    use "pack" {}
+    registry {
+      # ECR registry to push built images to
+      use "aws-ecr" {
+        region     = "${attrs.region}"
+        repository = "${attrs.repoName}"
+        tag        = "latest"
       }
+    }
+  }
+
+  deploy {
+    # ECS Deployment cluster parameters
+    # Doubles as the release platform
+    use "aws-ecs" {
+      region = "${attrs.region}"
+      memory = "512"
+    }
+  }
+}`
+
+const appGCPBackendHCL = (attrs: HCLAttributes) =>
+  `# See the following for additional information on Waypoint's built-in GCR plugin:
+# https://www.waypointproject.io/plugins/google-cloud-run
+
+app "${attrs.appName}" {
+  # The application entrypoint in relation to the root of your project/repo
+  # example: path = "./sub_dir/my_app"
+  path = "./${attrs.entryDir}"
+
+  build {
+    # Builds an image based off of your source code using Cloud Native Buildpacks
+    use "pack" {}
+
+    registry {
+      # Pushes built image to Cloud Container Registry
+      use "docker" {
+        image = "gcr.io/${attrs.project}/${attrs.appName}"
+        tag   = "latest"
+      }
+    }
+  }
+
+  deploy {
+    # Deploys application to Google Cloud Run
+    use "google-cloud-run" {
+      project  = "${attrs.project}"
+      location = "${attrs.region}"
+
+      capacity {
+        memory                     = 128
+        cpu_count                  = 1
+        max_requests_per_container = 10
+        request_timeout            = 300
+      }
+
+      auto_scaling {
+        max = 2
+      }
+    }
+  }
+
+  release {
+    # Releases application on Google Cloud Run
+    use "google-cloud-run" {}
   }
 }`
 
@@ -149,32 +221,33 @@ project = "my-project"
 
 # An application to deploy.
 app "web" {
-    # Build specifies how an application should be deployed. In this case,
-    # we'll build using a Dockerfile and keeping it in a local registry.
-    build {
-        use "docker" {}
+  # Build specifies how an application should be deployed. In this case,
+  # we'll build using a Dockerfile and keeping it in a local registry.
+  build {
+    use "docker" {}
 
-        # Uncomment below to use a remote docker registry to push your built images.
-        #
-        # registry {
-        #   use "docker" {
-        #     image = "registry.example.com/image"
-        #     tag   = "latest"
-        #   }
-        # }
+    # Uncomment below to use a remote docker registry to push your built images.
+    #
+    # registry {
+    #   use "docker" {
+    #     image = "registry.example.com/image"
+    #     tag   = "latest"
+    #   }
+    # }
 
-    }
+  }
 
-    # Deploy to Docker
-    deploy {
-        use "docker" {}
-    }
-}
-`
+  # Deploy to Docker
+  deploy {
+      use "docker" {}
+  }
+}`
 
 export default {
   yamlConfig,
   appAWSFrontendHCL,
   appGCPFrontendHCL,
+  appAWSBackendHCL,
+  appGCPBackendHCL,
   standardHCLTemplate,
 }

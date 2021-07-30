@@ -5,6 +5,7 @@ import tmpl from '../util/templates'
 import fs from '../util/fs'
 import { cwd } from 'process'
 import { join } from 'path'
+import { HCLAttributes } from '../util/types'
 
 export default class New extends Command {
   static description = 'Initializes a project or application to be used with Pilot'
@@ -49,12 +50,12 @@ export default class New extends Command {
 
       await waypoint.newProject(project.name)
       this.log(`\nCreated project: ${project.name}`)
-      this.log('Configure the project from the UI of your Waypoint server.')
-      this.log('A project needs at least one application. You can initialize applications by running \'pilot new app\'.')
+      this.log('You can configure the project from the UI of your Waypoint server.')
+      this.log('A project needs at least one application. You can initialize a waypoint.hcl file by running \'pilot new app\'.')
     }
 
     if (args.type === 'app') {
-      const initChoices: any | undefined = await inquirer.prompt([
+      const projectChoices: any | undefined = await inquirer.prompt([
         {
           name: 'project',
           message: 'Select a project:',
@@ -75,23 +76,18 @@ export default class New extends Command {
       ])
       console.clear()
 
-      interface HCLAttributes {
-        appName: string;
-        frontend: boolean;
-        entryDir: string;
-        bucket: string;
-        region: string;
-        project: string;
-        domain: string;
-      }
-
       const appChoices: Array<HCLAttributes> = []
-      for (let count = 1; count <= initChoices.amount; count += 1) {
+      for (let count = 1; count <= projectChoices.amount; count += 1) {
         // eslint-disable-next-line no-await-in-loop
         const choices: any | undefined = await inquirer.prompt([
           {
             name: 'appName',
-            message: 'Application name:',
+            message: `Application name (${count}):`,
+            type: 'input',
+          },
+          {
+            name: 'entryDir',
+            message: 'What is the source path of your app (ex: dir/subdir/app)?',
             type: 'input',
           },
           {
@@ -99,15 +95,20 @@ export default class New extends Command {
             message: 'Is this part of the project frontend-only (i.e. compiles into static files for web hosting)?',
             type: 'confirm',
           },
+          {
+            name: 'region',
+            message: 'Region (AWS) or Location (GCP) to deploy/release to:',
+            type: 'input',
+          },
+          {
+            name: 'project',
+            message: 'GCP project ID:',
+            type: 'input',
+            when: () => projectChoices.provider === 'GCP',
+          },
         ])
           .then(async choices => {
             const moreChoices = await inquirer.prompt([
-              {
-                name: 'entryDir',
-                message: 'What is the entrypoint directory based on the root of your project?',
-                type: 'input',
-                when: () => choices.frontend === true,
-              },
               {
                 name: 'bucket',
                 message: 'Name of your bucket:',
@@ -115,21 +116,16 @@ export default class New extends Command {
                 when: choices.frontend,
               },
               {
-                name: 'region',
-                message: 'Region to deploy/release to:',
-                type: 'input',
-              },
-              {
-                name: 'project',
-                message: 'GCP project ID:',
-                type: 'input',
-                when: () => initChoices.provider === 'GCP',
-              },
-              {
                 name: 'domain',
                 message: 'Domain for Cloud CDN release:',
                 type: 'input',
-                when: () => initChoices.provider === 'GCP' && choices.frontend,
+                when: () => projectChoices.provider === 'GCP' && choices.frontend,
+              },
+              {
+                name: 'repoName',
+                message: 'Image repository name to push image builds:',
+                type: 'input',
+                when: () => !choices.frontend && projectChoices.provider === 'AWS',
               },
             ])
             return Object.assign(choices, moreChoices)
@@ -138,14 +134,12 @@ export default class New extends Command {
         console.clear()
       }
 
-      let content = `project = ${initChoices.project}`
+      let content = `# The name of your project.\nproject = "${projectChoices.project}"`
       appChoices.forEach(app => {
-        if (initChoices.provider === 'AWS' && app.frontend) {
-          content += '\n\n' + tmpl.appAWSFrontendHCL(app)
-        }
-        if (initChoices.provider === 'GCP' && app.frontend) {
-          content += '\n\n' + tmpl.appGCPFrontendHCL(app)
-        }
+        if (projectChoices.provider === 'AWS' && app.frontend) content += '\n\n' + tmpl.appAWSFrontendHCL(app)
+        if (projectChoices.provider === 'AWS' && !app.frontend)content += '\n\n' + tmpl.appAWSBackendHCL(app)
+        if (projectChoices.provider === 'GCP' && app.frontend) content += '\n\n' + tmpl.appGCPFrontendHCL(app)
+        if (projectChoices.provider === 'GCP' && !app.frontend) content += '\n\n' + tmpl.appGCPBackendHCL(app)
       })
       fs.createFile(join(cwd(), '/waypoint.hcl'), content)
     }
