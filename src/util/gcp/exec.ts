@@ -188,9 +188,10 @@ const installWaypoint = async (opts: SetupOpts) => {
     // wait for docker daemon to finish coming online
     await timeout(30000)
     const pgrep = await sshExec('pgrep docker')
-    console.log('PID:', pgrep)
+    // TODO?: Move console logs to a log file
+    // console.log('PID:', pgrep)
     const install = await sshExec(`waypoint install -platform=docker ${image} -accept-tos`)
-    console.log(install)
+    // console.log(install)
   } catch (error) {
     console.log(error)
   }

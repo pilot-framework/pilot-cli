@@ -26,7 +26,15 @@ export default class Server extends Command {
   async run() {
     const {flags} = this.parse(Server)
     const spinner = ora()
-    spinner.color = 'grey'
+    spinner.color = 'magenta'
+    spinner.spinner = {
+      interval: 500,
+      frames: [
+        '\u2708  ',
+        ' \u2708 ',
+        '  \u2708',
+      ],
+    }
 
     if (!flags.ssh && !flags.destroy) this.log('Run "pilot server -h" for command listing')
 
