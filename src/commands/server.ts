@@ -3,8 +3,10 @@ import awsExec from '../util/aws/exec'
 import gcpExec from '../util/gcp/exec'
 import paths from '../util/paths'
 import fs from '../util/fs'
+import cli from '../util/cli'
 import chalk from 'chalk'
 const ora = require('ora')
+
 
 export default class Server extends Command {
   static description = 'Used to interact with the remote management server'
@@ -27,14 +29,7 @@ export default class Server extends Command {
     const {flags} = this.parse(Server)
     const spinner = ora()
     spinner.color = 'magenta'
-    spinner.spinner = {
-      interval: 500,
-      frames: [
-        '\u2708  ',
-        ' \u2708 ',
-        '  \u2708',
-      ],
-    }
+    spinner.spinner = cli.planeSpinner
 
     if (!flags.ssh && !flags.destroy) this.log('Run "pilot server -h" for command listing')
 
