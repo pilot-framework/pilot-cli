@@ -3,8 +3,7 @@ import awsExec from '../util/aws/exec'
 import gcpExec from '../util/gcp/exec'
 import paths from '../util/paths'
 import fs from '../util/fs'
-import cli from '../util/cli'
-import chalk from 'chalk'
+import { pilotSpinner, pilotText, successText, failText, grayText } from '../util/cli'
 
 export default class Server extends Command {
   static description = 'Used to interact with the remote management server'
@@ -25,7 +24,7 @@ export default class Server extends Command {
 
   async run() {
     const {flags} = this.parse(Server)
-    const spinner = cli.pilotSpinner()
+    const spinner = pilotSpinner()
 
     if (!flags.ssh && !flags.destroy) this.log('Run "pilot server -h" for command listing')
 
@@ -34,20 +33,20 @@ export default class Server extends Command {
     if (flags.ssh) {
       let ipAddr: string
 
-      this.log(chalk.gray('To SSH to the remote server, execute the following:'))
+      this.log(grayText('To SSH to the remote server, execute the following:'))
       if (serverPlatform === 'aws') {
         try {
           ipAddr = await awsExec.getServerIP()
-          this.log(chalk.bold.magentaBright(`ssh pilot@${ipAddr} -i ${paths.PILOT_SSH}`))
+          this.log(pilotText(`ssh pilot@${ipAddr} -i ${paths.PILOT_SSH}`))
         } catch {
-          this.log(chalk.bold.red('No server found'))
+          this.log(failText('No server found'))
         }
       } else if (serverPlatform === 'gcp') {
         try {
           ipAddr = await gcpExec.getServerIP()
-          this.log(chalk.bold.magentaBright(`ssh pilot@${ipAddr} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no`))
+          this.log(pilotText(`ssh pilot@${ipAddr} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no`))
         } catch {
-          this.log(chalk.bold.red('No server found'))
+          this.log(failText('No server found'))
         }
       }
     }
@@ -56,10 +55,10 @@ export default class Server extends Command {
       spinner.start('Tearing down remote management server')
       if (serverPlatform === 'aws') {
         await awsExec.terraDestroy()
-        spinner.succeed(chalk.bold.green('EC2 destroyed'))
+        spinner.succeed(successText('EC2 destroyed'))
       } else if (serverPlatform === 'gcp') {
         await gcpExec.terraDestroy()
-        spinner.succeed(chalk.bold.green('GCE destroyed'))
+        spinner.succeed(successText('GCE destroyed'))
       }
     }
   }

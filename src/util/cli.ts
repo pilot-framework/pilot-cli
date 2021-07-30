@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 const ora = require('ora')
 
-const planeSpinnerAnim = {
+export const planeSpinnerAnim = {
   interval: 500,
   frames: [
     '\u2708  ',
@@ -10,13 +10,20 @@ const planeSpinnerAnim = {
   ],
 }
 
-const pilotSpinner = () => {
+export const pilotSpinner = () => {
   const s = ora()
   s.color = 'magenta'
   s.spinner = planeSpinnerAnim
   return s
 }
 
+export const pilotText = chalk.bold.magentaBright
+export const successText = chalk.bold.green
+export const failText = chalk.bold.red
+export const grayText = chalk.gray
+
 export default {
   pilotSpinner,
+  pilotText,
+  failText,
 }
