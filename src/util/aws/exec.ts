@@ -309,30 +309,31 @@ const createAccessKey = async () => {
       res()
     })
   })
+    .catch(error => {
+      throw error
+    })
 }
 
 const pilotUserInit = async () => {
-  if (await serviceAccountExists()) {
-    console.log('Found existing pilot-user account')
-  } else {
-    await createServiceAccount()
-    console.log('Created pilot-user service account')
+  try {
+    if (await !serviceAccountExists()) {
+      await createServiceAccount()
+    }
+
+    await addPolicy()
+    await createAccessKey()
+
+    const keys = await fsUtil.readPilotKeys()
+    const envVars = [
+      `AWS_ACCESS_KEY_ID=${keys.AccessKey.AccessKeyId}`,
+      `AWS_SECRET_ACCESS_KEY=${keys.AccessKey.SecretAccessKey}`,
+      `AWS_DEFAULT_REGION=${await creds.getAWSRegion()}`,
+    ]
+
+    await waypoint.setEnvVars(envVars)
+  } catch (error) {
+    throw error
   }
-
-  await addPolicy()
-  console.log('Attached Pilot policy to service account')
-
-  await createAccessKey()
-  console.log('Created access keys')
-
-  const keys = await fsUtil.readPilotKeys()
-  const envVars = [
-    `AWS_ACCESS_KEY_ID=${keys.AccessKey.AccessKeyId}`,
-    `AWS_SECRET_ACCESS_KEY=${keys.AccessKey.SecretAccessKey}`,
-    `AWS_DEFAULT_REGION=${await creds.getAWSRegion()}`,
-  ]
-
-  await waypoint.setEnvVars(envVars)
 }
 
 const configureRunner = async () => {
