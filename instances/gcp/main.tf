@@ -66,8 +66,6 @@ resource "google_compute_instance" "pilot-instance" {
   zone         = "us-east1-b" # TODO: get defaults from .pilot config
   project = data.google_project.pilot.project_id
 
-  tags = [ "pilot-waypoint-server" ]
-
   boot_disk {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-2004-lts"
@@ -114,17 +112,4 @@ resource "google_compute_firewall" "pilot-firewall" {
     protocol = "tcp"
     ports    = ["22", "80", "8080", "1000-2000", "9701", "9702"]
   }
-}
-
-resource "google_compute_firewall" "pilot-firewall-docker" {
-  name    = "pilot-firewall-docker"
-  project = data.google_project.pilot.project_id
-  network = google_compute_network.pilot-network.name
-
-  allow {
-    protocol = "tcp"
-    ports    = ["2375"]
-  }
-
-  source_tags = [ "pilot-waypoint-server" ]
 }

@@ -56,8 +56,8 @@ resource "aws_route_table_association" "rta_subnet_public" {
   route_table_id = aws_route_table.rtb_public.id
 }
 
-resource "aws_security_group" "sg_22_80" {
-  name   = "sg_22"
+resource "aws_security_group" "sg_pilot" {
+  name   = "sg_pilot"
   vpc_id = aws_vpc.vpc.id
 
   # SSH access from the VPC
@@ -89,13 +89,6 @@ resource "aws_security_group" "sg_22_80" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    from_port   = 2375
-    to_port     = 2375
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.vpc.cidr_block]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -113,7 +106,7 @@ resource "aws_instance" "waypoint" {
   instance_type               = "t2.medium"
   key_name                    = var.aws_key_pair
   subnet_id                   = aws_subnet.subnet_public.id
-  vpc_security_group_ids      = [aws_security_group.sg_22_80.id]
+  vpc_security_group_ids      = [aws_security_group.sg_pilot.id]
   associate_public_ip_address = true
   user_data                   = data.template_file.user_data.rendered
 

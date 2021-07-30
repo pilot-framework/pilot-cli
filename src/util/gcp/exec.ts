@@ -3,9 +3,35 @@ import paths from '../paths'
 import waypoint from '../waypoint'
 import fsUtil from '../fs'
 import creds from './creds'
+import { SetupOpts } from '../../commands/setup'
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+const setDockerConnection = async () => {
+  const ipAddress = await getServerIP()
+  return new Promise<string>((res, rej) => {
+    exec(`gcloud compute firewall-rules create docker-connection --network pilot-network --action allow --source-ranges ${ipAddress}/32 --rules tcp:2375`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const removeDockerConnection = async () => {
+  return new Promise<string>((res, rej) => {
+    exec('gcloud compute firewall-rules delete docker-connection -q', (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
 }
 
 const terraInit = async (): Promise<string> => {
@@ -33,6 +59,8 @@ const terraApply = async (): Promise<string> => {
 }
 
 const terraDestroy = async (): Promise<string> => {
+  await removeDockerConnection()
+
   return new Promise<string>((res, rej) => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} destroy -auto-approve`, (error, _) => {
       if (error) rej(error)
@@ -147,14 +175,23 @@ const setContext = async () => {
   await waypoint.setContext(ipAddress, token)
 }
 
-const installWaypoint = async () => {
+const installWaypoint = async (opts: SetupOpts) => {
+  let image = '-docker-server-image=pilotframework/pilot-waypoint'
+
+  if (opts.dev) {
+    image = `${image}:dev`
+  } else if (opts.bare) {
+    image = ''
+  }
+
   try {
     // wait for docker daemon to finish coming online
     await timeout(30000)
     const pgrep = await sshExec('pgrep docker')
-    console.log('PID:', pgrep)
-    const install = await sshExec('waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos')
-    console.log(install)
+    // TODO?: Move console logs to a log file
+    // console.log('PID:', pgrep)
+    const install = await sshExec(`waypoint install -platform=docker ${image} -accept-tos`)
+    // console.log(install)
   } catch (error) {
     console.log(error)
   }
@@ -257,13 +294,32 @@ const serviceAccountAuth = async (): Promise<void> => {
 
 const createIAMRole = async (): Promise<string> => {
   const defaultProject = await creds.getGCPProject()
-  const policy = await fsUtil.fileToString(paths.PILOT_GCP_POLICY)
+  const permissions = await fsUtil.fileToString(paths.PILOT_GCP_POLICY)
 
   return new Promise<string>((res, rej) => {
     exec(`gcloud iam roles create pilotService \\
-    --project ${defaultProject} --title 'Pilot Framework IAM Role' \\
-    --description 'This role has the necessary permissions that the Pilot service account uses to deploy applications' \\
-    --permissions ${policy} \\
+    --title="Pilot Framework IAM Role" \\
+    --description="This role has the necessary permissions that the Pilot service account uses to deploy applications" \\
+    --project=${defaultProject} \\
+    --permissions=${permissions} \\
+    --quiet`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const updateIAMRole = async (): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
+  const permissions = await fsUtil.fileToString(paths.PILOT_GCP_POLICY)
+
+  return new Promise<string>((res, rej) => {
+    exec(`gcloud iam roles update pilotService \\
+    --project=${defaultProject} \\
+    --add-permissions=${permissions} \\
     --quiet`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
@@ -303,6 +359,9 @@ const pilotUserInit = async (runner: boolean) => {
   if (!roleExists) {
     await createIAMRole()
       .catch(error => console.log(error))
+  } else {
+    await updateIAMRole()
+      .catch(error => console.log(error))
   }
 
   await bindIAMRole()
@@ -338,4 +397,6 @@ export default {
   setContext,
   getServerIP,
   configureRunner,
+  setDockerConnection,
+  removeDockerConnection,
 }

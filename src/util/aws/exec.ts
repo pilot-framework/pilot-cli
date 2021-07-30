@@ -4,6 +4,7 @@ import paths from '../paths'
 import waypoint from '../waypoint'
 import creds from './creds'
 import fsUtil from '../fs'
+import { SetupOpts } from '../../commands/setup'
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -14,6 +15,40 @@ const getServerIP = async (): Promise<string> => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw public_ip`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const getSecurityGroups = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec('aws ec2 describe-security-groups', (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const getPilotSecurityGroup = async (): Promise<string> => {
+  const securityGroups = await getSecurityGroups()
+  const sgPilot = JSON.parse(securityGroups).SecurityGroups.find((group: object) => group.GroupName === 'sg_pilot')
+
+  return new Promise<string>(res => res(sgPilot))
+}
+
+const setDockerConnection = async (): Promise<string> => {
+  const sgPilot = await getPilotSecurityGroup()
+  const ipAddr = await getServerIP()
+
+  return new Promise<string>((res, rej) => {
+    exec(`aws ec2 authorize-security-group-ingress --group-id ${sgPilot.GroupId} --protocol tcp --port 2375 --cidr ${ipAddr}/32`, error => {
+      if (error) rej(error)
+      res('Docker Connection Set. Port 2375')
     })
   })
     .catch(error => {
@@ -72,12 +107,20 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
     })
 }
 
-const installWaypoint = async (): Promise<string> => {
+const installWaypoint = async (opts: SetupOpts): Promise<string> => {
   const ipAddr = await getServerIP()
+
+  let image = '-docker-server-image=pilotframework/pilot-waypoint'
+
+  if (opts.dev) {
+    image = `${image}:dev`
+  } else if (opts.bare) {
+    image = ''
+  }
 
   return new Promise<string>((res, rej) => {
     exec(`ssh pilot@${ipAddr} -i ${paths.PILOT_SSH} -o StrictHostKeyChecking=no \\
-    "waypoint install -platform=docker -docker-server-image=pilotframework/pilot-waypoint -accept-tos"`, (error, stdout) => {
+    "waypoint install -platform=docker ${image} -accept-tos"`, (error, stdout) => {
       if (error) rej(error)
       res(stdout)
     })
@@ -323,8 +366,11 @@ export default {
   createServiceAccount,
   deleteKeyPair,
   getServerIP,
+  getSecurityGroups,
+  getPilotSecurityGroup,
   getServerStatus,
   getInstanceID,
+  setDockerConnection,
   serverReachability,
   installWaypoint,
   terraApply,
