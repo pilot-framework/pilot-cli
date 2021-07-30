@@ -1,11 +1,8 @@
 import {Command, flags} from '@oclif/command'
-import * as inquirer from 'inquirer'
-import waypoint from '../util/waypoint'
 import tmpl from '../util/templates'
 import fs from '../util/fs'
 import { cwd } from 'process'
 import { join } from 'path'
-import { HCLAttributes } from '../util/types'
 import prompt from '../util/prompt'
 
 export default class New extends Command {
