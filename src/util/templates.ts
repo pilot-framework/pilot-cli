@@ -54,7 +54,9 @@ write_files:
       ExecStart=/usr/bin/dockerd
     path: /etc/systemd/system/docker.service.d/override.conf
   - content: |
-      {"hosts": ["tcp://0.0.0.0:2375", "unix:///var/run/docker.sock"]}
+      {"hosts": ["tcp://0.0.0.0:2375", "unix:///var/run/docker.sock"],
+      "log-driver": "json-file",
+      "log-opts": {"max-size": "200m", "max-file": "3"}}
     path: /etc/docker/daemon.json
 
 runcmd:
