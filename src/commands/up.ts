@@ -15,18 +15,6 @@ export default class Up extends Command {
     const {args} = this.parse(Up)
 
     const execArgs = ['up', `${args.project}`]
-    const waypointUp = spawn(`${paths.WAYPOINT_EXEC}`, execArgs)
-
-    waypointUp.stdout.on('data', data => {
-      console.log(data.toString())
-    })
-
-    waypointUp.stderr.on('data', data => {
-      console.error(data.toString())
-    })
-
-    waypointUp.on('exit', code => {
-      console.log(`Child process exited with code: ${code}`)
-    })
+    spawn(`${paths.WAYPOINT_EXEC}`, execArgs, { stdio: 'inherit'})
   }
 }
