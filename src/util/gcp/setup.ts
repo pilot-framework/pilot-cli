@@ -5,7 +5,7 @@ import { existsSync } from 'fs'
 import fs from '../fs'
 import waypoint from '../waypoint'
 import { SetupOpts } from '../../commands/setup'
-import { pilotSpinner, successText, failText } from '../cli'
+import { pilotSpinner, successText, failText, pilotText } from '../cli'
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
