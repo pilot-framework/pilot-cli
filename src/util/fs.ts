@@ -79,8 +79,8 @@ const updateMetadata = async (metadata: object): Promise<void> => {
   return createFile(paths.PILOT_METADATA, JSON.stringify(metadata))
 }
 
-const genTerraformVars = async (data: string) => {
-  writeFile(join(paths.AWS_INSTANCES, '/terraform.tfvars'), data, error => {
+const genTerraformVars = async (path: string, data: string) => {
+  writeFile(join(path, '/terraform.tfvars'), data, error => {
     if (error) throw new Error('Unable to write Terraform .tfvars file')
   })
 }

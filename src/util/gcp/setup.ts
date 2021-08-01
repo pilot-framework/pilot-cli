@@ -6,6 +6,7 @@ import fs from '../fs'
 import waypoint from '../waypoint'
 import { SetupOpts } from '../../commands/setup'
 import { pilotSpinner, successText, failText, pilotText } from '../cli'
+import creds from './creds'
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -25,6 +26,19 @@ export async function gcpSetup(opts: SetupOpts) {
     spinner.start('Setting up initial resources')
     timeout(1500)
 
+    const zone = await creds.getGCPZone()
+    const project = await creds.getGCPProject()
+
+    if (zone === '') {
+      spinner.fail(failText('No default zone configured for GCP. Please run \'pilot init\''))
+      return
+    }
+
+    if (project === '') {
+      spinner.fail(failText('No default project configured for GCP. Please run \'pilot init\''))
+      return
+    }
+
     spinner.text = 'Configuring initial metadata'
     const currentMetadata = await fs.getPilotMetadata()
 
@@ -34,16 +48,19 @@ export async function gcpSetup(opts: SetupOpts) {
 
     await fs.mkDir(paths.appRoot + '/templates')
 
+    // Set up tfvars
+    spinner.text = 'Generating Terraform tfvars file'
+    await fs.genTerraformVars(paths.GCP_INSTANCES, `default_zone="${zone}"\ndefault_project="${project}"`)
+    spinner.succeed(successText('Terraform tfvars file created'))
+
     if (!existsSync(paths.PILOT_SSH)) {
       spinner.text = 'Generating SSH keys'
       await fs.sshKeyGen()
-      // console.log('Successfully generated SSH keys')
     }
 
     // Generate yaml file for cloud-init
     spinner.text = 'Generating cloud-init configuration file'
     await fs.genCloudInitYaml()
-    // console.log('Successfully generated cloud init')
     spinner.succeed(successText('Initial resources configured'))
 
     // Configure GCP IAM user / role

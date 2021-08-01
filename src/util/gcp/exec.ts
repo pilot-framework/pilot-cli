@@ -9,6 +9,25 @@ const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+const getServerIP = async (): Promise<string> => {
+  const defaultProject = await creds.getGCPProject()
+  const defaultZone = await creds.getGCPZone()
+
+  return new Promise<string>((res, rej) => {
+    exec(`gcloud compute instances describe pilot-gcp-instance --project='${defaultProject}' --format='json(networkInterfaces)' --zone='${defaultZone}'`, (error, stdout) => {
+      if (error) rej(error)
+      if (stdout.trim() === '') {
+        res('')
+      } else {
+        res(JSON.parse(stdout).networkInterfaces[0].accessConfigs[0].natIP)
+      }
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
 const setDockerConnection = async () => {
   const ipAddress = await getServerIP()
   return new Promise<string>((res, rej) => {
@@ -65,25 +84,6 @@ const terraDestroy = async (): Promise<string> => {
     exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} destroy -auto-approve`, (error, _) => {
       if (error) rej(error)
       res('success')
-    })
-  })
-    .catch(error => {
-      throw error
-    })
-}
-
-const getServerIP = async (): Promise<string> => {
-  const defaultProject = await creds.getGCPProject()
-  const defaultZone = await creds.getGCPZone()
-
-  return new Promise<string>((res, rej) => {
-    exec(`gcloud compute instances describe pilot-gcp-instance --project='${defaultProject}' --format='json(networkInterfaces)' --zone='${defaultZone}'`, (error, stdout) => {
-      if (error) rej(error)
-      if (stdout.trim() === '') {
-        res('')
-      } else {
-        res(JSON.parse(stdout).networkInterfaces[0].accessConfigs[0].natIP)
-      }
     })
   })
     .catch(error => {

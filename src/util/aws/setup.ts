@@ -67,7 +67,7 @@ export async function awsSetup(opts: SetupOpts) {
     await fsUtil.mkDir(paths.appRoot + '/templates')
 
     spinner.text = 'Generating Terraform tfvars file'
-    await fsUtil.genTerraformVars(`region="${awsRegion}"`)
+    await fsUtil.genTerraformVars(paths.AWS_INSTANCES, `region="${awsRegion}"`)
     spinner.succeed(successText('Terraform tfvars file created'))
 
     // Generate SSH Keys
