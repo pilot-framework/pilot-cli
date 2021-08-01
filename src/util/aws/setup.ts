@@ -6,13 +6,14 @@ import { existsSync } from 'fs'
 import execUtil from './exec'
 import waypoint from '../waypoint'
 import { SetupOpts } from '../../commands/setup'
-import { pilotSpinner, successText, failText, pilotText } from '../cli'
+import { logo, pilotSpinner, successText, failText, pilotText } from '../cli'
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 export async function awsSetup(opts: SetupOpts) {
+  console.log(logo)
   const spinner = pilotSpinner()
 
   try {
@@ -130,7 +131,7 @@ export async function awsSetup(opts: SetupOpts) {
     await execUtil.configureRunner()
     spinner.succeed(successText('Final configurations completed'))
 
-    console.log(pilotText('\nWe\'re ready for takeoff...\u2708'))
+    console.log(pilotText('\nThis is you pilot speaking...We\'re ready for takeoff! \uD83D\uDEEB'))
   } catch (error) {
     cli.error(error)
   }

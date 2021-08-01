@@ -5,7 +5,7 @@ import { existsSync } from 'fs'
 import fs from '../fs'
 import waypoint from '../waypoint'
 import { SetupOpts } from '../../commands/setup'
-import { pilotSpinner, successText, failText, pilotText } from '../cli'
+import { logo, pilotSpinner, successText, failText, pilotText } from '../cli'
 import creds from './creds'
 
 const timeout = (ms: number): Promise<number> => {
@@ -13,6 +13,7 @@ const timeout = (ms: number): Promise<number> => {
 }
 
 export async function gcpSetup(opts: SetupOpts) {
+  console.log(logo)
   const spinner = pilotSpinner()
 
   // Check for gcloud config
@@ -106,7 +107,7 @@ export async function gcpSetup(opts: SetupOpts) {
     await execUtil.configureRunner()
     spinner.succeed(successText('Final configurations completed'))
 
-    console.log(pilotText('\nWe\'re ready for takeoff...\u2708'))
+    console.log(pilotText('\nThis is you pilot speaking...We\'re ready for takeoff! \uD83D\uDEEB'))
   } catch (error) {
     cli.error(error)
   }

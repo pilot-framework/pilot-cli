@@ -22,8 +22,23 @@ export const successText = chalk.bold.green
 export const failText = chalk.bold.red
 export const grayText = chalk.gray
 
-export default {
-  pilotSpinner,
-  pilotText,
-  failText,
-}
+export const logo = chalk.bold.magentaBright(`
+
+    *(((((((((((((((((((((((((((((((((((.  (((((((((((((((((* 
+                                     .((.                     
+         *(((((((((((((((((.         .((.  ((((((((((((*      
+                       .((.         .((.                     
+             *(((((((.  ((/         /((. .(((((((*           
+                         ((((.    ((((                       
+                           ./(((((/. 
+
+    _________________________________________________________
+              _____      __    __        ___     ______
+              /    )     /      /      /    )      /
+     __  __  /____/ __  /  __  /  __  /    /  __  /  __  __
+            /          /      /      /    /      /
+           /         _/_     /____/ (____/      /
+    _________________________________________________________
+
+
+`)
