@@ -7,11 +7,8 @@ terraform {
   }
 }
 
-# TODO: project, region, and zone will be custom to the google project
 provider "google" {
-  project = "pilot"
-  region = "us-east1"
-  zone = "us-east1-b"
+  project = var.default_project
 }
 
 data "google_billing_account" "acct" {
@@ -19,14 +16,8 @@ data "google_billing_account" "acct" {
   open         = true
 }
 
-# resource "google_project" "my_project" {
-#   name       = "pilot"
-#   project_id = "pilot-321119"
-#   billing_account = data.google_billing_account.acct.id
-# }
-
 data "google_project" "pilot" {
-  project_id = "pilot-321119" # TODO: Make dynamic through variables.tf
+  project_id = var.default_project
 }
 
 data "google_service_account" "pilot_user" {
@@ -76,7 +67,7 @@ resource "google_project_service" "crm" {
 resource "google_compute_instance" "pilot-instance" {
   name         = "pilot-gcp-instance"
   machine_type = "e2-medium"
-  zone         = "us-east1-b" # TODO: get defaults from .pilot config
+  zone         = var.default_zone
   project = data.google_project.pilot.project_id
 
   boot_disk {
