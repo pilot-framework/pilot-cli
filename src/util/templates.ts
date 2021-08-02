@@ -245,6 +245,342 @@ app "web" {
   }
 }`
 
+const defaultGCPPermissions = () => 'compute.addresses.list,compute.backendBuckets.create,compute.backendBuckets.delete,compute.backendBuckets.get,compute.backendBuckets.use,compute.globalAddresses.create,compute.globalAddresses.delete,compute.globalAddresses.get,compute.globalAddresses.use,compute.globalForwardingRules.create,compute.globalForwardingRules.delete,compute.globalForwardingRules.get,compute.globalOperations.get,compute.regions.list,compute.sslCertificates.create,compute.sslCertificates.delete,compute.sslCertificates.get,compute.sslCertificates.list,compute.targetHttpsProxies.create,compute.targetHttpsProxies.delete,compute.targetHttpsProxies.get,compute.targetHttpsProxies.use,compute.urlMaps.create,compute.urlMaps.delete,compute.urlMaps.get,compute.urlMaps.list,compute.urlMaps.use,storage.buckets.create,storage.buckets.delete,storage.buckets.get,storage.buckets.update,storage.objects.create,storage.objects.delete,storage.objects.get,storage.objects.update,storage.buckets.getIamPolicy,storage.buckets.setIamPolicy,run.services.get,run.services.list,run.services.create,run.services.update,run.services.delete,run.services.getIamPolicy,run.services.setIamPolicy,run.routes.get,run.routes.list,run.configurations.get,run.configurations.list,run.revisions.get,run.revisions.list,run.revisions.delete,run.locations.get,run.locations.list,iam.serviceAccounts.create,iam.serviceAccounts.actAs,iam.serviceAccounts.get,iam.serviceAccounts.list,resourcemanager.projects.get'
+
+const defaultAWSPolicy = () => `
+{
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Effect": "Allow",
+          "Action": [
+            "iam:UpdateAssumeRolePolicy",
+            "iam:PutRolePermissionsBoundary",
+            "logs:*",
+            "iam:CreateRole",
+            "iam:AttachRolePolicy",
+            "iam:PutRolePolicy",
+            "iam:CreateUser",
+            "autoscaling:*",
+            "iam:GetGroup",
+            "iam:AddRoleToInstanceProfile",
+            "iam:CreateAccessKey",
+            "iam:PassRole",
+            "cloudfront:*",
+            "iam:PutGroupPolicy",
+            "iam:GetRole",
+            "iam:GetPolicy",
+            "s3:*",
+            "iam:UpdateUser",
+            "iam:AttachUserPolicy",
+            "iam:UpdateRoleDescription",
+            "iam:DeleteRole",
+            "elasticloadbalancing:*",
+            "iam:CreatePolicy",
+            "iam:CreateServiceLinkedRole",
+            "iam:AttachGroupPolicy",
+            "ecs:*",
+            "lambda:*",
+            "ec2:*",
+            "ecr:*",
+            "iam:UpdateRole",
+            "iam:GetGroupPolicy",
+            "iam:GetRolePolicy"
+        ],
+          "Resource": "*"
+      }
+  ]
+}
+`
+
+const awsTerraformMain = () => `
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.region
+}
+
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-*20*-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+resource "aws_vpc" "vpc" {
+  cidr_block           = var.cidr_vpc
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+}
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.vpc.id
+}
+
+resource "aws_subnet" "subnet_public" {
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = var.cidr_subnet
+}
+
+resource "aws_route_table" "rtb_public" {
+  vpc_id = aws_vpc.vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+}
+
+resource "aws_route_table_association" "rta_subnet_public" {
+  subnet_id      = aws_subnet.subnet_public.id
+  route_table_id = aws_route_table.rtb_public.id
+}
+
+resource "aws_security_group" "sg_pilot" {
+  name   = "sg_pilot"
+  vpc_id = aws_vpc.vpc.id
+
+  # SSH access from the VPC
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 9701
+    to_port     = 9701
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 9702
+    to_port     = 9702
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+data "template_file" "user_data" {
+  template = file("../../templates/ssh-docker-waypoint-init.yaml")
+}
+
+resource "aws_instance" "waypoint" {
+  ami                         = data.aws_ami.ubuntu.id
+  instance_type               = "t2.medium"
+  key_name                    = var.aws_key_pair
+  subnet_id                   = aws_subnet.subnet_public.id
+  vpc_security_group_ids      = [aws_security_group.sg_pilot.id]
+  associate_public_ip_address = true
+  user_data                   = data.template_file.user_data.rendered
+
+  root_block_device {
+    volume_size = 20
+  }
+
+  tags = {
+    Name = "Pilot Waypoint Server"
+  }
+}
+
+output "public_ip" {
+  value = aws_instance.waypoint.public_ip
+}
+
+output "instance_id" {
+  value = aws_instance.waypoint.id
+}
+`
+
+const awsTerraformVars = () => `
+variable "cidr_vpc" {
+  description = "CIDR block for the VPC"
+  default     = "10.1.0.0/16"
+}
+variable "cidr_subnet" {
+  description = "CIDR block for the subnet"
+  default     = "10.1.0.0/24"
+}
+
+variable "environment_tag" {
+  description = "Environment tag"
+  default     = "Learn"
+}
+
+variable "region" {
+  description = "The region Terraform deploys your instance"
+}
+
+variable "aws_key_pair" {
+  description = "Your SSH key to connect to EC2 instance"
+  default = "PilotKeyPair"
+}
+`
+
+const gcpTerraformMain = () => `
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 3.0"
+    }
+  }
+}
+
+provider "google" {
+  project = var.default_project
+}
+
+data "google_billing_account" "acct" {
+  display_name = "pilot-billing"
+  open         = true
+}
+
+data "google_project" "pilot" {
+  project_id = var.default_project
+}
+
+data "google_service_account" "pilot_user" {
+  # Should automatically pull project info from provider
+  account_id = "pilot-user"
+}
+
+resource "google_project_service" "computeEngine" {
+  project = data.google_project.pilot.project_id
+  service = "compute.googleapis.com"
+  disable_on_destroy = false
+
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+
+  disable_dependent_services = true  
+}
+
+resource "google_project_service" "cloudRun" {
+  project = data.google_project.pilot.project_id
+  service = "run.googleapis.com"
+  disable_on_destroy = false
+
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+
+  disable_dependent_services = true  
+}
+
+resource "google_project_service" "crm" {
+  project = data.google_project.pilot.project_id
+  service = "cloudresourcemanager.googleapis.com"
+
+
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+
+  disable_dependent_services = true  
+}
+
+resource "google_compute_instance" "pilot-instance" {
+  name         = "pilot-gcp-instance"
+  machine_type = "e2-medium"
+  zone         = var.default_zone
+  project = data.google_project.pilot.project_id
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.pilot-network.self_link
+
+    access_config {
+      // Ephemeral IP
+    }
+  }
+
+  metadata = {
+    user-data = file("../../templates/ssh-docker-waypoint-init.yaml")
+  }
+
+  service_account {
+    email  = data.google_service_account.pilot_user.email
+    scopes = [ "cloud-platform" ]
+  }
+
+  depends_on = [google_project_service.computeEngine]
+  allow_stopping_for_update = true
+}
+
+resource "google_compute_network" "pilot-network" {
+  name = "pilot-network"
+  project = data.google_project.pilot.project_id
+  depends_on = [google_project_service.computeEngine]
+}
+
+resource "google_compute_firewall" "pilot-firewall" {
+  name    = "pilot-firewall"
+  project = data.google_project.pilot.project_id
+  network = google_compute_network.pilot-network.name
+
+  allow {
+    protocol = "icmp"
+  }
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22", "80", "8080", "1000-2000", "9701", "9702"]
+  }
+}
+`
+
+const gcpTerraformVars = () => `
+variable "default_project" {
+  description = "The default GCP project configured via gcloud"
+}
+
+variable "default_zone" {
+  description = "The zone where the Pilot server is provisioned"
+}
+`
+
 export default {
   yamlConfig,
   appAWSFrontendHCL,
@@ -252,4 +588,10 @@ export default {
   appAWSBackendHCL,
   appGCPBackendHCL,
   standardHCLTemplate,
+  defaultGCPPermissions,
+  defaultAWSPolicy,
+  awsTerraformMain,
+  awsTerraformVars,
+  gcpTerraformMain,
+  gcpTerraformVars,
 }
