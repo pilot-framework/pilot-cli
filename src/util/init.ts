@@ -6,7 +6,7 @@ import {
   copyFile,
 } from 'fs'
 import templates from './templates'
-import { pilotSpinner, successText, failText, pilotText  } from './cli'
+import { pilotSpinner, successText, failText } from './cli'
 import { fail } from 'assert'
 
 export async function initialize(overridePolicyPath: string | null) {
