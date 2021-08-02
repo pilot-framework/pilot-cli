@@ -5,17 +5,18 @@ const appRoot = require('app-root-path')
 
 const HOME: string = homedir()
 const CONFIG: string = join(HOME, '/.pilot')
+const TEMPLATES: string = join(CONFIG, '/templates')
 const PILOT_AWS: string = join(CONFIG, '/aws')
 const PILOT_AWS_METADATA = join(CONFIG, '/aws/metadata')
 const PILOT_AWS_SSH: string = join(CONFIG, '/aws/ssh')
 const PILOT_AWS_CONFIG: string = join(CONFIG, '/aws/config')
 const PILOT_AWS_CREDENTIALS: string = join(CONFIG, '/aws/credentials')
-const PILOT_AWS_POLICY: string = join(appRoot.toString(), '/templates/pilotAWSPolicy.json')
+const PILOT_AWS_POLICY: string = join(TEMPLATES, '/pilotAWSPolicy.json')
 const PILOT_AWS_USER_KEYS: string = join(CONFIG, '/aws/pilot_keys')
 const PILOT_GCP: string = join(CONFIG, '/gcp')
 const PILOT_GCP_CONFIG: string = join(CONFIG, '/gcp/config')
 const PILOT_GCP_SERVICE: string = join(CONFIG, '/gcp/service')
-const PILOT_GCP_POLICY_TEMPLATE: string = join(appRoot.toString(), '/templates/pilotGCPPolicy.csv')
+const PILOT_GCP_POLICY_TEMPLATE: string = join(TEMPLATES, '/pilotGCPPolicy.csv')
 const PILOT_GCP_SERVICE_FILE: string = join(CONFIG, '/gcp/service/pilot-user-file.json')
 const PILOT_GCP_POLICY: string = join(CONFIG, '/gcp/service/policy.csv')
 const PILOT_METADATA: string = join(CONFIG, '/metadata.json')
@@ -33,6 +34,7 @@ const WAYPOINT_EXEC: string = join(appRoot.toString(), '/bin/waypoint/waypoint')
 export default {
   HOME,
   CONFIG,
+  TEMPLATES,
   PILOT_AWS,
   PILOT_AWS_METADATA,
   PILOT_AWS_SSH,

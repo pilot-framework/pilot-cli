@@ -5,6 +5,7 @@ import {
   existsSync,
   copyFile,
 } from 'fs'
+import templates from './templates'
 
 export async function initialize(overridePolicyPath: string | null) {
   // Create ~/.pilot file structure
@@ -12,6 +13,9 @@ export async function initialize(overridePolicyPath: string | null) {
     console.log('Pilot configuration detected...')
   } else {
     await fsUtil.mkDir(paths.CONFIG)
+    await fsUtil.mkDir(paths.TEMPLATES)
+    await fsUtil.createFile(paths.PILOT_AWS_POLICY, templates.defaultAWSPolicy())
+    await fsUtil.createFile(paths.PILOT_GCP_POLICY_TEMPLATE, templates.defaultGCPPermissions())
     await fsUtil.mkDir(paths.PILOT_AWS)
     await fsUtil.mkDir(paths.PILOT_AWS_SSH)
     await fsUtil.createFile(paths.PILOT_AWS_METADATA, '{}')
