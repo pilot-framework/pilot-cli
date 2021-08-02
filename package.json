@@ -1,7 +1,7 @@
 {
   "name": "pilot-framework",
-  "version": "0.0.0",
-  "author": " @cjaquino",
+  "version": "0.1.0",
+  "author": " Pilot Framework",
   "bin": {
     "pilot": "./bin/run"
   },
@@ -51,7 +51,10 @@
       "@oclif/plugin-help"
     ]
   },
-  "repository": "pilot-framework/pilot-cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pilot-framework/pilot-cli.git"
+  },
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint . --ext .ts --config .eslintrc",
