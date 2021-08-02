@@ -131,7 +131,7 @@ export async function awsSetup(opts: SetupOpts) {
     await execUtil.configureRunner()
     spinner.succeed(successText('Final configurations completed'))
 
-    console.log(pilotText('\nThis is you pilot speaking...We\'re ready for takeoff! \uD83D\uDEEB'))
+    console.log(pilotText('\nThis is your pilot speaking...We\'re ready for takeoff! \uD83D\uDEEB'))
   } catch (error) {
     cli.error(error)
   }
