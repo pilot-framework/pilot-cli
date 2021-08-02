@@ -5,6 +5,7 @@ import waypoint from '../waypoint'
 import creds from './creds'
 import fsUtil from '../fs'
 import { SetupOpts } from '../../commands/setup'
+import { SecurityGroup } from '../types'
 
 const timeout = (ms: number): Promise<number> => {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -34,11 +35,11 @@ const getSecurityGroups = async (): Promise<string> => {
     })
 }
 
-const getPilotSecurityGroup = async (): Promise<string> => {
+const getPilotSecurityGroup = async (): Promise<SecurityGroup> => {
   const securityGroups = await getSecurityGroups()
-  const sgPilot = JSON.parse(securityGroups).SecurityGroups.find((group: object) => group.GroupName === 'sg_pilot')
+  const sgPilot = JSON.parse(securityGroups).SecurityGroups.find((group: SecurityGroup) => group.GroupName === 'sg_pilot')
 
-  return new Promise<string>(res => res(sgPilot))
+  return new Promise<SecurityGroup>(res => res(sgPilot))
 }
 
 const setDockerConnection = async (): Promise<string> => {

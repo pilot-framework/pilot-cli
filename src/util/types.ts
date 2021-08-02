@@ -8,3 +8,8 @@ export interface HCLAttributes {
   repoName: string;
   frontend: boolean;
 }
+
+export interface SecurityGroup {
+  GroupId: string;
+  GroupName: string;
+}
