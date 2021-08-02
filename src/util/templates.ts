@@ -248,8 +248,7 @@ app "web" {
 
 const defaultGCPPermissions = () => 'compute.addresses.list,compute.backendBuckets.create,compute.backendBuckets.delete,compute.backendBuckets.get,compute.backendBuckets.use,compute.globalAddresses.create,compute.globalAddresses.delete,compute.globalAddresses.get,compute.globalAddresses.use,compute.globalForwardingRules.create,compute.globalForwardingRules.delete,compute.globalForwardingRules.get,compute.globalOperations.get,compute.regions.list,compute.sslCertificates.create,compute.sslCertificates.delete,compute.sslCertificates.get,compute.sslCertificates.list,compute.targetHttpsProxies.create,compute.targetHttpsProxies.delete,compute.targetHttpsProxies.get,compute.targetHttpsProxies.use,compute.urlMaps.create,compute.urlMaps.delete,compute.urlMaps.get,compute.urlMaps.list,compute.urlMaps.use,storage.buckets.create,storage.buckets.delete,storage.buckets.get,storage.buckets.update,storage.objects.create,storage.objects.delete,storage.objects.get,storage.objects.update,storage.buckets.getIamPolicy,storage.buckets.setIamPolicy,run.services.get,run.services.list,run.services.create,run.services.update,run.services.delete,run.services.getIamPolicy,run.services.setIamPolicy,run.routes.get,run.routes.list,run.configurations.get,run.configurations.list,run.revisions.get,run.revisions.list,run.revisions.delete,run.locations.get,run.locations.list,iam.serviceAccounts.create,iam.serviceAccounts.actAs,iam.serviceAccounts.get,iam.serviceAccounts.list,resourcemanager.projects.get'
 
-const defaultAWSPolicy = () => `
-{
+const defaultAWSPolicy = () => `{
   "Version": "2012-10-17",
   "Statement": [
       {
