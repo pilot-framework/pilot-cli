@@ -1,3 +1,4 @@
+import paths from './paths'
 import { HCLAttributes } from './types'
 
 const yamlConfig = (sshPubKey: string) =>
@@ -394,7 +395,7 @@ resource "aws_security_group" "sg_pilot" {
 }
 
 data "template_file" "user_data" {
-  template = file("../../templates/ssh-docker-waypoint-init.yaml")
+  template = file("${paths.SSH_DOCKER_WAYPOINT_INIT}")
 }
 
 resource "aws_instance" "waypoint" {
@@ -537,7 +538,7 @@ resource "google_compute_instance" "pilot-instance" {
   }
 
   metadata = {
-    user-data = file("../../templates/ssh-docker-waypoint-init.yaml")
+    user-data = file("${paths.SSH_DOCKER_WAYPOINT_INIT}")
   }
 
   service_account {

@@ -13,6 +13,7 @@ export async function initialize(overridePolicyPath: string | null) {
     console.log('Pilot configuration detected...')
   } else {
     await fsUtil.mkDir(paths.CONFIG)
+    await fsUtil.mkDir(paths.PILOT_BIN)
     await fsUtil.mkDir(paths.TEMPLATES)
     await fsUtil.mkDir(paths.TEMPLATES + '/instances')
     await fsUtil.mkDir(paths.AWS_INSTANCES)

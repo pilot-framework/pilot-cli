@@ -5,6 +5,7 @@ const appRoot = require('app-root-path')
 
 const HOME: string = homedir()
 const CONFIG: string = join(HOME, '/.pilot')
+const PILOT_BIN: string = join(CONFIG, '/bin')
 const TEMPLATES: string = join(CONFIG, '/templates')
 const PILOT_AWS: string = join(CONFIG, '/aws')
 const PILOT_AWS_METADATA = join(CONFIG, '/aws/metadata')
@@ -26,13 +27,14 @@ const AWS_INSTANCES: string = join(TEMPLATES, '/instances/aws')
 const GCP_CONFIG: string = join(HOME, '/.config/gcloud/configurations/config_default')
 const GCP_INSTANCES: string = join(TEMPLATES, '/instances/gcp')
 const PILOT_SSH: string = join(CONFIG, '/pilot-ssh')
-const SSH_DOCKER_WAYPOINT_INIT: string = join(appRoot.toString(), '/templates/ssh-docker-waypoint-init.yaml')
+const SSH_DOCKER_WAYPOINT_INIT: string = join(TEMPLATES, '/ssh-docker-waypoint-init.yaml')
 const EC2_KEY_PAIR: string = join(CONFIG, '/aws/ssh/PilotKeyPair.pem')
-const TERRAFORM_EXEC: string = join(appRoot.toString(), '/bin/terraform/terraform')
-const WAYPOINT_EXEC: string = join(appRoot.toString(), '/bin/waypoint/waypoint')
+const TERRAFORM_EXEC: string = join(PILOT_BIN, '/terraform')
+const WAYPOINT_EXEC: string = join(PILOT_BIN, '/waypoint')
 
 export default {
   HOME,
+  PILOT_BIN,
   CONFIG,
   TEMPLATES,
   PILOT_AWS,
