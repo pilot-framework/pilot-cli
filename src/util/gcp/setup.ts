@@ -47,8 +47,6 @@ export async function gcpSetup(opts: SetupOpts) {
 
     await fs.updateMetadata(currentMetadata)
 
-    await fs.mkDir(paths.appRoot + '/templates')
-
     // Set up tfvars
     spinner.text = 'Generating Terraform tfvars file'
     await fs.genTerraformVars(paths.GCP_INSTANCES, `default_zone="${zone}"\ndefault_project="${project}"`)

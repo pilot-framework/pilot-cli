@@ -64,9 +64,6 @@ export async function awsSetup(opts: SetupOpts) {
 
     spinner.start('Preparing resources for EC2 provisioning')
 
-    // Create templates directory
-    await fsUtil.mkDir(paths.appRoot + '/templates')
-
     spinner.text = 'Generating Terraform tfvars file'
     await fsUtil.genTerraformVars(paths.AWS_INSTANCES, `region="${awsRegion}"`)
     spinner.succeed(successText('Terraform tfvars file created'))
