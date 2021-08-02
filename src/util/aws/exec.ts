@@ -317,7 +317,6 @@ const createAccessKey = async () => {
 
 const pilotUserInit = async () => {
   try {
-    console.log('in pilotUserInit...')
     const acctExists = await serviceAccountExists()
     if (!acctExists) {
       await createServiceAccount()
