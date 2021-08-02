@@ -15,28 +15,12 @@ export default class Configure extends Command {
       char: 'p',
       description: 'Project ID for GCP Project that the service account and IAM role will be created for',
     }),
-    list: flags.boolean({
-      char: 'l',
-      description: 'List existing Waypoint Runner configuration',
-    }),
   }
 
   async run() {
     const { flags } = this.parse(Configure)
 
     const spinner = pilotSpinner()
-
-    if (flags.list) {
-      try {
-        const list = await waypoint.getEnvVars()
-
-        this.log(list)
-      } catch (error) {
-        this.log(error)
-      }
-
-      return
-    }
 
     const envVars: Array<string> = []
 

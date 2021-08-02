@@ -3,6 +3,7 @@ import awsExec from '../util/aws/exec'
 import gcpExec from '../util/gcp/exec'
 import paths from '../util/paths'
 import fs from '../util/fs'
+import waypoint from '../util/waypoint'
 import { pilotSpinner, pilotText, successText, failText, grayText } from '../util/cli'
 
 export default class Server extends Command {
@@ -13,6 +14,10 @@ export default class Server extends Command {
     ssh: flags.boolean({char: 's', description: 'SSH to remote management server'}),
     destroy: flags.boolean({char: 'd',
       description: 'Teardown the remote management server with its provisioned resources'}),
+    list: flags.boolean({
+      char: 'l',
+      description: 'List existing Waypoint Runner configuration',
+    }),
     // provider: flags.string({char: 'p', description: 'Which provider is being used'})
   }
 
@@ -25,6 +30,18 @@ export default class Server extends Command {
   async run() {
     const {flags} = this.parse(Server)
     const spinner = pilotSpinner()
+
+    if (flags.list) {
+      try {
+        const list = await waypoint.getEnvVars()
+
+        this.log(list)
+      } catch (error) {
+        this.log(error)
+      }
+
+      return
+    }
 
     if (!flags.ssh && !flags.destroy) this.log('Run "pilot server -h" for command listing')
 
