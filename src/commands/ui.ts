@@ -1,7 +1,9 @@
 import { Command, flags } from '@oclif/command'
 import paths from '../util/paths'
 import { exec } from 'child_process'
-import { readFile } from 'fs'
+import awsExec from '../util/aws/exec'
+import gcpExec from '../util/gcp/exec'
+import fs from '../util/fs'
 import * as open from 'open'
 
 export default class Ui extends Command {
@@ -24,12 +26,14 @@ export default class Ui extends Command {
         if (error) throw error
       })
     } else {
-      readFile(paths.PILOT_AWS_METADATA, 'utf8', (err, data) => {
-        if (err) throw err
-
-        const metadata = JSON.parse(data)
-        open(`https://${metadata.ipAddress}:9702`)
-      })
+      const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
+      if (serverPlatform === 'aws') {
+        const ipAddr = await awsExec.getServerIP()
+        await open(`https://${ipAddr}:9702`)
+      } else if (serverPlatform === 'gcp') {
+        const ipAddr = await gcpExec.getServerIP()
+        await open(`https://${ipAddr}:9702`)
+      }
     }
   }
 }
