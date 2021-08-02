@@ -19,7 +19,7 @@ $ npm install -g pilot-framework
 $ pilot COMMAND
 running command...
 $ pilot (-v|--version|version)
-pilot-framework/0.0.0 linux-x64 node-v14.16.1
+pilot-framework/0.1.0 linux-x64 node-v14.16.1
 $ pilot --help [COMMAND]
 USAGE
   $ pilot COMMAND
@@ -28,34 +28,50 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`pilot hello [FILE]`](#pilot-hello-file)
+* [`pilot configure`](#pilot-configure)
+* [`pilot destroy [APP]`](#pilot-destroy-app)
 * [`pilot help [COMMAND]`](#pilot-help-command)
 * [`pilot init`](#pilot-init)
+* [`pilot new TYPE`](#pilot-new-type)
 * [`pilot server [FILE]`](#pilot-server-file)
 * [`pilot setup`](#pilot-setup)
-* [`pilot template [FILE]`](#pilot-template-file)
 * [`pilot ui [FILE]`](#pilot-ui-file)
-* [`pilot up [FILE]`](#pilot-up-file)
+* [`pilot up [PROJECT] [PATH]`](#pilot-up-project-path)
 
-## `pilot hello [FILE]`
+## `pilot configure`
 
-describe the command here
+Configure remote Waypoint Server with credentials for selected cloud provider.
 
 ```
 USAGE
-  $ pilot hello [FILE]
+  $ pilot configure
 
 OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
+  -h, --help             show CLI help
+  -l, --list             List existing Waypoint Runner configuration
+  -p, --project=project  Project ID for GCP Project that the service account and IAM role will be created for
+  --aws                  Configure server with AWS Pilot IAM credentials
+  --gcp                  Configure server with GCP Pilot IAM credentials
 
-EXAMPLE
-  $ pilot hello
-  hello world from ./src/hello.ts!
+DESCRIPTION
+  This typically only needs to be run once for each provider.
 ```
 
-_See code: [src/commands/hello.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/hello.ts)_
+_See code: [src/commands/configure.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.0/src/commands/configure.ts)_
+
+## `pilot destroy [APP]`
+
+Destroys all deployments and releases of an application
+
+```
+USAGE
+  $ pilot destroy [APP]
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/destroy.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.0/src/commands/destroy.ts)_
 
 ## `pilot help [COMMAND]`
 
@@ -83,10 +99,29 @@ USAGE
   $ pilot init
 
 OPTIONS
+  -h, --help               show CLI help
+  --gcp-policy=gcp-policy  Specify a path to a CSV file for granular permissions
+```
+
+_See code: [src/commands/init.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.0/src/commands/init.ts)_
+
+## `pilot new TYPE`
+
+Initializes a project or application to be used with Pilot
+
+```
+USAGE
+  $ pilot new TYPE
+
+ARGUMENTS
+  TYPE  (project|app) the type you are trying to initialize (project or app)
+
+OPTIONS
+  -b, --bare  Generates Waypoint's template project hcl file.
   -h, --help  show CLI help
 ```
 
-_See code: [src/commands/init.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/init.ts)_
+_See code: [src/commands/new.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.0/src/commands/new.ts)_
 
 ## `pilot server [FILE]`
 
@@ -102,7 +137,7 @@ OPTIONS
   -s, --ssh      SSH to remote management server
 ```
 
-_See code: [src/commands/server.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/server.ts)_
+_See code: [src/commands/server.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.0/src/commands/server.ts)_
 
 ## `pilot setup`
 
@@ -113,28 +148,17 @@ USAGE
   $ pilot setup
 
 OPTIONS
+  -d, --dev   Provision Waypoint server using our experimental Docker image. Not guaranteed to work.
   -h, --help  show CLI help
-  --aws       Provision Waypoint server on AWS EC2
-  --gcp       Provision Waypoint server on GCP Compute Engine
+  --aws       Provision Waypoint server on AWS EC2 using Pilot's Docker image.
+
+  --bare      Provision Waypoint server using the default Waypoint Docker image.
+              WARNING: you will not have access to Pilot's custom plugins.
+
+  --gcp       Provision Waypoint server on GCP Compute Engine using Pilot's Docker image.
 ```
 
-_See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/setup.ts)_
-
-## `pilot template [FILE]`
-
-describe the command here
-
-```
-USAGE
-  $ pilot template [FILE]
-
-OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
-```
-
-_See code: [src/commands/template.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/template.ts)_
+_See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.0/src/commands/setup.ts)_
 
 ## `pilot ui [FILE]`
 
@@ -149,21 +173,19 @@ OPTIONS
   -h, --help          show CLI help
 ```
 
-_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/ui.ts)_
+_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.0/src/commands/ui.ts)_
 
-## `pilot up [FILE]`
+## `pilot up [PROJECT] [PATH]`
 
-describe the command here
+Deploys your project
 
 ```
 USAGE
-  $ pilot up [FILE]
+  $ pilot up [PROJECT] [PATH]
 
 OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
+  -h, --help  show CLI help
 ```
 
-_See code: [src/commands/up.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.0.0/src/commands/up.ts)_
+_See code: [src/commands/up.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.0/src/commands/up.ts)_
 <!-- commandsstop -->
