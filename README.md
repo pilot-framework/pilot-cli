@@ -19,7 +19,7 @@ $ npm install -g @pilot-framework/pilot
 $ pilot COMMAND
 running command...
 $ pilot (-v|--version|version)
-@pilot-framework/pilot/0.1.1 linux-x64 node-v14.16.1
+@pilot-framework/pilot/0.1.4 linux-x64 node-v14.16.1
 $ pilot --help [COMMAND]
 USAGE
   $ pilot COMMAND
@@ -57,7 +57,7 @@ DESCRIPTION
   This typically only needs to be run once for each provider.
 ```
 
-_See code: [src/commands/configure.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.1/src/commands/configure.ts)_
+_See code: [src/commands/configure.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/configure.ts)_
 
 ## `pilot destroy [APP]`
 
@@ -71,7 +71,7 @@ OPTIONS
   -h, --help  show CLI help
 ```
 
-_See code: [src/commands/destroy.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.1/src/commands/destroy.ts)_
+_See code: [src/commands/destroy.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/destroy.ts)_
 
 ## `pilot help [COMMAND]`
 
@@ -103,7 +103,7 @@ OPTIONS
   --gcp-policy=gcp-policy  Specify a path to a CSV file for granular permissions
 ```
 
-_See code: [src/commands/init.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.1/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/init.ts)_
 
 ## `pilot new TYPE`
 
@@ -121,7 +121,7 @@ OPTIONS
   -h, --help  show CLI help
 ```
 
-_See code: [src/commands/new.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.1/src/commands/new.ts)_
+_See code: [src/commands/new.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/new.ts)_
 
 ## `pilot server [FILE]`
 
@@ -137,7 +137,7 @@ OPTIONS
   -s, --ssh      SSH to remote management server
 ```
 
-_See code: [src/commands/server.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.1/src/commands/server.ts)_
+_See code: [src/commands/server.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/server.ts)_
 
 ## `pilot setup`
 
@@ -158,7 +158,7 @@ OPTIONS
   --gcp       Provision Waypoint server on GCP Compute Engine using Pilot's Docker image.
 ```
 
-_See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.1/src/commands/setup.ts)_
+_See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/setup.ts)_
 
 ## `pilot ui [FILE]`
 
@@ -173,7 +173,7 @@ OPTIONS
   -h, --help          show CLI help
 ```
 
-_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.1/src/commands/ui.ts)_
+_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/ui.ts)_
 
 ## `pilot up [PROJECT] [PATH]`
 
@@ -187,5 +187,5 @@ OPTIONS
   -h, --help  show CLI help
 ```
 
-_See code: [src/commands/up.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.1/src/commands/up.ts)_
+_See code: [src/commands/up.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/up.ts)_
 <!-- commandsstop -->
