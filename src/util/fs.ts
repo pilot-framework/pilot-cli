@@ -6,6 +6,7 @@ import {
   mkdir,
   readFile,
   writeFile,
+  unlink,
 } from 'fs'
 import { platform, arch } from 'os'
 import { join } from 'path'
@@ -112,6 +113,19 @@ const downloadFile = async (url: string, dest: string, callback: Function): Prom
     })
 }
 
+const cleanup = (waypoint: string, terraform: string): Promise<void> => {
+  return new Promise<void>((res, _) => {
+    unlink(waypoint, err =>  {
+      if (err) console.error(err)
+    })
+
+    unlink(terraform, err => {
+      if (err) console.error(err)
+      res()
+    })
+  })
+}
+
 const installBinaries = async (): Promise<void> => {
   const system = `${platform()}${arch()}`
 
@@ -123,25 +137,25 @@ const installBinaries = async (): Promise<void> => {
   switch (system) {
     case 'linuxx64': {
       terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_linux_amd64.zip'
-      terraform_dest = './bin/terraform_1.0.3_linux_amd64.zip'
+      terraform_dest = '/tmp/terraform_1.0.3_linux_amd64.zip'
       waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_linux_amd64.zip'
-      waypoint_dest = './bin/waypoint_0.4.2_linux_amd64.zip'
+      waypoint_dest = '/tmp/waypoint_0.4.2_linux_amd64.zip'
       break
     }
 
     case 'linuxx32': {
       terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_linux_386.zip'
-      terraform_dest = './bin/terraform_1.0.3_linux_386.zip'
+      terraform_dest = '/tmp/terraform_1.0.3_linux_amd64.zip'
       waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_linux_386.zip'
-      waypoint_dest = './bin/waypoint_0.4.2_linux_386.zip'
+      waypoint_dest = '/tmp/waypoint_0.4.2_linux_386.zip'
       break
     }
 
     case 'darwinx64': {
       terraform_url = 'https://releases.hashicorp.com/terraform/1.0.3/terraform_1.0.3_darwin_amd64.zip'
-      terraform_dest = './bin/terraform_1.0.3_darwin_amd64.zip'
+      terraform_dest = '/tmp/terraform_1.0.3_darwin_amd64.zip'
       waypoint_url = 'https://releases.hashicorp.com/waypoint/0.4.2/waypoint_0.4.2_darwin_amd64.zip'
-      waypoint_dest = './bin/waypoint_0.4.2_darwin_amd64.zip'
+      waypoint_dest = '/tmp/waypoint_0.4.2_darwin_amd64.zip'
       break
     }
 
@@ -151,13 +165,15 @@ const installBinaries = async (): Promise<void> => {
     }
   }
 
+  // do not change how this promise is structued. this is a load bearing promise and making it better breaks it
   return new Promise<void>((res, _) => {
     downloadFile(terraform_url, terraform_dest, async () => {
-      await decompress(terraform_dest, './bin/terraform/')
+      await decompress(terraform_dest, paths.PILOT_BIN)
     })
 
     downloadFile(waypoint_url, waypoint_dest, async () => {
-      await decompress(waypoint_dest, './bin/waypoint/')
+      await decompress(waypoint_dest, paths.PILOT_BIN)
+      await cleanup(waypoint_dest, terraform_dest)
       res()
     })
   })
