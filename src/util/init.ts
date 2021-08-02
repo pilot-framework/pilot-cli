@@ -14,6 +14,13 @@ export async function initialize(overridePolicyPath: string | null) {
   } else {
     await fsUtil.mkDir(paths.CONFIG)
     await fsUtil.mkDir(paths.TEMPLATES)
+    await fsUtil.mkDir(paths.TEMPLATES + '/instances')
+    await fsUtil.mkDir(paths.AWS_INSTANCES)
+    await fsUtil.mkDir(paths.GCP_INSTANCES)
+    await fsUtil.createFile(paths.AWS_INSTANCES + '/main.tf', templates.awsTerraformMain())
+    await fsUtil.createFile(paths.AWS_INSTANCES + '/variables.tf', templates.awsTerraformVars())
+    await fsUtil.createFile(paths.GCP_INSTANCES + '/main.tf', templates.gcpTerraformMain())
+    await fsUtil.createFile(paths.GCP_INSTANCES + '/variables.tf', templates.gcpTerraformVars())
     await fsUtil.createFile(paths.PILOT_AWS_POLICY, templates.defaultAWSPolicy())
     await fsUtil.createFile(paths.PILOT_GCP_POLICY_TEMPLATE, templates.defaultGCPPermissions())
     await fsUtil.mkDir(paths.PILOT_AWS)
