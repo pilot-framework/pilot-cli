@@ -1,6 +1,6 @@
 {
   "name": "@pilot-framework/pilot",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Pilot Framework",
   "bin": {
     "pilot": "./bin/run"
