@@ -24,12 +24,14 @@ const projectInit = async () => {
 }
 
 const appInit = async () => {
+  const hclExists = existsSync(join(cwd(), '/waypoint.hcl'))
   const projectChoices: any | undefined = await inquirer.prompt([
     {
       name: 'project',
       message: 'Select a project:',
       type: 'list',
       choices: (await waypoint.getProjects()),
+      when: !hclExists,
     },
     {
       name: 'provider',
@@ -106,7 +108,7 @@ const appInit = async () => {
   }
 
   let content = ''
-  if (!existsSync(join(cwd(), '/waypoint.hcl'))) {
+  if (!hclExists) {
     content = `# The name of your project.\nproject = "${projectChoices.project}"`
   }
 
