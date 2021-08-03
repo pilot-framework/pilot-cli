@@ -6,6 +6,7 @@ import {
   mkdir,
   readFile,
   writeFile,
+  appendFile,
   unlink,
 } from 'fs'
 import { platform, arch } from 'os'
@@ -33,6 +34,18 @@ const sshKeyGen = async (): Promise<string> => {
 const createFile = async (path: string, content: string): Promise<void> => {
   return new Promise<void>((res, rej) => {
     writeFile(path, content, error => {
+      if (error) rej(error)
+      res()
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const addToFile = async (path: string, content: string): Promise<void> => {
+  return new Promise<void>((res, rej) => {
+    appendFile(path, content, error => {
       if (error) rej(error)
       res()
     })
@@ -214,6 +227,7 @@ export default {
   fileToString,
   mkDir,
   createFile,
+  addToFile,
   sshKeyGen,
   getPilotMetadata,
   updateMetadata,

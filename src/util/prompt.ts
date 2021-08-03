@@ -6,6 +6,7 @@ import fs from '../util/fs'
 import gcpCreds from './gcp/creds'
 import { cwd } from 'process'
 import { join } from 'path'
+import { existsSync } from 'fs'
 
 const projectInit = async () => {
   console.log('Initializing a new project will create a project on the Waypoint server.')
@@ -38,7 +39,7 @@ const appInit = async () => {
     },
     {
       name: 'amount',
-      message: 'Number of applications your project contains:',
+      message: 'Number of applications to add to your project:',
       type: 'number',
     },
   ])
@@ -104,14 +105,19 @@ const appInit = async () => {
     console.clear()
   }
 
-  let content = `# The name of your project.\nproject = "${projectChoices.project}"`
+  let content = ''
+  if (!existsSync(join(cwd(), '/waypoint.hcl'))) {
+    content = `# The name of your project.\nproject = "${projectChoices.project}"`
+  }
+
   appChoices.forEach(app => {
     if (projectChoices.provider === 'AWS' && app.frontend) content += '\n\n' + tmpl.appAWSFrontendHCL(app)
     if (projectChoices.provider === 'AWS' && !app.frontend)content += '\n\n' + tmpl.appAWSBackendHCL(app)
     if (projectChoices.provider === 'GCP' && app.frontend) content += '\n\n' + tmpl.appGCPFrontendHCL(app)
     if (projectChoices.provider === 'GCP' && !app.frontend) content += '\n\n' + tmpl.appGCPBackendHCL(app)
   })
-  await fs.createFile(join(cwd(), '/waypoint.hcl'), content)
+
+  await fs.addToFile(join(cwd(), '/waypoint.hcl'), content)
   console.log('Your waypoint.hcl is ready!')
   console.log('Make alterations or use as is by configuring your project in the Waypoint UI.')
   console.log('You can push the waypoint.hcl to the root of your Github repo or paste it within the project settings.')
