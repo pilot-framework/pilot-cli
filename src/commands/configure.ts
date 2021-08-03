@@ -1,7 +1,7 @@
 import { Command, flags } from '@oclif/command'
 import gcpExec from '../util/gcp/exec'
 import awsExec from '../util/aws/exec'
-import { cli } from 'cli-ux'
+import { pilotSpinner, successText, failText, pilotText } from '../util/cli'
 import waypoint from '../util/waypoint'
 
 export default class Configure extends Command {
@@ -15,55 +15,42 @@ export default class Configure extends Command {
       char: 'p',
       description: 'Project ID for GCP Project that the service account and IAM role will be created for',
     }),
-    list: flags.boolean({
-      char: 'l',
-      description: 'List existing Waypoint Runner configuration',
-    }),
   }
 
   async run() {
     const { flags } = this.parse(Configure)
 
-    if (flags.list) {
-      try {
-        const list = await waypoint.getEnvVars()
-
-        this.log(list)
-      } catch (error) {
-        this.log(error)
-      }
-
-      return
-    }
+    const spinner = pilotSpinner()
 
     const envVars: Array<string> = []
 
     if (flags.aws) {
-      cli.action.start('Configuring IAM user and role for Pilot on AWS...')
+      spinner.start('Configuring IAM user and role for Pilot on AWS...')
 
       try {
         await awsExec.pilotUserInit()
       } catch (error) {
+        spinner.fail(failText('ERROR: IAM user and role configuration failed'))
         throw error
       }
 
-      cli.action.stop()
+      spinner.succeed(successText('IAM user and role configured'))
     } else if (flags.gcp) {
-      cli.action.start('Configuring IAM user and role for Pilot on GCP...')
+      spinner.start('Configuring IAM user and role for Pilot on GCP...')
 
       try {
         await gcpExec.pilotUserInit(true)
 
         envVars.push('GOOGLE_APPLICATION_CREDENTIALS=/root/.config/pilot-user-file.json')
       } catch (error) {
-        this.log(error)
+        spinner.fail(failText(`ERROR: ${error}`))
       }
 
       await waypoint.setEnvVars(envVars)
 
-      cli.action.stop()
+      spinner.succeed(successText('IAM user and role configured'))
     } else {
-      this.log('Run "pilot configure -h" for cloud provider options')
+      this.log(pilotText('Run "pilot configure -h" for cloud provider options'))
     }
   }
 }

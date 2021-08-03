@@ -5,6 +5,7 @@ import awsExec from '../util/aws/exec'
 import gcpExec from '../util/gcp/exec'
 import fs from '../util/fs'
 import * as open from 'open'
+import { failText } from '../util/cli'
 
 export default class Ui extends Command {
   static description = 'Opens the Waypoint UI on the default browser'
@@ -21,18 +22,28 @@ export default class Ui extends Command {
 
   async run() {
     const { flags } = this.parse(Ui)
+
     if (flags.authenticate) {
       exec(`${paths.WAYPOINT_EXEC} ui -authenticate`, error => {
-        if (error) throw error
+        if (error) {
+          console.log(failText('Unable to open UI. See error below...'))
+          throw error
+        }
       })
     } else {
       const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
+      let ipAddress: string
+
       if (serverPlatform === 'aws') {
-        const ipAddr = await awsExec.getServerIP()
-        await open(`https://${ipAddr}:9702`)
+        ipAddress = await awsExec.getServerIP()
       } else if (serverPlatform === 'gcp') {
-        const ipAddr = await gcpExec.getServerIP()
-        await open(`https://${ipAddr}:9702`)
+        ipAddress = await gcpExec.getServerIP()
+      }
+
+      if (ipAddress) {
+        open(`https://${ipAddress}:9702`)
+      } else {
+        console.log(failText('No server detected. Run `pilot setup` to initialize a server.'))
       }
     }
   }
