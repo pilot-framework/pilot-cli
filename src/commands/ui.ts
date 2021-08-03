@@ -32,13 +32,7 @@ export default class Ui extends Command {
       })
     } else {
       const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
-      let ipAddress: string
-
-      if (serverPlatform === 'aws') {
-        ipAddress = await awsExec.getServerIP()
-      } else if (serverPlatform === 'gcp') {
-        ipAddress = await gcpExec.getServerIP()
-      }
+      const ipAddress = (serverPlatform === 'aws') ? await awsExec.getServerIP() : await gcpExec.getServerIP()
 
       if (ipAddress) {
         open(`https://${ipAddress}:9702`)
