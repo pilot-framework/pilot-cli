@@ -64,24 +64,21 @@ export async function awsSetup(opts: SetupOpts) {
 
     spinner.start('Preparing resources for EC2 provisioning')
 
-    // Create templates directory
-    await fsUtil.mkDir(paths.appRoot + '/templates')
-
     spinner.text = 'Generating Terraform tfvars file'
     await fsUtil.genTerraformVars(paths.AWS_INSTANCES, `region="${awsRegion}"`)
-    spinner.succeed(successText('Terraform tfvars file created'))
+    spinner.succeed(successText('Terraform tfvars file generated'))
 
     // Generate SSH Keys
     if (!existsSync(paths.PILOT_SSH)) {
       spinner.start('Generating SSH keys')
       await fsUtil.sshKeyGen()
-      spinner.succeed(successText('Successfully generated SSH keys'))
+      spinner.succeed(successText('SSH keys generated'))
     }
 
     // Generate yaml file for cloud-init
     spinner.start('Generating cloud-init files')
     await fsUtil.genCloudInitYaml()
-    spinner.succeed(successText('Successfully generated cloud init'))
+    spinner.succeed(successText('Cloud init template file generated'))
 
     // Generate keypair to associate with EC2 for SSH access
     spinner.start('Refreshing EC2 key pair')
@@ -115,7 +112,7 @@ export async function awsSetup(opts: SetupOpts) {
     spinner.succeed(successText('Docker connection port configured'))
 
     // install waypoint post EC2 initialization
-    spinner.start('Setting up your remote Waypoint server')
+    spinner.start('Setting up remote Waypoint server')
     await execUtil.installWaypoint(opts)
     spinner.succeed(successText('Remote Waypoint server configured'))
 
@@ -126,7 +123,7 @@ export async function awsSetup(opts: SetupOpts) {
     spinner.text = 'Setting context'
     await execUtil.setContext()
 
-    spinner.text = ('Configuring runner')
+    spinner.text = 'Configuring runner'
     await waypoint.setDefaultContext()
     await execUtil.configureRunner()
     spinner.succeed(successText('Final configurations completed'))

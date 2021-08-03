@@ -1,7 +1,9 @@
 import { Command, flags } from '@oclif/command'
 import paths from '../util/paths'
 import { exec } from 'child_process'
-import { readFile } from 'fs'
+import awsExec from '../util/aws/exec'
+import gcpExec from '../util/gcp/exec'
+import fs from '../util/fs'
 import * as open from 'open'
 import { failText } from '../util/cli'
 
@@ -29,20 +31,20 @@ export default class Ui extends Command {
         }
       })
     } else {
-      readFile(paths.PILOT_AWS_METADATA, 'utf8', (err, data) => {
-        if (err) {
-          console.log(failText('Unable to open UI. See error below...'))
-          throw err
-        }
+      const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
+      let ipAddress: string
 
-        // const metadata = JSON.parse(data)
-        const ipAddress = JSON.parse(data).ipAddress
-        if (ipAddress) {
-          open(`https://${ipAddress}:9702`)
-        } else {
-          console.log(failText('No server detected. Run `pilot setup` to initialize a server.'))
-        }
-      })
+      if (serverPlatform === 'aws') {
+        ipAddress = await awsExec.getServerIP()
+      } else if (serverPlatform === 'gcp') {
+        ipAddress = await gcpExec.getServerIP()
+      }
+
+      if (ipAddress) {
+        open(`https://${ipAddress}:9702`)
+      } else {
+        console.log(failText('No server detected. Run `pilot setup` to initialize a server.'))
+      }
     }
   }
 }

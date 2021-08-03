@@ -1,8 +1,6 @@
 import { join } from 'path'
 import { homedir } from 'os'
 
-const appRoot = require('app-root-path')
-
 const HOME: string = homedir()
 const CONFIG: string = join(HOME, '/.pilot')
 const PILOT_BIN: string = join(CONFIG, '/bin')
@@ -49,7 +47,6 @@ export default {
   PILOT_GCP_POLICY,
   PILOT_GCP_POLICY_TEMPLATE,
   PILOT_GCP_SERVICE_FILE,
-  appRoot,
   AWS_CREDENTIALS,
   AWS_CONFIG,
   AWS_INSTANCES,
