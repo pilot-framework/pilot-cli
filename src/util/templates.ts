@@ -194,6 +194,9 @@ app "${attrs.appName}" {
       project  = "${attrs.project}"
       location = "${attrs.region}"
 
+      # Port the application is listening on
+      port = 5000
+
       capacity {
         memory                     = 128
         cpu_count                  = 1
@@ -487,7 +490,7 @@ resource "google_project_service" "computeEngine" {
     update = "40m"
   }
 
-  disable_dependent_services = true  
+  disable_dependent_services = true
 }
 
 resource "google_project_service" "cloudRun" {
@@ -500,7 +503,7 @@ resource "google_project_service" "cloudRun" {
     update = "40m"
   }
 
-  disable_dependent_services = true  
+  disable_dependent_services = true
 }
 
 resource "google_project_service" "crm" {
@@ -513,7 +516,7 @@ resource "google_project_service" "crm" {
     update = "40m"
   }
 
-  disable_dependent_services = true  
+  disable_dependent_services = true
 }
 
 resource "google_compute_instance" "pilot-instance" {
