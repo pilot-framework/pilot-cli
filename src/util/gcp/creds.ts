@@ -14,6 +14,12 @@ const getGCPZone = async (): Promise<string> => {
   return defaultZone[0].replace('zone = ', '')
 }
 
+const getGCPRegion = async (): Promise<string> => {
+  const zone = (await getGCPZone()).split('-')
+
+  return `${zone[0]}-${zone[1]}`
+}
+
 const getGCPProject = async (): Promise<string> => {
   const path = existsSync(paths.PILOT_GCP_CONFIG) ? paths.PILOT_GCP_CONFIG : paths.GCP_CONFIG
   const cfg = await fsUtil.fileToString(path)
@@ -29,4 +35,5 @@ const getGCPProject = async (): Promise<string> => {
 export default {
   getGCPProject,
   getGCPZone,
+  getGCPRegion,
 }

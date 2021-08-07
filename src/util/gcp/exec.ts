@@ -144,7 +144,7 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
       } catch (error) {
         // Don't want to throw an error in case the SSH key is still propagating
         if (!error.message.includes('Connection refused')) {
-          throw error
+          // TODO: log error messages
         }
       }
 
@@ -187,10 +187,10 @@ const installWaypoint = async (opts: SetupOpts) => {
   try {
     // wait for docker daemon to finish coming online
     await timeout(30000)
-    const pgrep = await sshExec('pgrep docker')
+    // const pgrep = await sshExec('pgrep docker')
     // TODO?: Move console logs to a log file
     // console.log('PID:', pgrep)
-    const install = await sshExec(`waypoint install -platform=docker ${image} -accept-tos`)
+    await sshExec(`waypoint install -platform=docker ${image} -accept-tos`)
     // console.log(install)
   } catch (error) {
     console.log(error)
