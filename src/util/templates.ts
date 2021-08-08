@@ -208,6 +208,11 @@ app "${attrs.appName}" {
       auto_scaling {
         max = 2
       }
+
+      vpc_access {
+        connector = "pilot-vpc-connector"
+        egress = "all"
+      }
     }
   }
 
