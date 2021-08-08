@@ -443,17 +443,38 @@ resource "aws_db_subnet_group" "pilot_db_subnet_group" {
   subnet_ids = [aws_subnet.db_subnet1.id, aws_subnet.db_subnet2.id]
 }
 
+resource "aws_security_group" "sg_pilot_db" {
+  name   = "sg_pilot_db"
+  vpc_id = aws_vpc.vpc.id
+  description = "Pilot DB security group"
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    security_groups = [aws_security_group.sg_pilot.id]
+    description = "Rule allowing access for sg_pilot group"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_db_instance" "pilot-db" {
   db_subnet_group_name         = aws_db_subnet_group.pilot_db_subnet_group.name
   allocated_storage            = 100
   max_allocated_storage        = 1000
   engine                       = "postgres"
   instance_class               = "db.m6g.large"
-  name                         = "pilotdb"
+  name                         = "postgres"
   username                     = "pilot"
   password                     = random_password.pilot_db_pass.result
   skip_final_snapshot          = true
-  vpc_security_group_ids       = [aws_security_group.sg_pilot.id]
+  vpc_security_group_ids       = [aws_security_group.sg_pilot_db.id]
   performance_insights_enabled = true
   port                         = 5432
 }
