@@ -18,6 +18,9 @@ export default class Server extends Command {
       char: 'l',
       description: 'List existing Waypoint Runner configuration',
     }),
+    db: flags.boolean({
+      description: 'Provides database connection information',
+    }),
     // provider: flags.string({char: 'p', description: 'Which provider is being used'})
   }
 
@@ -43,7 +46,7 @@ export default class Server extends Command {
       return
     }
 
-    if (!flags.ssh && !flags.destroy) this.log('Run "pilot server -h" for command listing')
+    if (!flags.ssh && !flags.destroy && !flags.db) this.log('Run "pilot server -h" for command listing')
 
     const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
 
@@ -76,6 +79,15 @@ export default class Server extends Command {
       } else if (serverPlatform === 'gcp') {
         await gcpExec.terraDestroy()
         spinner.succeed(successText('GCE destroyed'))
+      }
+    }
+
+    if (flags.db) {
+      if (serverPlatform === 'gcp') {
+        const user = await gcpExec.getDBUser()
+        const pass = await gcpExec.getDBPass()
+        const addr = await gcpExec.getDBAddr()
+        this.log(pilotText(`DB_HOST: ${addr}:5432\nDB_USER: ${user}\nDB_PASS: ${pass}`))
       }
     }
   }

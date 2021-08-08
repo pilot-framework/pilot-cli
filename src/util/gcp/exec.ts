@@ -28,6 +28,33 @@ const getServerIP = async (): Promise<string> => {
     })
 }
 
+const getDBUser = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} output -raw db_user`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+}
+
+const getDBPass = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} output -raw db_pass`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+}
+
+const getDBAddr = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} output -raw db_address`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+}
+
 const setDockerConnection = async () => {
   const ipAddress = await getServerIP()
   return new Promise<string>((res, rej) => {
@@ -399,4 +426,7 @@ export default {
   configureRunner,
   setDockerConnection,
   removeDockerConnection,
+  getDBUser,
+  getDBPass,
+  getDBAddr,
 }

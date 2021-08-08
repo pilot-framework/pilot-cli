@@ -671,6 +671,19 @@ resource "google_vpc_access_connector" "pilot_vpc_connector" {
   network       = google_compute_network.pilot-network.name
   region        = "${await gcpCreds.getGCPRegion()}"
 }
+
+output "db_user" {
+  value = google_sql_user.pilot_db_user.name
+}
+
+output "db_pass" {
+  value = google_sql_user.pilot_db_user.password
+  sensitive = true
+}
+
+ouput "db_address" {
+  value = google_compute_global_address.pilot_db_address
+}
 `
 
 const gcpTerraformVars = () => `
