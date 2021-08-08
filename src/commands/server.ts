@@ -88,6 +88,11 @@ export default class Server extends Command {
         const pass = await gcpExec.getDBPass()
         const addr = await gcpExec.getDBAddr()
         this.log(pilotText(`DB_HOST: ${addr}:5432\nDB_USER: ${user}\nDB_PASS: ${pass}`))
+      } else if (serverPlatform === 'aws') {
+        const user = await awsExec.getDBUser()
+        const pass = await awsExec.getDBPass()
+        const addr = await awsExec.getDBAddr()
+        this.log(pilotText(`DB_HOST: ${addr}\nDB_USER: ${user}\nDB_PASS: ${pass}`))
       }
     }
   }
