@@ -476,6 +476,7 @@ output "db_address" {
 
 output "db_pass" {
   value = random_password.pilot_db_pass.result
+  sensitive = true
 }
 `
 
