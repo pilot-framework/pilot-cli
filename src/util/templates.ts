@@ -1,3 +1,4 @@
+import gcpCreds from './gcp/creds'
 import paths from './paths'
 import { HCLAttributes } from './types'
 
@@ -452,17 +453,26 @@ variable "aws_key_pair" {
 }
 `
 
-const gcpTerraformMain = () => `
+const gcpTerraformMain = async (): Promise<string> => `
 terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
       version = "~> 3.0"
     }
+
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "~> 3.0"
+    }
   }
 }
 
 provider "google" {
+  project = var.default_project
+}
+
+provider "google-beta" {
   project = var.default_project
 }
 
@@ -496,6 +506,32 @@ resource "google_project_service" "computeEngine" {
 resource "google_project_service" "cloudRun" {
   project = data.google_project.pilot.project_id
   service = "run.googleapis.com"
+  disable_on_destroy = false
+
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "service_networking" {
+  project = data.google_project.pilot.project_id
+  service = "servicenetworking.googleapis.com"
+  disable_on_destroy = false
+
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "vpc_connector" {
+  project = data.google_project.pilot.project_id
+  service = "vpcaccess.googleapis.com"
   disable_on_destroy = false
 
   timeouts {
@@ -571,6 +607,82 @@ resource "google_compute_firewall" "pilot-firewall" {
     protocol = "tcp"
     ports    = ["22", "80", "8080", "1000-2000", "9701", "9702"]
   }
+}
+
+resource "google_compute_global_address" "pilot_db_address" {
+  provider = google-beta
+
+  name          = "pilot-db-address"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.pilot-network.id
+}
+
+resource "google_service_networking_connection" "pilot_vpc_connection" {
+  provider = google-beta
+
+  network                 = google_compute_network.pilot-network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.pilot_db_address.name]
+}
+
+resource "random_id" "db_name_suffix" {
+  byte_length = 4
+}
+
+resource "google_sql_database_instance" "pilot_db" {
+  provider = google-beta
+  region = "${await gcpCreds.getGCPRegion()}"
+
+  name              = "pilot-db-\${random_id.db_name_suffix.hex}"
+  database_version  = "POSTGRES_11"
+
+  depends_on = [google_service_networking_connection.pilot_vpc_connection]
+
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled    = true
+      private_network = google_compute_network.pilot-network.id
+    }
+  }
+}
+
+resource "random_password" "pilot_db_pass" {
+  length           = 16
+  special          = true
+  override_special = "_-!"
+  min_numeric      = 4
+}
+
+resource "google_sql_user" "pilot_db_user" {
+  name      = "pilot"
+  password  = random_password.pilot_db_pass.result
+  instance  = google_sql_database_instance.pilot_db.name
+  type      = "BUILT_IN"
+}
+
+# Serverless VPC connector is required for Cloud Run services needing to connect to DB
+# Then specify the connector in Waypoint config
+resource "google_vpc_access_connector" "pilot_vpc_connector" {
+  name          = "pilot-vpc-connector"
+  ip_cidr_range = "10.8.0.0/28"
+  network       = google_compute_network.pilot-network.name
+  region        = "${await gcpCreds.getGCPRegion()}"
+}
+
+output "db_user" {
+  value = google_sql_user.pilot_db_user.name
+}
+
+output "db_pass" {
+  value = google_sql_user.pilot_db_user.password
+  sensitive = true
+}
+
+ouput "db_address" {
+  value = google_compute_global_address.pilot_db_address
 }
 `
 

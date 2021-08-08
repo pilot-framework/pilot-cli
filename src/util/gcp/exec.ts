@@ -28,6 +28,33 @@ const getServerIP = async (): Promise<string> => {
     })
 }
 
+const getDBUser = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} output -raw db_user`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+}
+
+const getDBPass = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} output -raw db_pass`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+}
+
+const getDBAddr = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.GCP_INSTANCES} output -raw db_address`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+}
+
 const setDockerConnection = async () => {
   const ipAddress = await getServerIP()
   return new Promise<string>((res, rej) => {
@@ -144,7 +171,7 @@ const serverReachability = async (timeout: number): Promise<boolean> => {
       } catch (error) {
         // Don't want to throw an error in case the SSH key is still propagating
         if (!error.message.includes('Connection refused')) {
-          throw error
+          // TODO: log error messages
         }
       }
 
@@ -187,10 +214,10 @@ const installWaypoint = async (opts: SetupOpts) => {
   try {
     // wait for docker daemon to finish coming online
     await timeout(30000)
-    const pgrep = await sshExec('pgrep docker')
+    // const pgrep = await sshExec('pgrep docker')
     // TODO?: Move console logs to a log file
     // console.log('PID:', pgrep)
-    const install = await sshExec(`waypoint install -platform=docker ${image} -accept-tos`)
+    await sshExec(`waypoint install -platform=docker ${image} -accept-tos`)
     // console.log(install)
   } catch (error) {
     console.log(error)
@@ -399,4 +426,7 @@ export default {
   configureRunner,
   setDockerConnection,
   removeDockerConnection,
+  getDBUser,
+  getDBPass,
+  getDBAddr,
 }
