@@ -23,6 +23,42 @@ const getServerIP = async (): Promise<string> => {
     })
 }
 
+const getDBUser = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw db_user`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const getDBPass = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw db_pass`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const getDBAddr = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw db_address`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
 const getSecurityGroups = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec('aws ec2 describe-security-groups', (error, stdout) => {
@@ -375,6 +411,9 @@ export default {
   createServiceAccount,
   deleteKeyPair,
   getServerIP,
+  getDBUser,
+  getDBPass,
+  getDBAddr,
   getSecurityGroups,
   getPilotSecurityGroup,
   getServerStatus,

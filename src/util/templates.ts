@@ -450,7 +450,7 @@ resource "aws_db_instance" "pilot-db" {
   engine                       = "postgres"
   instance_class               = "db.m6g.large"
   name                         = "pilotdb"
-  username                     = "pilotdbuser"
+  username                     = "pilot"
   password                     = random_password.pilot_db_pass.result
   skip_final_snapshot          = true
   vpc_security_group_ids       = [aws_security_group.sg_pilot.id]
@@ -464,6 +464,10 @@ output "public_ip" {
 
 output "instance_id" {
   value = aws_instance.waypoint.id
+}
+
+output "db_user" {
+  value = aws_db_instance.pilot-db.username
 }
 
 output "db_address" {
