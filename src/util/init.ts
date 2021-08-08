@@ -7,7 +7,6 @@ import {
 } from 'fs'
 import templates from './templates'
 import { pilotSpinner, successText, failText } from './cli'
-import { fail } from 'assert'
 
 export async function initialize(overridePolicyPath: string | null) {
   const spinner = pilotSpinner()
@@ -26,7 +25,7 @@ export async function initialize(overridePolicyPath: string | null) {
     await fsUtil.mkDir(paths.GCP_INSTANCES)
     await fsUtil.createFile(paths.AWS_INSTANCES + '/main.tf', templates.awsTerraformMain())
     await fsUtil.createFile(paths.AWS_INSTANCES + '/variables.tf', templates.awsTerraformVars())
-    await fsUtil.createFile(paths.GCP_INSTANCES + '/main.tf', templates.gcpTerraformMain())
+    await fsUtil.createFile(paths.GCP_INSTANCES + '/main.tf', await templates.gcpTerraformMain())
     await fsUtil.createFile(paths.GCP_INSTANCES + '/variables.tf', templates.gcpTerraformVars())
     await fsUtil.createFile(paths.PILOT_AWS_POLICY, templates.defaultAWSPolicy())
     await fsUtil.createFile(paths.PILOT_GCP_POLICY_TEMPLATE, templates.defaultGCPPermissions())
