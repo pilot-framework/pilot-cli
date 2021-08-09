@@ -4,6 +4,7 @@ import waypoint from '../util/waypoint'
 import tmpl from '../util/templates'
 import fs from '../util/fs'
 import gcpCreds from './gcp/creds'
+import awsExec from './aws/exec'
 import { cwd } from 'process'
 import { join } from 'path'
 import { existsSync } from 'fs'
@@ -49,6 +50,7 @@ const appInit = async () => {
 
   const appChoices: Array<HCLAttributes> = []
   const gcpProjID = projectChoices.provider === 'GCP' ? await gcpCreds.getGCPProject() : ''
+  const awsAppSubnets = projectChoices.provider === 'AWS' ? await awsExec.getAppSubnets() : ''
   for (let count = 1; count <= projectChoices.amount; count += 1) {
     // eslint-disable-next-line no-await-in-loop
     const choices: any | undefined = await inquirer.prompt([
@@ -114,7 +116,7 @@ const appInit = async () => {
 
   appChoices.forEach(app => {
     if (projectChoices.provider === 'AWS' && app.frontend) content += '\n\n' + tmpl.appAWSFrontendHCL(app)
-    if (projectChoices.provider === 'AWS' && !app.frontend)content += '\n\n' + tmpl.appAWSBackendHCL(app)
+    if (projectChoices.provider === 'AWS' && !app.frontend)content += '\n\n' + tmpl.appAWSBackendHCL(app, awsAppSubnets)
     if (projectChoices.provider === 'GCP' && app.frontend) content += '\n\n' + tmpl.appGCPFrontendHCL(app)
     if (projectChoices.provider === 'GCP' && !app.frontend) content += '\n\n' + tmpl.appGCPBackendHCL(app)
   })

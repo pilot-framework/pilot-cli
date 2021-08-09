@@ -135,7 +135,7 @@ app "${attrs.appName}" {
   }
 }`
 
-const appAWSBackendHCL = (attrs: HCLAttributes) =>
+const appAWSBackendHCL = (attrs: HCLAttributes, subnets: string) =>
   `# See the following for additional information on Waypoint's built-in ECS plugin:
 # https://www.waypointproject.io/plugins/aws-ecs
 
@@ -163,6 +163,8 @@ app "${attrs.appName}" {
     use "aws-ecs" {
       region = "${attrs.region}"
       memory = "512"
+      # By default this value uses subnets associated with the Pilot VPC
+      subnets = ${subnets}
     }
   }
 }`
