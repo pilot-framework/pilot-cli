@@ -759,7 +759,7 @@ output "db_pass" {
   sensitive = true
 }
 
-ouput "db_address" {
+output "db_address" {
   value = google_compute_global_address.pilot_db_address
 }
 `
