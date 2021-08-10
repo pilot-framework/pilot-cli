@@ -59,6 +59,18 @@ const getDBAddr = async (): Promise<string> => {
     })
 }
 
+const getAppSubnets = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -json app_subnets`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
 const getSecurityGroups = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec('aws ec2 describe-security-groups', (error, stdout) => {
@@ -414,6 +426,7 @@ export default {
   getDBUser,
   getDBPass,
   getDBAddr,
+  getAppSubnets,
   getSecurityGroups,
   getPilotSecurityGroup,
   getServerStatus,

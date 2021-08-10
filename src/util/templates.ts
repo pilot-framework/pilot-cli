@@ -135,7 +135,7 @@ app "${attrs.appName}" {
   }
 }`
 
-const appAWSBackendHCL = (attrs: HCLAttributes) =>
+const appAWSBackendHCL = (attrs: HCLAttributes, subnets: string) =>
   `# See the following for additional information on Waypoint's built-in ECS plugin:
 # https://www.waypointproject.io/plugins/aws-ecs
 
@@ -163,6 +163,8 @@ app "${attrs.appName}" {
     use "aws-ecs" {
       region = "${attrs.region}"
       memory = "512"
+      # By default this value uses subnets associated with the Pilot VPC
+      subnets = ${subnets}
     }
   }
 }`
@@ -457,8 +459,8 @@ resource "aws_security_group" "sg_pilot_db" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    security_groups = [aws_security_group.sg_pilot.id]
-    description = "Rule allowing access for sg_pilot group"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Rule allowing internal access to DB instance"
   }
 
   egress {
@@ -484,6 +486,30 @@ resource "aws_db_instance" "pilot-db" {
   port                         = 5432
 }
 
+resource "aws_subnet" "pilot_apps_1" {
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = "10.1.3.0/24"
+  availability_zone = "\${var.region}a"
+  map_public_ip_on_launch = true
+}
+
+resource "aws_subnet" "pilot_apps_2" {
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = "10.1.4.0/24"
+  availability_zone = "\${var.region}b"
+  map_public_ip_on_launch = true
+}
+
+resource "aws_route_table_association" "rta_subnet_public_apps_1" {
+  subnet_id      = aws_subnet.pilot_apps_1.id
+  route_table_id = aws_route_table.rtb_public.id
+}
+
+resource "aws_route_table_association" "rta_subnet_public_apps_2" {
+  subnet_id      = aws_subnet.pilot_apps_2.id
+  route_table_id = aws_route_table.rtb_public.id
+}
+
 output "public_ip" {
   value = aws_instance.waypoint.public_ip
 }
@@ -503,6 +529,10 @@ output "db_address" {
 output "db_pass" {
   value = random_password.pilot_db_pass.result
   sensitive = true
+}
+
+output "app_subnets" {
+  value = [aws_subnet.pilot_apps_1.id, aws_subnet.pilot_apps_2.id]
 }
 `
 
