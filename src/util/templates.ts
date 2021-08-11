@@ -135,7 +135,7 @@ app "${attrs.appName}" {
   }
 }`
 
-const appAWSBackendHCL = (attrs: HCLAttributes, subnets: string) =>
+const appAWSBackendHCL = (attrs: HCLAttributes, subnets: string, serverPlatform: string) =>
   `# See the following for additional information on Waypoint's built-in ECS plugin:
 # https://www.waypointproject.io/plugins/aws-ecs
 
@@ -163,13 +163,18 @@ app "${attrs.appName}" {
     use "aws-ecs" {
       region = "${attrs.region}"
       memory = "512"
-      # By default this value uses subnets associated with the Pilot VPC
-      subnets = ${subnets}
+      ${(() => {
+    if (serverPlatform === 'aws') {
+      return `# By default this value uses subnets associated with the Pilot VPC
+      subnets = ${subnets}`
+    }
+    return ''
+  })()}
     }
   }
 }`
 
-const appGCPBackendHCL = (attrs: HCLAttributes) =>
+const appGCPBackendHCL = (attrs: HCLAttributes, serverPlatform: string) =>
   `# See the following for additional information on Waypoint's built-in GCR plugin:
 # https://www.waypointproject.io/plugins/google-cloud-run
 
@@ -210,11 +215,16 @@ app "${attrs.appName}" {
       auto_scaling {
         max = 2
       }
-
+      ${(() => {
+    if (serverPlatform === 'gcp') {
+      return `
       vpc_access {
         connector = "pilot-vpc-connector"
         egress = "all"
-      }
+      }`
+    }
+    return ''
+  })()}
     }
   }
 

@@ -24,7 +24,7 @@ const projectInit = async () => {
   console.log('A project needs at least one application. You can initialize a waypoint.hcl file by running \'pilot new app\'.')
 }
 
-const appInit = async () => {
+const appInit = async (serverPlatform: string) => {
   const hclExists = existsSync(join(cwd(), '/waypoint.hcl'))
   const projectChoices: any | undefined = await inquirer.prompt([
     {
@@ -116,9 +116,9 @@ const appInit = async () => {
 
   appChoices.forEach(app => {
     if (projectChoices.provider === 'AWS' && app.frontend) content += '\n\n' + tmpl.appAWSFrontendHCL(app)
-    if (projectChoices.provider === 'AWS' && !app.frontend)content += '\n\n' + tmpl.appAWSBackendHCL(app, awsAppSubnets)
+    if (projectChoices.provider === 'AWS' && !app.frontend)content += '\n\n' + tmpl.appAWSBackendHCL(app, awsAppSubnets, serverPlatform)
     if (projectChoices.provider === 'GCP' && app.frontend) content += '\n\n' + tmpl.appGCPFrontendHCL(app)
-    if (projectChoices.provider === 'GCP' && !app.frontend) content += '\n\n' + tmpl.appGCPBackendHCL(app)
+    if (projectChoices.provider === 'GCP' && !app.frontend) content += '\n\n' + tmpl.appGCPBackendHCL(app, serverPlatform)
   })
 
   await fs.addToFile(join(cwd(), '/waypoint.hcl'), content)

@@ -40,7 +40,8 @@ export default class New extends Command {
     }
 
     if (args.type === 'app') {
-      await prompt.appInit()
+      const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
+      await prompt.appInit(serverPlatform)
     }
   }
 }
