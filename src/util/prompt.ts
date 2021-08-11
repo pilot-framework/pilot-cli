@@ -25,6 +25,7 @@ const projectInit = async () => {
 }
 
 const appInit = async () => {
+  const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
   const hclExists = existsSync(join(cwd(), '/waypoint.hcl'))
   const projectChoices: any | undefined = await inquirer.prompt([
     {
@@ -116,9 +117,9 @@ const appInit = async () => {
 
   appChoices.forEach(app => {
     if (projectChoices.provider === 'AWS' && app.frontend) content += '\n\n' + tmpl.appAWSFrontendHCL(app)
-    if (projectChoices.provider === 'AWS' && !app.frontend)content += '\n\n' + tmpl.appAWSBackendHCL(app, awsAppSubnets)
+    if (projectChoices.provider === 'AWS' && !app.frontend)content += '\n\n' + tmpl.appAWSBackendHCL(app, awsAppSubnets, serverPlatform)
     if (projectChoices.provider === 'GCP' && app.frontend) content += '\n\n' + tmpl.appGCPFrontendHCL(app)
-    if (projectChoices.provider === 'GCP' && !app.frontend) content += '\n\n' + tmpl.appGCPBackendHCL(app)
+    if (projectChoices.provider === 'GCP' && !app.frontend) content += '\n\n' + tmpl.appGCPBackendHCL(app, serverPlatform)
   })
 
   await fs.addToFile(join(cwd(), '/waypoint.hcl'), content)
