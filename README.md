@@ -19,7 +19,7 @@ $ npm install -g @pilot-framework/pilot
 $ pilot COMMAND
 running command...
 $ pilot (-v|--version|version)
-@pilot-framework/pilot/0.1.4 linux-x64 node-v14.16.1
+@pilot-framework/pilot/0.1.5 linux-x64 node-v15.6.0
 $ pilot --help [COMMAND]
 USAGE
   $ pilot COMMAND
@@ -29,9 +29,11 @@ USAGE
 # Commands
 <!-- commands -->
 * [`pilot configure`](#pilot-configure)
+* [`pilot connect [FILE]`](#pilot-connect-file)
 * [`pilot destroy [APP]`](#pilot-destroy-app)
 * [`pilot help [COMMAND]`](#pilot-help-command)
 * [`pilot init`](#pilot-init)
+* [`pilot invite [FILE]`](#pilot-invite-file)
 * [`pilot new TYPE`](#pilot-new-type)
 * [`pilot server [FILE]`](#pilot-server-file)
 * [`pilot setup`](#pilot-setup)
@@ -48,7 +50,6 @@ USAGE
 
 OPTIONS
   -h, --help             show CLI help
-  -l, --list             List existing Waypoint Runner configuration
   -p, --project=project  Project ID for GCP Project that the service account and IAM role will be created for
   --aws                  Configure server with AWS Pilot IAM credentials
   --gcp                  Configure server with GCP Pilot IAM credentials
@@ -57,7 +58,23 @@ DESCRIPTION
   This typically only needs to be run once for each provider.
 ```
 
-_See code: [src/commands/configure.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/configure.ts)_
+_See code: [src/commands/configure.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/configure.ts)_
+
+## `pilot connect [FILE]`
+
+describe the command here
+
+```
+USAGE
+  $ pilot connect [FILE]
+
+OPTIONS
+  -f, --force
+  -h, --help       show CLI help
+  -n, --name=name  name to print
+```
+
+_See code: [src/commands/connect.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/connect.ts)_
 
 ## `pilot destroy [APP]`
 
@@ -71,7 +88,7 @@ OPTIONS
   -h, --help  show CLI help
 ```
 
-_See code: [src/commands/destroy.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/destroy.ts)_
+_See code: [src/commands/destroy.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/destroy.ts)_
 
 ## `pilot help [COMMAND]`
 
@@ -103,7 +120,23 @@ OPTIONS
   --gcp-policy=gcp-policy  Specify a path to a CSV file for granular permissions
 ```
 
-_See code: [src/commands/init.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/init.ts)_
+
+## `pilot invite [FILE]`
+
+describe the command here
+
+```
+USAGE
+  $ pilot invite [FILE]
+
+OPTIONS
+  -f, --force
+  -h, --help       show CLI help
+  -n, --name=name  name to print
+```
+
+_See code: [src/commands/invite.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/invite.ts)_
 
 ## `pilot new TYPE`
 
@@ -121,7 +154,7 @@ OPTIONS
   -h, --help  show CLI help
 ```
 
-_See code: [src/commands/new.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/new.ts)_
+_See code: [src/commands/new.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/new.ts)_
 
 ## `pilot server [FILE]`
 
@@ -134,10 +167,12 @@ USAGE
 OPTIONS
   -d, --destroy  Teardown the remote management server with its provisioned resources
   -h, --help     show CLI help
+  -l, --list     List existing Waypoint Runner configuration
   -s, --ssh      SSH to remote management server
+  --db           Provides database connection information
 ```
 
-_See code: [src/commands/server.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/server.ts)_
+_See code: [src/commands/server.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/server.ts)_
 
 ## `pilot setup`
 
@@ -158,7 +193,7 @@ OPTIONS
   --gcp       Provision Waypoint server on GCP Compute Engine using Pilot's Docker image.
 ```
 
-_See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/setup.ts)_
+_See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/setup.ts)_
 
 ## `pilot ui [FILE]`
 
@@ -173,7 +208,7 @@ OPTIONS
   -h, --help          show CLI help
 ```
 
-_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/ui.ts)_
+_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/ui.ts)_
 
 ## `pilot up [PROJECT] [PATH]`
 
@@ -187,5 +222,5 @@ OPTIONS
   -h, --help  show CLI help
 ```
 
-_See code: [src/commands/up.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.4/src/commands/up.ts)_
+_See code: [src/commands/up.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/up.ts)_
 <!-- commandsstop -->
