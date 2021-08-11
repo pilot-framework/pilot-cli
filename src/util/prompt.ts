@@ -24,7 +24,8 @@ const projectInit = async () => {
   console.log('A project needs at least one application. You can initialize a waypoint.hcl file by running \'pilot new app\'.')
 }
 
-const appInit = async (serverPlatform: string) => {
+const appInit = async () => {
+  const serverPlatform = (await fs.getPilotMetadata()).serverPlatform
   const hclExists = existsSync(join(cwd(), '/waypoint.hcl'))
   const projectChoices: any | undefined = await inquirer.prompt([
     {
