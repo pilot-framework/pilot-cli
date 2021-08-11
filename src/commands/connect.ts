@@ -1,25 +1,25 @@
 import {Command, flags} from '@oclif/command'
+import prompt from '../util/prompt'
+import paths from '../util/paths'
+import { spawn } from 'child_process'
 
 export default class Connect extends Command {
-  static description = 'describe the command here'
+  static description = 'Used to set the connection context to a Waypoint server'
 
   static flags = {
     help: flags.help({char: 'h'}),
-    // flag with a value (-n, --name=VALUE)
-    name: flags.string({char: 'n', description: 'name to print'}),
-    // flag with no value (-f, --force)
-    force: flags.boolean({char: 'f'}),
+    verify: flags.boolean({char: 'v'}),
   }
 
-  static args = [{name: 'file'}]
-
   async run() {
-    const {args, flags} = this.parse(Connect)
+    const {flags} = this.parse(Connect)
 
-    const name = flags.name ?? 'world'
-    this.log(`hello ${name} from /home/vbundage/capstone/cli-dev/pilot-cli/src/commands/connect.ts`)
-    if (args.file && flags.force) {
-      this.log(`you input --force and --file: ${args.file}`)
+    if (flags.verify) {
+      const execArgs = ['context', 'verify']
+      spawn(`${paths.WAYPOINT_EXEC}`, execArgs, { stdio: 'inherit'})
+      return
     }
+
+    await prompt.connectContext()
   }
 }

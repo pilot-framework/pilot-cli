@@ -9,6 +9,29 @@ import { cwd } from 'process'
 import { join } from 'path'
 import { existsSync } from 'fs'
 
+const connectContext = async () => {
+  console.log('This will set the connection context to a Waypoint server.')
+  const contextInfo = await inquirer.prompt([
+    {
+      name: 'address',
+      message: 'Address of server:',
+      type: 'input',
+    },
+    {
+      name: 'token',
+      message: 'Authentication Token:',
+      type: 'input',
+    },
+  ])
+
+  try {
+    await waypoint.setContext(contextInfo.address, contextInfo.token)
+    await waypoint.setDefaultContext()
+  } catch (error) {
+    throw error
+  }
+}
+
 const projectInit = async () => {
   console.log('Initializing a new project will create a project on the Waypoint server.')
   const project = await inquirer.prompt([
@@ -131,4 +154,5 @@ const appInit = async () => {
 export default {
   appInit,
   projectInit,
+  connectContext,
 }
