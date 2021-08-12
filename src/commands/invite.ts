@@ -42,6 +42,6 @@ export default class Invite extends Command {
 
     const token = await waypoint.getToken()
     this.log(`${grayText('Provide the following command to your team member')}
-${pilotText(`pilot connect --address=${ipAddr} --token=${token}`)}`)
+${pilotText(`pilot connect --address=${ipAddr} --token=${token} --provider=${serverPlatform}`)}`)
   }
 }

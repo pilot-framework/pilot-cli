@@ -2,10 +2,11 @@ import {Command, flags} from '@oclif/command'
 import paths from '../util/paths'
 import { spawn } from 'child_process'
 import waypoint from '../util/waypoint'
-import { successText } from '../util/cli'
+import { failText, successText } from '../util/cli'
+import fsUtil from '../util/fs'
 
 export default class Connect extends Command {
-  static description = 'Used to set the connection context to a Waypoint server'
+  static description = 'Used to set the connection context to a Waypoint server from an invite'
 
   static flags = {
     help: flags.help({char: 'h'}),
@@ -15,11 +16,15 @@ export default class Connect extends Command {
     }),
     address: flags.string({
       description: 'Address of server',
-      dependsOn: ['token'],
+      dependsOn: ['token', 'provider'],
     }),
     token: flags.string({
       description: 'Authentication token of server',
-      dependsOn: ['address'],
+      dependsOn: ['address', 'provider'],
+    }),
+    provider: flags.string({
+      description: 'Pilot server cloud provider',
+      dependsOn: ['address', 'token'],
     }),
   }
 
@@ -32,7 +37,16 @@ export default class Connect extends Command {
       return
     }
 
-    if (flags.address && flags.token) {
+    if (flags.address && flags.token && flags.provider) {
+      if (flags.provider !== 'aws' && flags.provider !== 'gcp') {
+        this.log(failText('Not a valid cloud provider'))
+        return
+      }
+
+      const metadata = {serverPlatform: ''}
+      metadata.serverPlatform = flags.provider
+      await fsUtil.updateMetadata(metadata)
+
       try {
         await waypoint.setContext(flags.address, flags.token)
         await waypoint.setDefaultContext()
