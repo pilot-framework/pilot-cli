@@ -51,7 +51,7 @@ const appInit = async () => {
 
   const appChoices: Array<HCLAttributes> = []
   const gcpProjID = projectChoices.provider === 'GCP' ? await gcpCreds.getGCPProject() : ''
-  const awsAppSubnets = projectChoices.provider === 'AWS' ? await awsExec.getAppSubnets() : ''
+  const awsAppSubnets = serverPlatform === 'aws' ? await awsExec.getAppSubnets() : ''
   for (let count = 1; count <= projectChoices.amount; count += 1) {
     // eslint-disable-next-line no-await-in-loop
     const choices: any | undefined = await inquirer.prompt([
