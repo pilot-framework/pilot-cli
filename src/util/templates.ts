@@ -765,6 +765,8 @@ resource "google_sql_database_instance" "pilot_db" {
       private_network = google_compute_network.pilot-network.id
     }
   }
+  
+  deletion_protection = false
 }
 
 resource "random_password" "pilot_db_pass" {
