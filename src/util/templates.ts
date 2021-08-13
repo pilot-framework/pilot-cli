@@ -800,7 +800,7 @@ output "db_pass" {
 }
 
 output "db_address" {
-  value = google_compute_global_address.pilot_db_address
+  value = google_compute_global_address.pilot_db_address.address
 }
 `
 
