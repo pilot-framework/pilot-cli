@@ -10,6 +10,7 @@ export interface HCLAttributes {
 }
 
 export interface SecurityGroup {
+  Description: string;
   GroupId: string;
   GroupName: string;
 }
