@@ -74,6 +74,7 @@ export default class Server extends Command {
     if (flags.destroy) {
       spinner.start('Tearing down remote management server')
       if (serverPlatform === 'aws') {
+        await awsExec.deleteSecurityGroups()
         await awsExec.terraDestroy()
         spinner.succeed(successText('EC2 destroyed'))
       } else if (serverPlatform === 'gcp') {
