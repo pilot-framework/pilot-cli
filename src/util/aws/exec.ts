@@ -71,6 +71,59 @@ const getAppSubnets = async (): Promise<string> => {
     })
 }
 
+const getPilotVPCID = async (): Promise<string> => {
+  return new Promise<string>((res, rej) => {
+    exec(`${paths.TERRAFORM_EXEC} -chdir=${paths.AWS_INSTANCES} output -raw pilot_vpc_id`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const getPilotVPCSG = async (): Promise<string> => {
+  const vpcID = await getPilotVPCID()
+  return new Promise<string>((res, rej) => {
+    exec(`aws ec2 describe-security-groups --filters Name=vpc-id,Values=${vpcID}`, (error, stdout) => {
+      if (error) rej(error)
+      res(stdout)
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const deleteSG = async (sgId: string): Promise<void> => {
+  return new Promise<void>((res, rej) => {
+    exec(`aws ec2 delete-security-group --group-id ${sgId}`, (error, _) => {
+      if (error) rej(error)
+      res()
+    })
+  })
+    .catch(error => {
+      throw error
+    })
+}
+
+const deleteSecurityGroups = async (): Promise<void[]> => {
+  const sgData = JSON.parse(await getPilotVPCSG()).SecurityGroups
+  const sgPromises: Array<Promise<void>> = []
+  sgData.forEach((sg: SecurityGroup) => {
+    if (sg.Description.includes('Managed by Terraform') ||
+    sg.Description.includes('Pilot DB security group') ||
+    sg.GroupName === 'default') return
+    sgPromises.push(deleteSG(sg.GroupId))
+  })
+
+  return Promise.all(sgPromises)
+    .catch(error => {
+      throw error
+    })
+}
+
 const getSecurityGroups = async (): Promise<string> => {
   return new Promise<string>((res, rej) => {
     exec('aws ec2 describe-security-groups', (error, stdout) => {
@@ -443,4 +496,5 @@ export default {
   configureRunner,
   serviceAccountExists,
   pilotUserInit,
+  deleteSecurityGroups,
 }
