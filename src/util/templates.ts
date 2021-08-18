@@ -544,6 +544,10 @@ output "db_pass" {
 output "app_subnets" {
   value = [aws_subnet.pilot_apps_1.id, aws_subnet.pilot_apps_2.id]
 }
+
+output "pilot_vpc_id" {
+  value = aws_vpc.vpc.id
+}
 `
 
 const awsTerraformVars = () => `
@@ -765,7 +769,7 @@ resource "google_sql_database_instance" "pilot_db" {
       private_network = google_compute_network.pilot-network.id
     }
   }
-  
+
   deletion_protection = false
 }
 
