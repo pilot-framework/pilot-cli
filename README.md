@@ -28,17 +28,20 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`pilot configure`](#pilot-configure)
-* [`pilot connect [FILE]`](#pilot-connect-file)
-* [`pilot destroy [APP]`](#pilot-destroy-app)
-* [`pilot help [COMMAND]`](#pilot-help-command)
-* [`pilot init`](#pilot-init)
-* [`pilot invite [FILE]`](#pilot-invite-file)
-* [`pilot new TYPE`](#pilot-new-type)
-* [`pilot server [FILE]`](#pilot-server-file)
-* [`pilot setup`](#pilot-setup)
-* [`pilot ui [FILE]`](#pilot-ui-file)
-* [`pilot up [PROJECT] [PATH]`](#pilot-up-project-path)
+- [pilot-framework](#pilot-framework)
+- [Usage](#usage)
+- [Commands](#commands)
+  - [`pilot configure`](#pilot-configure)
+  - [`pilot connect`](#pilot-connect)
+  - [`pilot destroy [APP]`](#pilot-destroy-app)
+  - [`pilot help [COMMAND]`](#pilot-help-command)
+  - [`pilot init`](#pilot-init)
+  - [`pilot invite`](#pilot-invite)
+  - [`pilot new TYPE`](#pilot-new-type)
+  - [`pilot server`](#pilot-server)
+  - [`pilot setup`](#pilot-setup)
+  - [`pilot ui`](#pilot-ui)
+  - [`pilot up [PROJECT] [PATH]`](#pilot-up-project-path)
 
 ## `pilot configure`
 
@@ -60,18 +63,20 @@ DESCRIPTION
 
 _See code: [src/commands/configure.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/configure.ts)_
 
-## `pilot connect [FILE]`
+## `pilot connect`
 
-describe the command here
+Used to set the connection context to a Waypoint server from an invite
 
 ```
 USAGE
-  $ pilot connect [FILE]
+  $ pilot connect
 
 OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
+  -v, --verify          Verify connection with the Waypoint server
+  -h, --help            show CLI help
+  --address=address     Address of server
+  --token=token         Authentication token of server
+  --provider=provider   Pilot server cloud provider
 ```
 
 _See code: [src/commands/connect.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/connect.ts)_
@@ -122,18 +127,16 @@ OPTIONS
 
 _See code: [src/commands/init.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/init.ts)_
 
-## `pilot invite [FILE]`
+## `pilot invite`
 
-describe the command here
+Creates an invite string that can be sent to team members
 
 ```
 USAGE
-  $ pilot invite [FILE]
+  $ pilot invite
 
 OPTIONS
-  -f, --force
   -h, --help       show CLI help
-  -n, --name=name  name to print
 ```
 
 _See code: [src/commands/invite.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/invite.ts)_
@@ -156,13 +159,13 @@ OPTIONS
 
 _See code: [src/commands/new.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/new.ts)_
 
-## `pilot server [FILE]`
+## `pilot server`
 
 Used to interact with the remote management server
 
 ```
 USAGE
-  $ pilot server [FILE]
+  $ pilot server
 
 OPTIONS
   -d, --destroy  Teardown the remote management server with its provisioned resources
@@ -195,13 +198,13 @@ OPTIONS
 
 _See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/setup.ts)_
 
-## `pilot ui [FILE]`
+## `pilot ui`
 
 Opens the Waypoint UI on the default browser
 
 ```
 USAGE
-  $ pilot ui [FILE]
+  $ pilot ui
 
 OPTIONS
   -a, --authenticate  Automatically log in to Waypoint UI
