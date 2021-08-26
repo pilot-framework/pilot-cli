@@ -19,7 +19,7 @@ $ npm install -g @pilot-framework/pilot
 $ pilot COMMAND
 running command...
 $ pilot (-v|--version|version)
-@pilot-framework/pilot/0.1.5 linux-x64 node-v15.6.0
+@pilot-framework/pilot/0.1.7 linux-x64 node-v15.6.0
 $ pilot --help [COMMAND]
 USAGE
   $ pilot COMMAND
@@ -61,7 +61,7 @@ DESCRIPTION
   This typically only needs to be run once for each provider.
 ```
 
-_See code: [src/commands/configure.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/configure.ts)_
+_See code: [src/commands/configure.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.7/src/commands/configure.ts)_
 
 ## `pilot connect`
 
@@ -72,14 +72,14 @@ USAGE
   $ pilot connect
 
 OPTIONS
-  -v, --verify          Verify connection with the Waypoint server
-  -h, --help            show CLI help
-  --address=address     Address of server
-  --token=token         Authentication token of server
-  --provider=provider   Pilot server cloud provider
+  -h, --help           show CLI help
+  -v, --verify         Verify connection with the Waypoint server
+  --address=address    Address of server
+  --provider=provider  Pilot server cloud provider
+  --token=token        Authentication token of server
 ```
 
-_See code: [src/commands/connect.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/connect.ts)_
+_See code: [src/commands/connect.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.7/src/commands/connect.ts)_
 
 ## `pilot destroy [APP]`
 
@@ -93,7 +93,7 @@ OPTIONS
   -h, --help  show CLI help
 ```
 
-_See code: [src/commands/destroy.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/destroy.ts)_
+_See code: [src/commands/destroy.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.7/src/commands/destroy.ts)_
 
 ## `pilot help [COMMAND]`
 
@@ -125,7 +125,7 @@ OPTIONS
   --gcp-policy=gcp-policy  Specify a path to a CSV file for granular permissions
 ```
 
-_See code: [src/commands/init.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.7/src/commands/init.ts)_
 
 ## `pilot invite`
 
@@ -136,10 +136,10 @@ USAGE
   $ pilot invite
 
 OPTIONS
-  -h, --help       show CLI help
+  -h, --help  show CLI help
 ```
 
-_See code: [src/commands/invite.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/invite.ts)_
+_See code: [src/commands/invite.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.7/src/commands/invite.ts)_
 
 ## `pilot new TYPE`
 
@@ -157,7 +157,7 @@ OPTIONS
   -h, --help  show CLI help
 ```
 
-_See code: [src/commands/new.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/new.ts)_
+_See code: [src/commands/new.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.7/src/commands/new.ts)_
 
 ## `pilot server`
 
@@ -175,7 +175,7 @@ OPTIONS
   --db           Provides database connection information
 ```
 
-_See code: [src/commands/server.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/server.ts)_
+_See code: [src/commands/server.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.7/src/commands/server.ts)_
 
 ## `pilot setup`
 
@@ -196,7 +196,7 @@ OPTIONS
   --gcp       Provision Waypoint server on GCP Compute Engine using Pilot's Docker image.
 ```
 
-_See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/setup.ts)_
+_See code: [src/commands/setup.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.7/src/commands/setup.ts)_
 
 ## `pilot ui`
 
@@ -211,7 +211,7 @@ OPTIONS
   -h, --help          show CLI help
 ```
 
-_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/ui.ts)_
+_See code: [src/commands/ui.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.7/src/commands/ui.ts)_
 
 ## `pilot up [PROJECT] [PATH]`
 
@@ -225,5 +225,5 @@ OPTIONS
   -h, --help  show CLI help
 ```
 
-_See code: [src/commands/up.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.5/src/commands/up.ts)_
+_See code: [src/commands/up.ts](https://github.com/pilot-framework/pilot-cli/blob/v0.1.7/src/commands/up.ts)_
 <!-- commandsstop -->
